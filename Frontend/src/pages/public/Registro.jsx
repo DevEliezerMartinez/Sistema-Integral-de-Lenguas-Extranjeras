@@ -5,28 +5,79 @@ import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import Modal from "antd/es/modal/Modal";
 
-//form
-const onFinish = (values) => {
-  console.log("Success:", values);
-};
-const onFinishFailed = (errorInfo) => {
-  console.log("Failed:", errorInfo);
-};
-
 function Registro() {
-  //modal
-  const info = () => {
-    Modal.info({
-      title: "Usuario creado con exito!",
-      content: (
-        <Result
-          status="success"
-          title="¡Felicidades! Has creado un nuevo usuario en nuestro sistema."
-          subTitle="Guarda tu usuario y contraseña para siempre poder acceder al sistema"
-        />
-      ),
-      onOk() {},
-    });
+  const [selectedCarrera, setSelectedCarrera] = useState("");
+
+  const handleChange = (value) => {
+    setSelectedCarrera(value);
+  };
+
+  const onFinish = async (values) => {
+    // Convertir los datos a formato JSON
+    const data = {
+      nombre: values.Nombre,
+      apellidos: values.Apellidos,
+      numeroControl: values.Ncontrol,
+      carrera: selectedCarrera,
+      correo: values.Correo,
+      password: values.Contraseña,
+    };
+
+    try {
+      // Hacer la solicitud POST a la API
+
+      const response = await fetch(
+        "http://localhost:8000/api/registroEstudiante",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data), // Convierte a JSON
+        }
+      );
+
+      if (response.ok) {
+        Modal.info({
+          title: "Usuario creado con éxito",
+          content: (
+            <Result
+              status="success"
+              title="¡Felicidades! Has creado un nuevo usuario en nuestro sistema."
+              subTitle="Ahora serás redirigido a nuestro login"
+            />
+          ),
+          onOk() {
+            console.log("Usuario creado con éxito");
+          },
+        });
+      } else {
+        const errorData = await response.json();
+        Modal.error({
+          title: "Error",
+          content: (
+            <Result
+              status="error"
+              title="Lo sentimos, ocurrió un error"
+              subTitle={`Error: ${errorData.message || "Inténtalo más tarde"}`}
+            />
+          ),
+          onOk() {
+            console.log("Error en la creación de usuario");
+          },
+        });
+        console.error(
+          "Error al hacer la solicitud:",
+          response.status,
+          errorData
+        );
+      }
+    } catch (error) {
+      console.error("Error de red:", error);
+    }
+  };
+  const onFinishFailed = (errorInfo) => {
+    console.log("Failed:", errorInfo);
   };
 
   return (
@@ -99,7 +150,7 @@ function Registro() {
               </Form.Item>
 
               <Form.Item label="Carrera">
-                <Select>
+                <Select onChange={handleChange}>
                   <Select.Option value="INF">
                     Ingenieria Informatica
                   </Select.Option>
@@ -139,7 +190,7 @@ function Registro() {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" onClick={info}>
+                <Button type="primary" htmlType="submit">
                   Registrarme
                 </Button>
               </Form.Item>
@@ -161,8 +212,6 @@ function Registro() {
             src="/Opt/CoverLogin.webp"
           />
         </section>
-
-       
       </main>
     </>
   );
