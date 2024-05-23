@@ -7,6 +7,7 @@ Este proyecto implementa un Sistema de Información para la Gestión de Lenguas 
 El sistema está diseñado para optimizar procesos administrativos y académicos, mejorando la eficiencia operativa y ofreciendo un seguimiento detallado del progreso académico. El proyecto abarca desde la investigación y análisis de requerimientos hasta la implementación y despliegue de la plataforma.
 
 ## Tecnologías Utilizadas
+Este proyecto está diseñado como una SPA (Single Page Application) que utiliza una arquitectura RESTful. En lugar de realizar renderizado del lado del servidor, la aplicación solicita y maneja datos en formato JSON.
 
 - **Backend:** Laravel
 - **Frontend:** React
