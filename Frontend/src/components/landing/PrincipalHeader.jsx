@@ -54,7 +54,7 @@ function Header() {
       </div>
 
       {/* Menú principal (visible en pantallas grandes) */}
-      <ul className="hidden md:flex Montserrat text-white flex-row gap-4">
+      <ul className="hidden md:flex Montserrat text-white flex-row gap-4 items-center">
         <li>
           <a href="#acerca-del-cle" className="hover:font-semibold transition duration-300">Acerca del CLE</a>
         </li>
@@ -64,6 +64,11 @@ function Header() {
         <li>
           <Link to="/Documentacion" className="hover:font-semibold transition duration-300">
             Documentación y centro de ayuda
+          </Link>
+        </li>
+        <li className="bg-[#0F5DD2] px-2 rounded-md">
+          <Link to="/Docentes/Login" className="hover:font-semibold transition duration-300">
+            Docentes
           </Link>
         </li>
       </ul>
