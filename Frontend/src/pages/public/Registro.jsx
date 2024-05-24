@@ -90,14 +90,14 @@ function Registro() {
           className=" w-full px-8 flex flex-col items-center md:w-1/2 "
         >
           <img alt="Logo" className="w-28 my-4" src="/LogoTransparente.png" />
-          <h2 className="Montserrat font-bold text-4xl text-center">
-            Registrate para empezar tu tramite
+          <h2 className="Montserrat font-bold text-2xl text-center">
+            ¡Bienvenido a tu nueva aventura como alumno!
           </h2>
 
           <Divider className="bg-black" />
 
           <p className="Montserrat font-light text-xl text-center my-4">
-            Ingresa y completa tus datos
+            Completa tus datos y comienza a aprender
           </p>
 
           <div id="bottom" className=" w-5/6 px-4 m-0">

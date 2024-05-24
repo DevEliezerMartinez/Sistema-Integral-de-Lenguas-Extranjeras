@@ -13,7 +13,7 @@ const onFinishFailed = (errorInfo) => {
 
 
 
-function LoginDocentes() {
+function LoginCoordinador() {
 
   const navigate = useNavigate();
 
@@ -34,13 +34,13 @@ function LoginDocentes() {
         >
           <img alt="Logo" className="w-32 my-8" src="/LogoTransparente.png" />
           <h2 className="Montserrat font-bold text-4xl text-center">
-            Bienvenido docente
+            Bienvenido coordinador
           </h2>
 
           <Divider className="bg-black" />
 
           <p className="Montserrat font-light text-2xl text-center my-4">
-            Ingresa tus datos
+            Ingresa tus datos para acceder.
           </p>
 
           <div id="bottom" className=" w-5/6 px-4 m-0">
@@ -105,7 +105,7 @@ function LoginDocentes() {
               </Link>
             </div>
 
-            
+           
           </div>
         </section>
 
@@ -117,4 +117,4 @@ function LoginDocentes() {
   );
 }
 
-export default LoginDocentes;
+export default LoginCoordinador;

@@ -14,7 +14,8 @@ function Footer() {
         <div className="flex flex-col items-center md:items-end Montserrat">
           <a href="#" className="text-sm mb-2">© Copyright 2023 TecNM - Todos los Derechos Reservados</a>
           <a href="#" className="text-sm mb-2">Aviso de Privacidad</a>
-          <a href="#" className="text-sm mb-2">Última actualización: 2023</a>
+          <a href="/Docentes" className="text-sm mb-2">Docentes</a>
+          <a href="/Coordinador" className="text-sm mb-2">Coordinador</a>
           <a href="#" className="text-sm">Autor: Eliezer Martinez</a>
         </div>
       </div>

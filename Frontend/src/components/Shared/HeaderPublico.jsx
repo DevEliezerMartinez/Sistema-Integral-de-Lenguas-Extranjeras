@@ -10,10 +10,12 @@ function Header() {
 
   return (
     <header className="flex bg-[#1B396A] m-auto md:m-0 justify-between items-center px-4">
+      <Link to="/">
       <picture className="p-4 m-auto flex items-center md:items-center gap-4 md:m-0">
         <img alt="Logo CLE" src="/Opt/TecNM_blanco.png" />
         <h2 className="Montserrat text-white">Campus San Marcos</h2>
       </picture>
+      </Link>
 
       {/* Menú de hamburguesa */}
       <div className="md:hidden">

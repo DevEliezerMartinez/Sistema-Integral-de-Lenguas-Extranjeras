@@ -21,13 +21,6 @@ import PerfilDocentes from "./pages/docentes/Perfil";
 import NotificacionesDocente from "./pages/docentes/Notificaciones";
 import LoginCoordinador from "./pages/coordinador/login";
 import DashboardCoordinador from './pages/coordinador/Dashboard_coordinador'
-import CursosCoordinador from './pages/coordinador/CursoActivo'
-import CursosArchivadosCoordinador from './pages/coordinador/CursosArchivados'
-import PerfilCoordinador from './pages/coordinador/Perfil'
-import NotificacionCoordinador from './pages/coordinador/Notificaciones'
-import DetalleCursoCoordinador from './pages/coordinador/DetalleCurso'
-import Solicitudes from "./pages/coordinador/Solicitudes";
-import NotFound from './pages/public/Notfound'
 
 
 function App() {
@@ -35,7 +28,6 @@ function App() {
     <div>
       <Routes>
         {/*   Rutas publicas */}
-        <Route path="*" element={<NotFound />} /> {/* Ruta 404 */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/Registro" element={<SignUp />} />
@@ -74,15 +66,14 @@ function App() {
         {/*   Rutas Coordinador */}
         <Route path="/LoginCoordinador" element={<LoginCoordinador />} />
         <Route path="/Coordinador" element={<DashboardCoordinador />}>
-          <Route path="/Coordinador/CursosActivos" element={<CursosCoordinador />} />
-          <Route path="/Coordinador/CursosArchivados" element={<CursosArchivadosCoordinador />} />
-          <Route path="/Coordinador/Perfil" element={<PerfilCoordinador />} />
-          <Route path="/Coordinador/Notificaciones" element={<NotificacionCoordinador />} />
-          <Route path="/Coordinador/Solicitudes" element={<Solicitudes />} />
+        {/*   <Route path="/Docentes/CursosActivos" element={<CursosActivos />} />
+          <Route path="/Docentes/CursosArchivados" element={<CursosArchivados />} />
+          <Route path="/Docentes/Perfil" element={<PerfilDocentes />} />
+          <Route path="/Docentes/Notificaciones" element={<NotificacionesDocente />} />
           <Route
-            path="/Coordinador/Cursos/:cursoId"
-            element={< DetalleCursoCoordinador />}
-          />
+            path="/Docentes/Cursos/:cursoId"
+            element={< DetalleCursoDocente />}
+          /> */}
         </Route>
       </Routes>
     </div>

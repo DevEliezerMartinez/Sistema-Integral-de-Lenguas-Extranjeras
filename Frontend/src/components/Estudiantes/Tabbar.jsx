@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 function Tabbar() {
   return (
-    <div className=" bg-[#1B396A] flex justify-between absolute top-[90%] w-full p-5 rounded gap-3 sm:hidden">
+    <div className="bg-[#1B396A] flex justify-between fixed bottom-0 w-full p-5 rounded gap-3 sm:hidden items-center ">
       <Link
         to="/Estudiantes/Perfil"
         className="Montserrat font-thin text-white flex flex-col items-center"

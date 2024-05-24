@@ -21,14 +21,14 @@ function Login() {
           className=" w-full px-8 flex flex-col items-center md:w-1/2 "
         >
           <img alt="Logo" className="w-32 my-8" src="/LogoTransparente.png" />
-          <h2 className="Montserrat font-bold text-4xl text-center">
-            Bienvenido de vuelta
+          <h2 className="Montserrat font-bold text-3xl text-center">
+            ¡Nos alegra verte de nuevo!
           </h2>
 
           <Divider className="bg-black" />
 
           <p className="Montserrat font-light text-2xl text-center my-4">
-            Ingresa tus datos
+            Inicia sesión para continuar tu viaje educativo
           </p>
 
           <div id="bottom" className=" w-5/6 px-4 m-0">
@@ -77,11 +77,9 @@ function Login() {
                 }}
               >
                 <Button type="primary" htmlType="submit">
-                  Submit
+                  Ingresar
                 </Button>
               </Form.Item>
-
-             
             </Form>
             <div id="Actions" className=" flex flex-col items-end mt">
               <Link
@@ -94,13 +92,20 @@ function Login() {
             </div>
 
             <p className="mt-6 Montserrat text-center ">
-                No tienes cuenta aun? <Link className="text-blue-600 font-medium" to="/Registro">Registrarme!</Link>
-              </p>
+              No tienes cuenta aun?{" "}
+              <Link className="text-blue-600 font-medium" to="/Registro">
+                Registrarme!
+              </Link>
+            </p>
           </div>
         </section>
 
         <section id="right" className="hidden w-1/2 h-full md:block ">
-          <img alt="imagen Alumnos" className="h-full" src="/Opt/CoverLogin.webp" />
+          <img
+            alt="imagen Alumnos"
+            className="h-full"
+            src="/Opt/CoverLogin.webp"
+          />
         </section>
       </main>
     </>

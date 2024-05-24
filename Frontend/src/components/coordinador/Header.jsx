@@ -1,55 +1,67 @@
+import { Button } from "antd";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "antd";
+
 function Header() {
+
   const [showMenu, setShowMenu] = useState(false);
 
   const toggleMenu = () => {
     setShowMenu(!showMenu);
   };
 
+  
   return (
     <header className="flex bg-[#1B396A] m-auto md:m-0 justify-between items-center px-4">
       <Link to="/">
       <picture className="p-4 m-auto flex items-center md:items-center gap-4 md:m-0">
         <img alt="Logo CLE" src="/Opt/TecNM_blanco.png" />
-        <h2 className="Montserrat text-white">Campus San Marcos</h2>
+        <h2 className="Montserrat text-white">Campus San Marcos ||CR</h2>
       </picture>
-
       </Link>
 
       <ul className="hidden md:flex Montserrat text-white flex-row gap-4">
-        <Link to="/Estudiantes/Progreso">
+        <Link to="/Coordinador/CursosActivos">
           <img
             className="w-6"
             alt="Logo Progreso"
-            src="/Opt/SVG/Progress.svg"
+            src="/Opt/SVG/classroom.svg"
           />
         </Link>
-        <Link to="/Estudiantes/Cursos">
+        <Link to="/Coordinador/CursosArchivados">
           <img
             className="w-6"
             alt="Logo notification"
             src="/Opt/SVG/Curso.svg"
           />
         </Link>
-        <Link to="/Estudiantes/Perfil">
+        <Link to="/Coordinador/Perfil">
           <img className="w-6" alt="Logo profile" src="/Opt/SVG/profile-.svg" />
         </Link>
-        <Link to="/Estudiantes/Notificaciones">
+        <Link to="/Coordinador/Notificaciones">
           <img
             className="w-6"
             alt="Logo notification"
             src="/Opt/SVG/notification.svg"
           />
         </Link>
+        <Link to="/Coordinador/Solicitudes">
+          <img
+            className="w-6"
+            alt="Logo notification"
+            src="/Opt/SVG/request.svg"
+          />
+        </Link>
+        <Button className="" danger ghost>Cerrar sesion</Button>
 
-        <Button danger ghost>Cerrar sesion</Button>
+        
 
+        
       </ul>
+      
 
-       {/* Menú de hamburguesa */}
-       <div className="md:hidden">
+      {/* Menú de hamburguesa */}
+      <div className="md:hidden">
         <button
           className="text-white"
           onClick={toggleMenu}

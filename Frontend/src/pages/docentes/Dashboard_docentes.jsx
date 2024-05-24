@@ -1,20 +1,19 @@
-// Dashboard.jsx
 import React from "react";
 import Header from "../../components/Docentes/Header";
 import Tabbar from "../../components/Docentes/Tabbar";
 import { Outlet } from "react-router-dom";
 
-function DashboardDocentes() {
+function Dashboard_docentes() {
   return (
     <div>
       <Header />
-      <div className=" m-2">
 
-      <Outlet /> 
+      <div className=" m-2 mb-48">
+        <Outlet />
       </div>
       <Tabbar />
     </div>
   );
 }
 
-export default DashboardDocentes;
+export default Dashboard_docentes;
