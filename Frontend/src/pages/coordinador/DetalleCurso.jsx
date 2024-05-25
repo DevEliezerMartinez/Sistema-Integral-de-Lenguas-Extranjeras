@@ -1,7 +1,7 @@
 import { Button, Divider } from "antd";
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import TablaAlumnos from "../../components/Docentes/TablaAlumnos";
+import TablaAlumnos from "../../components/coordinador/TablaAlumnos";
 
 function DetalleCurso() {
   const { cursoId } = useParams(); // Extract course ID from URL parameter

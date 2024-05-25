@@ -1,16 +1,19 @@
 import { Button, Divider, Form, Input } from "antd";
 import Headeeer from "../../components/Shared/HeaderPublico";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
-
-const onFinish = (values) => {
-  console.log("Success:", values);
-};
-const onFinishFailed = (errorInfo) => {
-  console.log("Failed:", errorInfo);
-};
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
+  const navigate = useNavigate();
+  const onFinish = (values) => {
+    console.log("Success:", values);
+
+    navigate("/Estudiantes/Cursos");
+  };
+  const onFinishFailed = (errorInfo) => {
+    s;
+    console.log("Failed:", errorInfo);
+  };
   return (
     <>
       <Headeeer />
@@ -22,7 +25,7 @@ function Login() {
         >
           <img alt="Logo" className="w-32 my-8" src="/LogoTransparente.png" />
           <h2 className="Montserrat font-bold text-3xl text-center">
-            ¡Nos alegra verte de nuevo!
+            ¡Nos alegra verte de nuevoo!
           </h2>
 
           <Divider className="bg-black" />
@@ -35,7 +38,6 @@ function Login() {
             <Form
               layout="vertical"
               name="basic"
-              onFinish={onFinish}
               onFinishFailed={onFinishFailed}
             >
               <Form.Item
@@ -76,7 +78,7 @@ function Login() {
                   span: 16,
                 }}
               >
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" onClick={onFinish}>
                   Ingresar
                 </Button>
               </Form.Item>

@@ -28,6 +28,8 @@ import NotificacionCoordinador from './pages/coordinador/Notificaciones'
 import DetalleCursoCoordinador from './pages/coordinador/DetalleCurso'
 import Solicitudes from "./pages/coordinador/Solicitudes";
 import NotFound from './pages/public/Notfound'
+import ListaAlumnos from "./components/coordinador/ListaAlumnos";
+import DetalleAlumno from "./components/coordinador/DetalleAlumno";
 
 
 function App() {
@@ -79,9 +81,14 @@ function App() {
           <Route path="/Coordinador/Perfil" element={<PerfilCoordinador />} />
           <Route path="/Coordinador/Notificaciones" element={<NotificacionCoordinador />} />
           <Route path="/Coordinador/Solicitudes" element={<Solicitudes />} />
+          <Route path="/Coordinador/Alumnos" element={<ListaAlumnos />} />
           <Route
             path="/Coordinador/Cursos/:cursoId"
             element={< DetalleCursoCoordinador />}
+          />
+          <Route
+            path="/Coordinador/Alumnos/:AlumnoId"
+            element={< DetalleAlumno />}
           />
         </Route>
       </Routes>

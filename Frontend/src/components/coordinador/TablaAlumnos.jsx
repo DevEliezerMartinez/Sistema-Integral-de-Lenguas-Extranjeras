@@ -171,9 +171,9 @@ const App = () => {
               title="Seguro que deseas generar constancia?"
               onConfirm={() => handleGenerate(record.key)}
             >
-              {/* <Button type="default">
+              <Button type="default">
                 Generar constancia
-              </Button> */}
+              </Button>
             </Popconfirm>
           </div>
         ) : null,

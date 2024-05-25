@@ -10,12 +10,21 @@ function Header() {
 
   return (
     <header className="flex bg-[#1B396A] m-auto md:m-0 justify-between items-center px-4">
+      <div className="flex  text-white  md:items-center justify-center  md:mb-0 py-4 gap-3">
       <Link to="/">
-      <picture className="p-4 m-auto flex items-center md:items-center gap-4 md:m-0">
-        <img alt="Logo CLE" src="/Opt/TecNM_blanco.png" />
-        <h2 className="Montserrat text-white">Campus San Marcos</h2>
-      </picture>
-      </Link>
+          <img
+            alt="Logo CLE"
+            src="/Opt/TecNMBig.png"
+            className="w-8 h-8 mb-4 md:mb-0"
+          />
+        </Link>
+        <div className="text-center md:text-left flex flex-col items-center ">
+          <p className="font-bold text-lg Poppins">TecNM | Campus San Marcos</p>
+          <span className="font-extralight text-lg">
+            Centro de Lenguas Extranjeras
+          </span>
+        </div>
+      </div>
 
       {/* Menú de hamburguesa */}
       <div className="md:hidden">
@@ -59,15 +68,15 @@ function Header() {
 
       {/* Menú principal (visible en pantallas grandes) */}
       <ul className="hidden md:flex Montserrat text-white flex-row gap-4">
-        <Link to="/Login">
-          <a  className="hover:font-semibold transition duration-300">Login</a>
+        <Link to="/LoginDocentes">
+          <a  className="hover:font-semibold transition duration-300">Docente</a>
         </Link>
-        <Link to="/Registro">
-          <a className="hover:font-semibold transition duration-300">Registro</a>
+        <Link to="/LoginCoordinador">
+          <a className="hover:font-semibold transition duration-300">Coordinador</a>
         </Link>
         <li>
           <Link to="/Documentacion" className="hover:font-semibold transition duration-300">
-            Documentación y centro de ayuda
+            Documentación
           </Link>
         </li>
       </ul>

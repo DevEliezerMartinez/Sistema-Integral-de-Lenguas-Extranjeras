@@ -1,62 +1,124 @@
-import { Button } from "antd";
+import { Button,message } from "antd";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Header() {
 
   const [showMenu, setShowMenu] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+  const key = 'updatable';
+  const navigate = useNavigate();
+
+
 
   const toggleMenu = () => {
     setShowMenu(!showMenu);
   };
 
+  const cerrarsesion = () => {
+    messageApi.open({
+      key,
+      type: "loading",
+      content: "Cerrando sesion",
+    });
+    setTimeout(() => {
+      messageApi.open({
+        key,
+        type: "success",
+        content: "Hasta luego!",
+        duration: 2,
+      });
+    }, 1000);
+
+    setTimeout(() => {
+      navigate("/");
+    }, 2000); // 3000 milisegundos = 3 segundos
+  };
+
   
   return (
     <header className="flex bg-[#1B396A] m-auto md:m-0 justify-between items-center px-4">
-      <Link to="/">
-      <picture className="p-4 m-auto flex items-center md:items-center gap-4 md:m-0">
-        <img alt="Logo CLE" src="/Opt/TecNM_blanco.png" />
-        <h2 className="Montserrat text-white">Campus San Marcos ||CR</h2>
-      </picture>
-      </Link>
+          {contextHolder}
+
+          <div className="flex  text-white  md:items-center justify-center  md:mb-0 py-4 gap-3">
+        <Link to="/">
+          <img
+            alt="Logo CLE"
+            src="/Opt/TecNMBig.png"
+            className="w-8 h-8 mb-4 md:mb-0"
+          />
+        </Link>
+        <div className="text-center md:text-left flex flex-col items-center ">
+          <p className="font-bold text-lg Poppins">TecNM | Campus San Marcos</p>
+          <span className="font-extralight text-lg">
+            Centro de Lenguas Extranjeras
+          </span>
+        </div>
+      </div>
 
       <ul className="hidden md:flex Montserrat text-white flex-row gap-4">
-        <Link to="/Coordinador/CursosActivos">
+        <Link
+          to="/Coordinador/CursosActivos"
+          className="flex flex-col items-center"
+        >
           <img
             className="w-6"
             alt="Logo Progreso"
             src="/Opt/SVG/classroom.svg"
           />
+          <span className="text-sm font-thin">Cursos Activos</span>
         </Link>
-        <Link to="/Coordinador/CursosArchivados">
+        <Link
+          to="/Coordinador/CursosArchivados"
+          className="flex flex-col items-center"
+        >
           <img
             className="w-6"
-            alt="Logo notification"
-            src="/Opt/SVG/Curso.svg"
+            alt="Logo Progreso"
+            src="/Opt/SVG/classroom.svg"
           />
+          <span className="text-sm font-thin">Cursos Archivados</span>
         </Link>
-        <Link to="/Coordinador/Perfil">
+        <Link to="/Coordinador/Perfil" className="flex flex-col items-center">
           <img className="w-6" alt="Logo profile" src="/Opt/SVG/profile-.svg" />
+          <span className="text-sm font-thin">Perfil</span>
         </Link>
-        <Link to="/Coordinador/Notificaciones">
+        <Link
+          to="/Coordinador/Notificaciones"
+          className="flex flex-col items-center"
+        >
           <img
             className="w-6"
             alt="Logo notification"
             src="/Opt/SVG/notification.svg"
           />
+          <span className="text-sm font-thin">Notificaciones</span>
         </Link>
-        <Link to="/Coordinador/Solicitudes">
+        <Link
+          to="/Coordinador/Solicitudes"
+          className="flex flex-col items-center"
+        >
           <img
             className="w-6"
             alt="Logo notification"
             src="/Opt/SVG/request.svg"
           />
+          <span className="text-sm font-thin">Solicitudes</span>
         </Link>
-        <Button className="" danger ghost>Cerrar sesion</Button>
-
-        
-
-        
+        <Link
+          to="/Coordinador/Alumnos"
+          className="flex flex-col items-center"
+        >
+          <img
+            className="w-6"
+            alt="Logo notification"
+            src="/Opt/SVG/student.svg"
+          />
+          <span className="text-sm font-thin">Alumnos</span>
+        </Link>
+        <Button className="" danger ghost onClick={cerrarsesion}>
+          Cerrar sesion
+        </Button>
       </ul>
       
 

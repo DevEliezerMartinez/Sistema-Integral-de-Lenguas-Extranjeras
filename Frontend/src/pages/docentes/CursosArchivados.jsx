@@ -1,4 +1,4 @@
-import { Button } from "antd";
+import { Breadcrumb, Button } from "antd";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -6,7 +6,17 @@ function CursoActivo() {
   const [hasModules, setHasModules] = useState(true); // Initial state (adjust as needed)
 
   return (
-    <>
+    <div className="px-4">
+    <Breadcrumb
+        items={[
+          {
+            title: <p className="font-medium text-black">Docente</p>,
+          },
+          {
+            title: <a href="">Mis cursos archivados</a>,
+          },
+        ]}
+      />
       <h2 className="Montserrat font-semibold text-2xl text-center">
         Cursos archivados
       </h2>
@@ -106,7 +116,7 @@ function CursoActivo() {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 

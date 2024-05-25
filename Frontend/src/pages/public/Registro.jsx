@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Divider, Form, Input, Result, Select, Space } from "antd";
 import Headeeer from "../../components/Shared/HeaderPublico";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import { LockOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import Modal from "antd/es/modal/Modal";
 
@@ -25,7 +25,6 @@ function Registro() {
 
     try {
       // Hacer la solicitud POST a la API
-
       const response = await fetch(
         "http://localhost:8000/api/registroEstudiante",
         {
@@ -76,6 +75,7 @@ function Registro() {
       console.error("Error de red:", error);
     }
   };
+
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
@@ -87,7 +87,7 @@ function Registro() {
       <main className="w-full flex flex-col  md:h-screen md:flex-row ">
         <section
           id="Left"
-          className=" w-full px-8 flex flex-col items-center md:w-1/2 "
+          className="w-full px-8 flex flex-col items-center md:w-1/2"
         >
           <img alt="Logo" className="w-28 my-4" src="/LogoTransparente.png" />
           <h2 className="Montserrat font-bold text-2xl text-center">
@@ -100,10 +100,10 @@ function Registro() {
             Completa tus datos y comienza a aprender
           </p>
 
-          <div id="bottom" className=" w-5/6 px-4 m-0">
+          <div id="bottom" className="w-5/6 px-4 m-0">
             <Form
               layout="inline"
-              className="flex flex-col gap-5 p-4 "
+              className="flex flex-col gap-5 p-4"
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}
               requiredMark="optional"
@@ -120,6 +120,7 @@ function Registro() {
               >
                 <Input />
               </Form.Item>
+
               <Form.Item
                 name="Apellidos"
                 label="Apellidos"
@@ -131,22 +132,6 @@ function Registro() {
                 ]}
               >
                 <Input />
-              </Form.Item>
-              <Form.Item
-                name="Ncontrol"
-                label="Numero de control"
-                rules={[
-                  {
-                    required: true,
-                    message: "Ingresa tu Numero de control",
-                  },
-                ]}
-              >
-                <Space>
-                  <Space.Compact>
-                    <Input className="w-full" placeholder="191230060" />
-                  </Space.Compact>
-                </Space>
               </Form.Item>
 
               <Form.Item label="Carrera">
@@ -162,6 +147,25 @@ function Registro() {
                 </Select>
               </Form.Item>
 
+              {selectedCarrera !== "EXT" && (
+                <Form.Item
+                  name="Ncontrol"
+                  label="Numero de control"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Ingresa tu Numero de control",
+                    },
+                  ]}
+                >
+                  <Space>
+                    <Space.Compact>
+                      <Input className="w-full" placeholder="191230060" />
+                    </Space.Compact>
+                  </Space>
+                </Form.Item>
+              )}
+
               <Form.Item
                 name="Correo"
                 label="Correo"
@@ -174,6 +178,7 @@ function Registro() {
               >
                 <Input />
               </Form.Item>
+
               <Form.Item
                 name="Contraseña"
                 label="Contraseña"
@@ -189,6 +194,62 @@ function Registro() {
                 />
               </Form.Item>
 
+              <Form.Item
+                name="Genero"
+                label="Género"
+                rules={[
+                  {
+                    required: true,
+                    message: "Selecciona tu género",
+                  },
+                ]}
+              >
+                <Select>
+                  <Select.Option value="Masculino">Masculino</Select.Option>
+                  <Select.Option value="Femenino">Femenino</Select.Option>
+                  <Select.Option value="Otro">Otro</Select.Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                name="Telefono"
+                label="Teléfono"
+                rules={[
+                  {
+                    required: true,
+                    message: "Ingresa tu número de teléfono",
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                name="Curp"
+                label="CURP"
+                rules={[
+                  {
+                    required: true,
+                    message: "Ingresa tu CURP",
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                name="Domicilio"
+                label="Domicilio"
+                rules={[
+                  {
+                    required: true,
+                    message: "Ingresa tu domicilio",
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+
               <Form.Item>
                 <Button type="primary" htmlType="submit">
                   Registrarme
@@ -197,9 +258,9 @@ function Registro() {
             </Form>
 
             <p className="mt-6 Montserrat text-center ">
-              Ya tienes una cuenta?{" "}
+              ¿Ya tienes una cuenta?{" "}
               <Link className="text-blue-600 font-medium" to="/login">
-                Iniciar sesion!
+                ¡Iniciar sesión!
               </Link>
             </p>
           </div>

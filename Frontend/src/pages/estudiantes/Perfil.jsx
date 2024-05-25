@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Divider, Form, Input, Result, Select, Space } from "antd";
+import { Breadcrumb, Button, Divider, Form, Input, Result, Select, Space } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 
@@ -12,7 +12,17 @@ const onFinishFailed = (errorInfo) => {
 
 function Perfil() {
   return (
-    <div>
+    <div className="px-12">
+    <Breadcrumb
+        items={[
+          {
+            title: <p className="font-medium text-black">Estudiantes</p>,
+          },
+          {
+            title: <a href="">Mi perfil</a>,
+          },
+        ]}
+      />
       <h2 className="Montserrat font-medium text-2xl text-center">Mi perfil</h2>
 
       {/* Tarjeta de Usuario */}

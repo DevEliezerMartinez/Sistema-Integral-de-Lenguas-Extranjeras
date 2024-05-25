@@ -1,9 +1,20 @@
-import { Button, Form, Input, Modal, Select, notification } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Form,
+  Input,
+  Modal,
+  Select,
+  notification,
+  DatePicker
+} from "antd";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 function CursoActivo() {
   const [hasModules, setHasModules] = useState(true);
+  const { RangePicker } = DatePicker;
+
 
   //notificaciones
   const [api, contextHolder] = notification.useNotification();
@@ -47,11 +58,21 @@ function CursoActivo() {
     setSelectedCarrera(value);
   };
   return (
-    <div className="mt-9 flex flex-col p-5">
+    <div className=" flex flex-col px-4">
+      <Breadcrumb
+        items={[
+          {
+            title: <p className="font-medium text-black">Coordinador</p>,
+          },
+          {
+            title: <a href="">Mis cursos activos</a>,
+          },
+        ]}
+      />
       {contextHolder}
 
       <h2 className="Montserrat font-semibold text-2xl text-center">
-        Cursos activos coordinador
+        Cursos activos - coordinador
       </h2>
 
       <Button
@@ -119,26 +140,35 @@ function CursoActivo() {
               { required: true, message: "Por favor ingresa el Campo B." },
             ]}
           >
-            <Input placeholder="Texto de entrada" />
+                <RangePicker />
+
           </Form.Item>
 
           <div className=" flex justify-between">
             <Form.Item label="Requiere" style={{ width: 200 }}>
               <Select onChange={handleChange}>
                 <Select.Option value="0">Sin Nivel</Select.Option>
-                <Select.Option value="1">Nivel II</Select.Option>
-                <Select.Option value="2">Nivel III</Select.Option>
-                <Select.Option value="3">Nivel IV</Select.Option>
-                <Select.Option value="4">Nivel V</Select.Option>
+                <Select.Option value="1">Nivel I</Select.Option>
+                <Select.Option value="2">Nivel II</Select.Option>
+                <Select.Option value="3">Nivel III</Select.Option>
+                <Select.Option value="4">Nivel IV</Select.Option>
               </Select>
             </Form.Item>
             <Form.Item label="Modalidad" style={{ width: 200 }}>
-              <Select  onChange={handleChange}>
+              <Select onChange={handleChange}>
                 <Select.Option value="Escolar">Escolar</Select.Option>
                 <Select.Option value="Fines">Fines de semana</Select.Option>
               </Select>
             </Form.Item>
           </div>
+
+          <Form.Item label="Horarios" style={{ width: 200 }}>
+              <Select onChange={handleChange}>
+                <Select.Option value="1">7:00 - 12:00</Select.Option>
+                <Select.Option value="2">3:00 - 6:00</Select.Option>
+                <Select.Option value="3">12:00 - 2:00</Select.Option>
+              </Select>
+            </Form.Item>
 
           <Form.Item
             label="Docente"
@@ -150,7 +180,10 @@ function CursoActivo() {
               },
             ]}
           >
-            <Input placeholder="Hermenegildo" />
+            <Select onChange={handleChange}>
+                <Select.Option value="1">Maria de Lourdes</Select.Option>
+                <Select.Option value="2">Maria Cruz</Select.Option>
+              </Select>
           </Form.Item>
         </Form>
       </Modal>

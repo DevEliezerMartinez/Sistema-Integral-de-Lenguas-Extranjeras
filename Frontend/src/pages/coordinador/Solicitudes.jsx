@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Collapse } from "antd";
+import { Breadcrumb, Button, Collapse } from "antd";
 
 function Solicitudes() {
   
@@ -167,7 +167,17 @@ const items = [
 ];
 
   return (
-    <div>
+    <div className="px-4">
+    <Breadcrumb
+        items={[
+          {
+            title: <p className="font-medium text-black">Coordinador</p>,
+          },
+          {
+            title: <a href="">Cursos Solicitudes</a>,
+          },
+        ]}
+      />
       <h2 className="Montserrat text-center text-2xl font-medium my-9">Solicitudes de inscripción</h2>
 
       <Collapse accordion items={items} />

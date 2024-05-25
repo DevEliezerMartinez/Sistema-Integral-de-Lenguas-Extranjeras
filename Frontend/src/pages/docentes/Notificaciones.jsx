@@ -1,4 +1,4 @@
-import { Timeline } from 'antd';
+import { Breadcrumb, Timeline } from 'antd';
 import React from 'react';
 import { DeleteOutlined } from '@ant-design/icons';
 
@@ -6,7 +6,17 @@ import { DeleteOutlined } from '@ant-design/icons';
 
 function Notificaciones() {
   return (
-    <div>
+    <div className='px-4'>
+    <Breadcrumb
+        items={[
+          {
+            title: <p className="font-medium text-black">Docente</p>,
+          },
+          {
+            title: <a href="">NotificacionesDocente</a>,
+          },
+        ]}
+      />
       <h2 className="Montserrat font-medium text-2xl text-center">
         Mis Notificaciones
       </h2>

@@ -1,9 +1,8 @@
-import { Button, Divider } from "antd";
+import { Breadcrumb, Button, Divider } from "antd";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 function Progreso() {
-
   const DetalleCursoActual = {
     Nombre: "Curso basico",
     Perido: "Enero Junio",
@@ -15,11 +14,24 @@ function Progreso() {
 
   return (
     <div className="md:px-8">
+      <Breadcrumb
+        items={[
+          {
+            title: <p className="font-medium text-black">Estudiantes</p>,
+          },
+          {
+            title: <a href="">Mi progreso</a>,
+          },
+        ]}
+      />
+
       <h2 className="Montserrat font-semibold text-2xl text-center md:mt-6 ">
         Mi progreso
       </h2>
 
-      <p className="Montserrat">Aqui encontraras todos los cursos que has tomado</p>
+      <p className="Montserrat">
+        Aqui encontraras todos los cursos que has tomado
+      </p>
 
       <div
         id="Contenedor de CARDS"

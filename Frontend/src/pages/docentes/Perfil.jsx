@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Form, Input} from "antd";
+import { Breadcrumb, Button, Form, Input, Select } from "antd";
 
 const onFinish = (values) => {
   console.log("Success:", values);
@@ -10,7 +10,17 @@ const onFinishFailed = (errorInfo) => {
 
 function Perfil() {
   return (
-    <div>
+    <div className="px-4">
+    <Breadcrumb
+        items={[
+          {
+            title: <p className="font-medium text-black">Docente</p>,
+          },
+          {
+            title: <a href="">Perfil Docente</a>,
+          },
+        ]}
+      />
       <h2 className="Montserrat font-medium text-2xl text-center">
         Mi perfil docente
       </h2>
@@ -35,7 +45,8 @@ function Perfil() {
       <div id="bottom" className=" w-5/6 px-4 m-0 md:w-2/6 md:m-auto">
         <Form
           layout="inline"
-          className="flex flex-col gap-2 p-4 "
+          
+          className="flex flex-col w-full justify-between gap-2 p-4"
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           requiredMark="optional"
@@ -52,6 +63,7 @@ function Perfil() {
           >
             <Input />
           </Form.Item>
+
           <Form.Item
             name="Apellidos"
             label="Apellidos"
@@ -88,7 +100,63 @@ function Perfil() {
               },
             ]}
           >
-            <Input /> 
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="Genero"
+            label="Género"
+            rules={[
+              {
+                required: true,
+                message: "Selecciona tu género",
+              },
+            ]}
+          >
+            <Select>
+              <Select.Option value="Masculino">Masculino</Select.Option>
+              <Select.Option value="Femenino">Femenino</Select.Option>
+              <Select.Option value="Otro">Otro</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="Telefono"
+            label="Teléfono"
+            rules={[
+              {
+                required: true,
+                message: "Ingresa tu número de teléfono",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="Curp"
+            label="CURP"
+            rules={[
+              {
+                required: true,
+                message: "Ingresa tu CURP",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="Domicilio"
+            label="Domicilio"
+            rules={[
+              {
+                required: true,
+                message: "Ingresa tu domicilio",
+              },
+            ]}
+          >
+            <Input />
           </Form.Item>
 
           <Form.Item>

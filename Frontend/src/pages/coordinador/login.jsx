@@ -18,7 +18,7 @@ function LoginCoordinador() {
   const navigate = useNavigate();
 
   const cambiameee = ()=>{
-    navigate('/Docentes/CursosActivos');
+    navigate('/Coordinador/CursosActivos');
 
 
   }
