@@ -1,8 +1,14 @@
 import { Breadcrumb, Timeline } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { DeleteOutlined } from '@ant-design/icons';
+import { useAuth } from "../../AuthContext";
 
 function Notificaciones() {
+
+  const { token } = useAuth();
+
+  console.log("🚀 ~ Notificaciones ~ token->", token)
+
   const [notifications, setNotifications] = useState([
     {
       content: 'Create a services site',
@@ -17,6 +23,8 @@ function Notificaciones() {
       date: '2015-09-01',
     },
   ]);
+
+
 
   const handleNotificationDelete = (index) => {
     // Update notifications state to remove the deleted item

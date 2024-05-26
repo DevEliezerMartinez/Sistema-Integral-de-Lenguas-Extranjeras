@@ -3,6 +3,8 @@ import Dragger from "antd/es/upload/Dragger";
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { InboxOutlined } from "@ant-design/icons";
+import { useAuth } from "../../AuthContext";
+import axios from "axios";
 
 const props = {
   name: "file",
@@ -24,10 +26,34 @@ const props = {
   },
 };
 
-
-
 function DetalleCurso() {
   const { cursoId } = useParams(); // Extract course ID from URL parameter
+
+  const [cursos, setCursos] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCursos = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/api/Cursos/${cursoId}`,
+
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log(cursos);
+        setCursos(response.data.cursos); // Guarda todos los cursos en el estado
+      } catch (err) {
+        setError(err);
+      }
+    };
+
+    fetchCursos();
+  }, [token]);
 
   const DetalleCursoActual = {
     Nombre: "Curso basico",
@@ -47,22 +73,30 @@ function DetalleCurso() {
 
   return (
     <div className="">
-      <h2 className="Montserrat font-medium text-2xl text-center">
-        Curso disponible {cursoId}
+      <h2 className="Montserrat font-light text-2xl text-center my-8">
+        Detalles del curso
       </h2>
 
-      <div id="Card" className="bg-slate-100 p-2 md:mx-16 md:p-16">
-        <div id="Actions" className="flex items-center hover:text-blue-700 ">
-          <img alt="icon" className="w-4" src="/Opt/SVG/LighArrow.svg" />
-          <Link to="/Estudiantes/Cursos" className="Popins  font-semibold ">
-            Volver
-          </Link>
-        </div>
-
+      <div id="Card" className="bg-slate-100 p-2 md:mx-16 md:p-16 mt-8 ">
         <div id="cardContent" className=" flex flex-col items-center">
-          <h3 className="Montserrat font-semibold mt-4 text-center">
-            Detalles del curso
-          </h3>
+          <div
+            id="headerCard"
+            className=" w-full flex justify-between  items-center"
+          >
+            <div id="Actions" className=" self-start  flex gap-2">
+              <img alt="icon" className="w-4" src="/Opt/SVG/LighArrow.svg" />
+              <Link
+                to="/Docentes/CursosActivos"
+                className="Popins  font-semibold "
+              >
+                Volver
+              </Link>
+            </div>
+            <h3 className="Montserrat font-medium text-2xl  ">
+              {cursos.nombre}
+            </h3>
+            <img alt="icon" className="w-8" src="/Opt/SVG/info.svg" />
+          </div>
           <Divider />
 
           <h2 className="Montserrat text-center">
@@ -84,12 +118,12 @@ function DetalleCurso() {
             <ul className="list-disc space-y-2">
               {" "}
               {/* Added list-disc and space-y-2 for styling */}
-              <li>Nombre: {DetalleCursoActual.Nombre}</li>
-              <li>Periodo: {DetalleCursoActual.Perido}</li>
-              <li>Modalidad: {DetalleCursoActual.Modalidad}</li>
-              <li>Horario: {DetalleCursoActual.Horario}</li>
-              <li>Docente: {DetalleCursoActual.Docente}</li>
-              <li>Nivel: {DetalleCursoActual.Requisitos}</li>
+              <li>Nombre: {cursos.Nombre}</li>
+              <li>Periodo: {cursos.Perido}</li>
+              <li>Modalidad: {cursos.Modalidad}</li>
+              <li>Horario: {cursos.Horario}</li>
+              <li>Docente: {cursos.Docente}</li>
+              <li>Nivel: {cursos.Requisitos}</li>
             </ul>
           </section>
 
@@ -102,7 +136,7 @@ function DetalleCurso() {
             cancelText="No"
           >
             <Button type="primary" className="bg-green-500">
-              Enviar
+              Solicitar inscripcion
             </Button>
           </Popconfirm>
         </div>

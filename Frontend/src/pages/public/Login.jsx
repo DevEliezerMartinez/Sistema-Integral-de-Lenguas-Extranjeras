@@ -1,21 +1,84 @@
-import { Button, Divider, Form, Input } from "antd";
+import { Button, Divider, Form, Input, message } from "antd";
 import Headeeer from "../../components/Shared/HeaderPublico";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../AuthContext";
+import React, { useState } from 'react';
 
 function Login() {
   const navigate = useNavigate();
-  const onFinish = (values) => {
-    console.log("Success:", values);
 
-    navigate("/Estudiantes/Cursos");
+
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const { setToken } = useAuth();
+
+
+  const onFinish = async (values) => {
+    // Construye el cuerpo de la petición
+    const requestBody = {
+      correo_electronico: values.correo,
+      contrasena: values.password,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      // Verifica si la petición fue exitosa
+      if (response.ok) {
+        // Parsea el cuerpo de la respuesta como JSON
+        const responseData = await response.json();
+
+        // Imprime los datos de la respuesta en la consola
+        console.log("Petición POST exitosa");
+        console.log("Token:", responseData.token);
+        console.log("Tipo de token:", responseData.token_type);
+        console.log("Usuario:", responseData.usuario);
+        messageApi.open({
+          type: "success",
+          content: "Inicio de sesion exitoso!",
+        });
+
+
+          // Lógica para iniciar sesión
+          setToken(responseData.token);
+        
+
+
+        setTimeout(() => {
+          navigate("/Estudiantes/Cursos");
+        }, 2000);
+      } else {
+        // Maneja errores de respuesta aquí
+        console.log("status:", response.status);
+        console.log("completo:", response);
+        console.log("Error:", response.statusText);
+
+        if (response.status == 401)
+          messageApi.open({
+            type: "error",
+            content: "Datos invalidos!",
+          });
+      }
+    } catch (error) {
+      // Maneja errores de red o de cliente aquí
+      console.error("Error al enviar la petición POST:", error);
+    }
   };
+
   const onFinishFailed = (errorInfo) => {
-    s;
     console.log("Failed:", errorInfo);
   };
   return (
     <>
+      {contextHolder}
       <Headeeer />
 
       <main className="w-full flex flex-col  md:h-screen md:flex-row ">
@@ -38,6 +101,7 @@ function Login() {
             <Form
               layout="vertical"
               name="basic"
+              onFinish={onFinish}
               onFinishFailed={onFinishFailed}
             >
               <Form.Item
@@ -78,7 +142,7 @@ function Login() {
                   span: 16,
                 }}
               >
-                <Button type="primary" htmlType="submit" onClick={onFinish}>
+                <Button type="primary" htmlType="submit">
                   Ingresar
                 </Button>
               </Form.Item>
