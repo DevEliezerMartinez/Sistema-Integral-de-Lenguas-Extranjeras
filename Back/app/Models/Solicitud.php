@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Solicitud extends Model
 {
     use HasFactory;
@@ -13,11 +14,11 @@ class Solicitud extends Model
 
     public function curso()
     {
-        return $this->belongsTo(Curso::class);
+        return $this->belongsTo(Curso::class, 'curso_id');
     }
 
     public function alumno()
     {
-        return $this->belongsTo(Estudiante::class);
+        return $this->belongsTo(Estudiante::class, 'alumno_id');
     }
 }

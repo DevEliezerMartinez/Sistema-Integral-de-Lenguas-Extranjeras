@@ -1,9 +1,64 @@
-import { Breadcrumb, Button } from "antd";
-import React, { useState } from "react";
+import { Breadcrumb, Button, Spin } from "antd";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-function CursoActivo() {
-  const [hasModules, setHasModules] = useState(true); // Initial state (adjust as needed)
+function CursosArchivados() {
+  const [cursos, setCursos] = useState([]); // Estado para almacenar los cursos
+  const [loading, setLoading] = useState(true); // Estado para el indicador de carga
+  const [error, setError] = useState(null); // Estado para manejar errores
+
+  useEffect(() => {
+    const fetchCursosArchivados = async () => {
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/cursosArchivados",
+          {
+            method: "GET",
+            headers: {
+              Authorization:
+                "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+              Accept: "*/*",
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setCursos(data.cursos);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCursosArchivados();
+  }, []);
+
+  const formatDate = (dateString) => {
+    const options = { day: "numeric", month: "long", year: "numeric" };
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", options);
+  };
+
+  if (loading)
+    return (
+      <div className="flex gap-4 flex-col h-[40vh] justify-center items-center">
+        <Spin size="large" />
+        <p>Cargando...</p>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex gap-4 flex-col h-[40vh] justify-center items-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
 
   return (
     <div className="px-4">
@@ -17,71 +72,65 @@ function CursoActivo() {
           },
         ]}
       />
-      <h2 className="Montserrat font-semibold text-2xl text-center">
-        Cursos archivados coordinador
-      </h2>
 
       <div
         id="Contenedor de CARDS"
         className="flex gap-3 justify-center mt-5 flex-wrap"
       >
-        {hasModules ? (
-          <>
+        {cursos.length > 0 ? (
+          cursos.map((curso) => (
             <div
+              key={curso.id}
               id="Card"
               className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
             >
               <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
-              <p className="Montserrat font-normal">Curso finalizado</p>
-              <ul className="self-start text-left ">
-                <li>Nombre del Curso: Programación en React</li>
-                <li>Docente: Laura Garza</li>
-                <li>Periodo: Semanal</li>
+
+              <ul className="self-start text-left font-medium">
+                <li className="Montserrat text-xl text-center my-4">
+                  {curso.nombre}
+                </li>
+                <span className="Montserrat bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">
+                  Curso archivado
+                </span>
+                <li>
+                  Docente:{" "}
+                  <span className="font-light">
+                    {curso.docente ? curso.docente.nombre : "Desconocido"}
+                  </span>
+                </li>
+                <li>
+                  Periodo:{" "}
+                  <span className="font-light">
+                    {curso.periodo ? (
+                      <>
+                        <span className="block mb-1">
+                          {formatDate(curso.periodo.fecha_inicio)}
+                        </span>
+                        <span className="block">
+                          {formatDate(curso.periodo.fecha_fin)}
+                        </span>
+                      </>
+                    ) : (
+                      "Desconocido"
+                    )}
+                  </span>
+                </li>
               </ul>
-              <Button type="primary" className="bg-green-500">
-                <Link to="/Coordinador/Cursos/55"> Detalles</Link>
+              <Button type="primary" className="bg-green-500 my-4">
+                <Link to={`/Coordinador/Cursos/${curso.id}`}>Detalles</Link>
               </Button>
             </div>
-            <div
-              id="Card"
-              className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
-            >
-              <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
-              <p className="Montserrat font-normal">Curso finalizado</p>
-              <ul className="self-start text-left ">
-                <li>Nombre del Curso: Programación en React</li>
-                <li>Docente: Laura Garza</li>
-                <li>Periodo: Semanal</li>
-              </ul>
-              <Button type="primary" className="bg-green-500">
-                <Link to="/Coordinador/Cursos/55"> Detalles</Link>
-              </Button>
-            </div>
-            <div
-              id="Card"
-              className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
-            >
-              <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
-              <p className="Montserrat font-normal">Curso finalizado</p>
-              <ul className="self-start text-left ">
-                <li>Nombre del Curso: Programación en React</li>
-                <li>Docente: Laura Garza</li>
-                <li>Periodo: Semanal</li>
-              </ul>
-              <Button type="primary" className="bg-green-500">
-                <Link to="/Coordinador/Cursos/55"> Detalles</Link>
-              </Button>
-            </div>
-          </>
+          ))
         ) : (
           <div
             id="Card"
-            className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center "
+            className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center"
           >
             <img alt="libro" src="/Opt/SVG/sad.svg" className="w-24" />
             <p className="Montserrat font-normal">Sin cursos disponibles</p>
             <span>
-              Si crees que hay un error notifica al coordinador del CLE
+              Si crees que hay un error, notifica al coordinador del CLE
             </span>
           </div>
         )}
@@ -90,4 +139,4 @@ function CursoActivo() {
   );
 }
 
-export default CursoActivo;
+export default CursosArchivados;

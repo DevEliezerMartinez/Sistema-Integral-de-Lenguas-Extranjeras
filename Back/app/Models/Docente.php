@@ -11,13 +11,15 @@ class Docente extends Model
 
     protected $fillable = ['usuario_id'];
 
+    // Relación con el modelo Usuario
     public function usuario()
     {
-        return $this->belongsTo(Usuario::class);
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
+    // Relación con el modelo Curso
     public function cursos()
     {
-        return $this->hasMany(Curso::class);
+        return $this->hasMany(Curso::class, 'maestro_id');
     }
 }

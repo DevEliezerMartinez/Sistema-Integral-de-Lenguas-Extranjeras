@@ -22,7 +22,17 @@ function Login() {
       contrasena: values.password,
     };
 
-    try {
+
+
+    navigate("/Estudiantes/Cursos");
+    messageApi.open({
+      type: "success",
+      content: "Inicio de sesion exitoso!",
+    });
+
+
+
+/*     try {
       const response = await fetch("http://localhost:8000/api/login", {
         method: "POST",
         headers: {
@@ -70,7 +80,7 @@ function Login() {
     } catch (error) {
       // Maneja errores de red o de cliente aquí
       console.error("Error al enviar la petición POST:", error);
-    }
+    } */
   };
 
   const onFinishFailed = (errorInfo) => {

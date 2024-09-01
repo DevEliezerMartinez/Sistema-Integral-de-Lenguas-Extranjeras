@@ -1,14 +1,14 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\Usuario; // Asegúrate de importar el modelo Usuario
-use App\Models\Estudiante; // Asegúrate de importar el modelo Usuario
+use App\Models\Usuario;
+use App\Models\Estudiante;
+use App\Models\Coordinador;
+use App\Models\Docente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash; // Importa el facade Hash
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
 
 class AuthController extends Controller
 {
@@ -24,39 +24,73 @@ class AuthController extends Controller
             'telefono' => 'required',
             'curp' => 'required|string',
             'domicilio' => 'required|string',
-            'tipo_usuario' => 'required|string',
+            'tipo_usuario' => 'required|string|in:estudiante,coordinador,docente',
+            // Solo valida los campos del estudiante si el tipo_usuario es estudiante
+            'carrera' => 'nullable|required_if:tipo_usuario,estudiante|string',
+            'numero_control' => 'nullable|required_if:tipo_usuario,estudiante|string',
+            'historial_cursos' => 'nullable|required_if:tipo_usuario,estudiante|string',
+            'perfil' => 'nullable|required_if:tipo_usuario,estudiante|string',
         ]);
-
+    
         // Verificar si la validación del usuario falla
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
+    
         // Crear el usuario con la contraseña hasheada
         $usuario = Usuario::create([
             'nombre' => $request->input('nombre'),
             'apellidos' => $request->input('apellidos'),
             'correo_electronico' => $request->input('correo_electronico'),
-            'contrasena' => Hash::make($request->input('contrasena')), // Hash the password
+            'contrasena' => Hash::make($request->input('contrasena')),
             'genero' => $request->input('genero'),
             'telefono' => $request->input('telefono'),
             'curp' => $request->input('curp'),
             'domicilio' => $request->input('domicilio'),
             'tipo_usuario' => $request->input('tipo_usuario'),
         ]);
-        // Crear el estudiante asociado al usuario
-        $estudiante = Estudiante::create([
-            'usuario_id' => $usuario->id,
-            'carrera' => $request->input('carrera'),
-            'numero_control' => $request->input('numero_control'),
-            'historial_cursos' => $request->input('historial_cursos'),
-            'perfil' => $request->input('perfil'),
-        ]);
-
+    
+        $response = [
+            'message' => 'Usuario registrado correctamente',
+            'usuario' => $usuario,
+            'condicional' => null, // Indicará a qué condicional entró
+            'tipo_usuario_creado' => $request->input('tipo_usuario')
+        ];
+    
+        // Crear un estudiante, coordinador o docente según el tipo de usuario
+        if ($request->input('tipo_usuario') === 'estudiante') {
+            $estudiante = Estudiante::create([
+                'usuario_id' => $usuario->id,
+                'carrera' => $request->input('carrera'),
+                'numero_control' => $request->input('numero_control'),
+                'historial_cursos' => $request->input('historial_cursos'),
+                'perfil' => $request->input('perfil'),
+            ]);
+            $response['estudiante'] = $estudiante;
+            $response['message'] = 'Estudiante registrado correctamente';
+            $response['condicional'] = 'estudiante';
+        } elseif ($request->input('tipo_usuario') === 'coordinador') {
+            $coordinador = Coordinador::create([
+                'usuario_id' => $usuario->id,
+                // Agrega aquí los campos específicos para el coordinador si los hay
+            ]);
+            $response['coordinador'] = $coordinador;
+            $response['message'] = 'Coordinador registrado correctamente';
+            $response['condicional'] = 'coordinador';
+        } elseif ($request->input('tipo_usuario') === 'docente') {
+            $docente = Docente::create([
+                'usuario_id' => $usuario->id,
+                // Agrega aquí los campos específicos para el docente si los hay
+            ]);
+            $response['docente'] = $docente;
+            $response['message'] = 'Docente registrado correctamente';
+            $response['condicional'] = 'docente';
+        }
+    
         // Responder con una respuesta JSON
-        return response()->json(['message' => 'Estudiante registrado correctamente', 'estudiante' => $estudiante], 201);
+        return response()->json($response, 201);
     }
-
+    
 
     public function login(Request $request)
     {
@@ -83,7 +117,6 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
-    return response()->json(['message' => 'Sesión cerrada exitosamente']);
+        return response()->json(['message' => 'Sesión cerrada exitosamente']);
     }
-    
 }

@@ -1,28 +1,45 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\EstudianteController;
+use App\Http\Controllers\Solicitudes;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/useeer', [UserController::class, 'index']);
-
-    //Logout
-    Route::post('/logout', [AuthController::class, 'logout']);
-
-    //Cursos
-    Route::get('/cursosDisponibles', [CursoController::class, 'index']);
-    Route::get('/Cursos/{id}', [CursoController::class, 'show']);
-
-
-
-});
-
+// Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'registrar']);
+
+// Rutas protegidas por autenticación
+Route::middleware('auth:sanctum')->group(function () {
+    // Usuarios
+    Route::get('/users', [UserController::class, 'index']); // Corrección: 'useeer' -> 'users'
+
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Cursos
+    Route::get('/cursos', [CursoController::class, 'index']); // Corrección: 'cursosDisponibles' -> 'cursos'
+    Route::get('/cursosArchivados', [CursoController::class, 'showArchived']); // Cursos Archivados
+    Route::get('/cursos/{id}', [CursoController::class, 'show']); // Corrección: 'Cursos' -> 'cursos'
+
+    // Cursos activos
+    Route::get('/cursos_activos', [CursoController::class, 'active']); 
+    Route::post('/crear_curso', [CursoController::class, 'create']); 
+
+
+
+    Route::get('/docentes', [DocenteController::class, 'show']); 
+
+
+
+    Route::get('/solicitudes', [Solicitudes::class, 'show']); 
+    Route::get('/solicitudes/{cursoId}', [Solicitudes::class, 'showByCurso']);
+    Route::post('/solicitudes', [Solicitudes::class, 'create']); 
+    // Opcional: Estudiantes (si se necesitan rutas relacionadas con estudiantes)
+    // Route::get('/estudiantes', [EstudianteController::class, 'index']);
+    // Route::get('/estudiantes/{id}', [EstudianteController::class, 'show']);
+});
