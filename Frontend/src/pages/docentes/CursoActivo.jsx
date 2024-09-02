@@ -32,8 +32,8 @@ function CursoActivo() {
           >
             <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
             <p className="Montserrat font-normal">Modulo en curso</p>
-            <Button type="primary" className="bg-green-500">
-              <Link to="/Docentes/Cursos/55"> Detalles</Link>
+            <Button type="primary" className="bg-green-500 my-4">
+              <Link to="/Docentes/Cursos/55"> Detalleees</Link>
             </Button>
           </div>
         ) : (

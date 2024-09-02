@@ -202,8 +202,9 @@ function CursoActivo() {
                 className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
               >
                 <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
-                <p className="Montserrat font-normal">{course.nombre}</p>
-                <Button type="primary" className="bg-green-500">
+                <h4 className="Montserrat  my-2 font-medium">{course.nombre}</h4>
+                <p>{course.descripción}</p>
+                <Button type="primary" className="bg-green-500 my-4">
                   <Link to={`/Coordinador/Cursos/${course.id}`}>Detalles</Link>
                 </Button>
               </div>

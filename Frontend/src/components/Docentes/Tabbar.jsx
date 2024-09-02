@@ -4,11 +4,11 @@ import { Dropdown } from "antd";
 
 const items = [
   {
-    label: <Link to="/Coordinador/CursosActivos">Cursos Activos</Link>,
+    label: <Link to="/Coordinador/CursosActivos">Activos</Link>,
     key: "0",
   },
   {
-    label: <Link to="/Coordinador/CursosArchivados">Cursos Archivados</Link>,
+    label: <Link to="/Coordinador/CursosArchivados">Archivados</Link>,
     key: "1",
   },
 ];

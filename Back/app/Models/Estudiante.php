@@ -23,7 +23,7 @@ class Estudiante extends Model
 
     public function solicitudes()
     {
-        return $this->hasMany(Solicitud::class);
+        return $this->hasMany(Solicitud::class, 'alumno_id');
     }
 
     public function constancias()

@@ -88,9 +88,8 @@ const App = ({ solicitudes }) => {
 
   useEffect(() => {
     if (solicitudes) {
-      // Map the solicitudes to include a unique key
       const formattedData = solicitudes.map((item, index) => ({
-        key: item.ID_Inscripcion || index.toString(), // Ensure each item has a unique key
+        key: item.ID_Inscripcion || index.toString(),
         ...item,
       }));
       setDataSource(formattedData);
@@ -122,19 +121,11 @@ const App = ({ solicitudes }) => {
       key: "ID_Inscripcion",
     },
     {
-      title: "Nombre del Alumno",
-      dataIndex: "Nombre_Alumno",
-      key: "Nombre_Alumno",
-    },
-    {
-      title: "Apellidos del Alumno",
-      dataIndex: "Apellidos_Alumno",
-      key: "Apellidos_Alumno",
-    },
-    {
-      title: "Nombre del Curso",
-      dataIndex: "Nombre_Curso",
-      key: "Nombre_Curso",
+      title: "Nombre Completo",
+      dataIndex: "NombreCompleto",
+      key: "NombreCompleto",
+      render: (_, record) =>
+        `${record.Nombre_Alumno} ${record.Apellidos_Alumno}`,
     },
     {
       title: "Fecha de Inscripción",
@@ -172,7 +163,7 @@ const App = ({ solicitudes }) => {
         bordered
         dataSource={dataSource}
         columns={columns}
-        locale={{ emptyText: 'No se encontraron solicitudes  para este curso' }}
+        locale={{ emptyText: 'No se encontraron solicitudes para este curso' }}
       />
     </div>
   );

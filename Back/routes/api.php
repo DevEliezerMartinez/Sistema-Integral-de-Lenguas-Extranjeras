@@ -26,6 +26,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cursosArchivados', [CursoController::class, 'showArchived']); // Cursos Archivados
     Route::get('/cursos/{id}', [CursoController::class, 'show']); // Corrección: 'Cursos' -> 'cursos'
 
+    //Set curso como Archivadooo
+    Route::post('/archivarCurso/{id}', [CursoController::class, 'ArchiveCourse']); // Corrección: 'Cursos' -> 'cursos'
+
     // Cursos activos
     Route::get('/cursos_activos', [CursoController::class, 'active']); 
     Route::post('/crear_curso', [CursoController::class, 'create']); 
@@ -33,13 +36,19 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::get('/docentes', [DocenteController::class, 'show']); 
+    //Delete
+    Route::delete('/docentes/{docenteId}', [DocenteController::class, 'delete']); 
 
 
 
     Route::get('/solicitudes', [Solicitudes::class, 'show']); 
     Route::get('/solicitudes/{cursoId}', [Solicitudes::class, 'showByCurso']);
-    Route::post('/solicitudes', [Solicitudes::class, 'create']); 
+    Route::post('/crear_solicitud', [Solicitudes::class, 'create']); 
     // Opcional: Estudiantes (si se necesitan rutas relacionadas con estudiantes)
     // Route::get('/estudiantes', [EstudianteController::class, 'index']);
     // Route::get('/estudiantes/{id}', [EstudianteController::class, 'show']);
+
+    //Rechazar solicitud
+    Route::post('/solicitudes/{solicitud_id}/rechazar', [Solicitudes::class, 'rechazar']);
+    Route::post('/solicitudes/{solicitud_id}/aceptar', [Solicitudes::class, 'aceptar']);
 });

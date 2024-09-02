@@ -119,6 +119,31 @@ class CursoController extends Controller
         }
     }
 
+    public function ArchiveCourse($id)
+    {
+        // Buscar el curso por su ID y cargar la relación del docente
+        $curso = Curso::with('docente.usuario')->find($id);
+    
+        // Verificar si el curso existe
+        if ($curso) {
+            // Cambiar el estado del curso a "Archivado"
+            $curso->estado = 'Archivado';
+    
+            // Guardar los cambios en la base de datos
+            $curso->save();
+    
+            // Incluir el nombre del docente en la respuesta
+            return response()->json([
+                'mensaje' => 'El curso ha sido archivado exitosamente.',
+                'success' => "true"
+               
+            ], 200);
+        } else {
+            return response()->json(['error' => 'Curso no encontrado','success' => "false"], 404);
+        }
+    }
+    
+
 
 
     public function showArchived()
