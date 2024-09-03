@@ -1,62 +1,54 @@
-import { Breadcrumb, Timeline } from 'antd';
-import React from 'react';
-import { DeleteOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { Spin, Alert, List } from 'antd';
+import axios from 'axios';
 
-// Import the close icon (replace with your preferred icon library/component)
+const Notificaciones = ({ userId }) => {
+  const [notificaciones, setNotificaciones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-function Notificaciones() {
+  useEffect(() => {
+    const fetchNotificaciones = async () => {
+      try {
+        // Hacer la petición para obtener las notificaciones
+        const response = await axios.get(`http://127.0.0.1:8000/api/users/notificaciones/${userId}`);
+        setNotificaciones(response.data.notificaciones);
+        setLoading(false);
+      } catch (err) {
+        setError(err.response ? err.response.data.mensaje : 'Error al obtener notificaciones');
+        setLoading(false);
+      }
+    };
+
+    fetchNotificaciones();
+  }, [userId]);
+
+  if (loading) {
+    return <Spin tip="Cargando notificaciones..." />;
+  }
+
+  if (error) {
+    return <Alert message="Error" description={error} type="error" showIcon />;
+  }
+
+  if (notificaciones.length === 0) {
+    return <Alert message="Sin Notificaciones" description="No se encontraron notificaciones para este usuario." type="info" showIcon />;
+  }
+
   return (
-    <div className='px-4'>
-    <Breadcrumb
-        items={[
-          {
-            title: <p className="font-medium text-black">Coordinador</p>,
-          },
-          {
-            title: <a href="">Notificaciones</a>,
-          },
-        ]}
-      />
-      <h2 className="Montserrat font-medium text-2xl text-center">
-        Mis Notificaciones
-      </h2>
-
-      <Timeline className='mt-8 px-8'>
-        { /* Render timeline items with close icons */ }
-        {[
-          {
-            children: (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                Create a services site 2015-09-01
-                <DeleteOutlined onClick={() => { /* Handle notification removal logic here */ }} />
-              </div>
-            ),
-          },
-          {
-            children: (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                Solve initial network problems 2015-09-01
-                <DeleteOutlined onClick={() => { /* Handle notification removal logic here */ }} />
-              </div>
-            ),
-          },
-          {
-            children: (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                Technical testing 2015-09-01
-                <DeleteOutlined onClick={() => { /* Handle notification removal logic here */ }} />
-              </div>
-            ),
-          },
-          
-        ].map((item) => (
-          <Timeline.Item key={item.children}>
-            {item.children}
-          </Timeline.Item>
-        ))}
-      </Timeline>
-    </div>
+    <List
+      itemLayout="horizontal"
+      dataSource={notificaciones}
+      renderItem={item => (
+        <List.Item>
+          <List.Item.Meta
+            title={item.titulo}
+            description={item.descripcion}
+          />
+        </List.Item>
+      )}
+    />
   );
-}
+};
 
 export default Notificaciones;

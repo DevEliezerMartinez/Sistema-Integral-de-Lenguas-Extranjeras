@@ -6,6 +6,7 @@ use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\Solicitudes;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\notificacions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,7 @@ Route::post('/register', [AuthController::class, 'registrar']);
 Route::middleware('auth:sanctum')->group(function () {
     // Usuarios
     Route::get('/users', [UserController::class, 'index']); // Corrección: 'useeer' -> 'users'
+    Route::get('/users/notificaciones/{id}', [notificacions::class, 'show']); // Corrección: 'useeer' -> 'users'
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout']);

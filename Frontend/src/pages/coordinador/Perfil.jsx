@@ -25,6 +25,7 @@ function Perfil() {
     fetchDocentes();
   }, []);
 
+  // Función para eliminar un docente
   const eliminarDocente = async (docente_id) => {
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/docentes/${docente_id}`, {
@@ -65,9 +66,9 @@ function Perfil() {
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex flex-col items-center">
               <img
-                src="./Opt/SVG/lol.jpg"
+                src="https://media.istockphoto.com/id/1448474701/es/foto/la-dise%C3%B1adora-gr%C3%A1fica-sonr%C3%ADe-mientras-trabaja-en-una-computadora-port%C3%A1til-en-una-oficina.webp?s=2048x2048&w=is&k=20&c=ralxlJILurgeMr9sWln8pCws1wayTUXcye7m2pLt2iA="
                 className="w-32 h-32 bg-gray-300 rounded-full mb-4 shrink-0"
-                alt=""
+                alt="Foto de perfil"
               />
               <h1 className="text-xl font-bold">Maricela Gallegos</h1>
               <p className="text-gray-700">Administrador</p>
@@ -89,6 +90,7 @@ function Perfil() {
           </h2>
 
           <Divider />
+
           {/* Pasar los datos de los docentes y la función de eliminación a la tabla */}
           <TablaDocentes docentes={docentes} onDocenteEliminado={eliminarDocente} />
         </div>
