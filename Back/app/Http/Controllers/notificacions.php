@@ -33,4 +33,35 @@ class notificacions extends Controller
             ], 500);
         }
     }
+
+    public function destroy($id)
+{
+    try {
+        // Buscar la notificación por ID
+        $notificacion = Notificacion::find($id);
+
+        // Verificar si la notificación existe
+        if (!$notificacion) {
+            return response()->json([
+                'mensaje' => 'No se encontró la notificación con el ID proporcionado.'
+            ], 404);
+        }
+
+        // Eliminar la notificación
+        $notificacion->delete();
+
+        // Retornar respuesta de éxito
+        return response()->json([
+            'mensaje' => 'Notificación eliminada exitosamente.'
+        ], 200);
+
+    } catch (\Exception $e) {
+        // Manejar cualquier error inesperado
+        return response()->json([
+            'mensaje' => 'Ocurrió un error al intentar eliminar la notificación.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 }

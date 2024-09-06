@@ -8,20 +8,23 @@ use App\Models\Notificacion;
 use App\Models\Curso;
 
 class Solicitudes extends Controller
-{
-    public function show()
+{public function show()
     {
         try {
             // Obtener todas las solicitudes con estado "Pendiente" y la información del curso, alumno, y usuario asociado
             $solicitudes = Solicitud::where('status', 'Pendiente')
                 ->with(['curso.docente.usuario', 'alumno.usuario']) // Cargar las relaciones necesarias
                 ->get();
-
-            // Verificar si hay solicitudes y depurar la carga de datos
+    
+            // Verificar si hay solicitudes pendientes
             if ($solicitudes->isEmpty()) {
-                return response()->json(['error' => 'No se encontraron solicitudes pendientes'], 404);
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'No se encontraron solicitudes pendientes', 
+                    'solicitudes' => []
+                ], 200);
             }
-
+    
             // Mapear la respuesta con los datos correctos
             $solicitudes = $solicitudes->map(function ($solicitud) {
                 return [
@@ -31,22 +34,30 @@ class Solicitudes extends Controller
                     'Nombre_Curso' => $solicitud->curso->nombre ?? 'No disponible',
                     'Fecha_Inicio_Curso' => $solicitud->curso->fecha_inicio ?? 'No disponible',
                     'Fecha_Fin_Curso' => $solicitud->curso->fecha_fin ?? 'No disponible',
-                    'Docente_Curso' => $solicitud->curso->docente ? $solicitud->curso->docente->usuario->nombre : 'No disponible', // Asegúrate de que 'docente' y 'usuario' no sean null
+                    'Docente_Curso' => $solicitud->curso->docente ? $solicitud->curso->docente->usuario->nombre : 'No disponible', 
                     'Nivel_Curso' => $solicitud->curso->nivel ?? 'No disponible',
                     'Modalidad_Curso' => $solicitud->curso->modalidad ?? 'No disponible',
                     'Fecha_Inscripcion' => $solicitud->fecha_inscripcion ?? 'No disponible',
                     'Estado_Solicitud' => $solicitud->status ?? 'No disponible',
                     'PDF_Solicitud' => $solicitud->pdf ?? 'No disponible',
-
                 ];
             });
-
-            return response()->json($solicitudes);
+    
+            // Retornar respuesta con los datos de las solicitudes
+            return response()->json([
+                'success' => true, 
+                'solicitudes' => $solicitudes
+            ], 200);
+    
         } catch (\Exception $e) {
             // Capturar cualquier excepción y devolver un error 500 con el mensaje de la excepción
-            return response()->json(['error' => 'Error en el servidor: ' . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false, 
+                'error' => 'Error en el servidor: ' . $e->getMessage()
+            ], 500);
         }
     }
+    
 
 
 

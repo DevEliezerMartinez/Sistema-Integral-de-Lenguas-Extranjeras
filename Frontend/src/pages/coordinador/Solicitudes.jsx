@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Breadcrumb, Button, Collapse, Spin, Alert, Input, notification } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Collapse,
+  Spin,
+  Alert,
+  Input,
+  notification,
+} from "antd";
 import axios from "axios";
 
 const { TextArea } = Input;
@@ -9,7 +17,7 @@ function Solicitudes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [visibleTextarea, setVisibleTextarea] = useState(null); // Estado para manejar el textarea visible
-  const [rejectionText, setRejectionText] = useState(''); // Estado para manejar el texto de rechazo
+  const [rejectionText, setRejectionText] = useState(""); // Estado para manejar el texto de rechazo
 
   useEffect(() => {
     fetchSolicitudes();
@@ -20,16 +28,25 @@ function Solicitudes() {
     axios
       .get("http://127.0.0.1:8000/api/solicitudes", {
         headers: {
-          Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+          Authorization:
+            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
           Accept: "*/*",
           "Content-Type": "application/json",
         },
       })
       .then((response) => {
-        setSolicitudes(response.data);
+        if (response.status === 404 || response.data.solicitudes.length === 0) {
+          // Si no hay solicitudes pendientes, manejarlo sin error
+          setError("No se encontraron solicitudes pendientes");
+          setSolicitudes([]);
+        } else {
+          // Hay solicitudes, establecerlas en el estado
+          setSolicitudes(response.data);
+          setError(null); // Limpiar cualquier mensaje de error
+        }
         setLoading(false);
       })
-      .catch((error) => {
+      .catch(() => {
         setError("Error al cargar las solicitudes");
         setLoading(false);
       });
@@ -41,56 +58,69 @@ function Solicitudes() {
 
   const handleEnviarClick = (id) => {
     axios
-      .post(`http://127.0.0.1:8000/api/solicitudes/${id}/rechazar`, { motivo: rejectionText }, {
-        headers: {
-          Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      })
+      .post(
+        `http://127.0.0.1:8000/api/solicitudes/${id}/rechazar`,
+        { motivo: rejectionText },
+        {
+          headers: {
+            Authorization:
+              "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+            Accept: "*/*",
+            "Content-Type": "application/json",
+          },
+        }
+      )
       .then(() => {
         notification.success({
-          message: 'Solicitud Rechazada',
-          description: 'El rechazo será notificado al estudiante.',
+          message: "Solicitud Rechazada",
+          description: "El rechazo será notificado al estudiante.",
         });
 
         // Resetear el textarea y ocultarlo
-        setRejectionText('');
+        setRejectionText("");
         setVisibleTextarea(null);
 
         // Recargar la lista de solicitudes
         fetchSolicitudes();
       })
-      .catch((error) => {
+      .catch(() => {
         notification.error({
-          message: 'Error',
-          description: 'No se pudo procesar el rechazo. Inténtalo de nuevo más tarde.',
+          message: "Error",
+          description:
+            "No se pudo procesar el rechazo. Inténtalo de nuevo más tarde.",
         });
       });
   };
 
   const handleAprobarClick = (id) => {
     axios
-      .post(`http://127.0.0.1:8000/api/solicitudes/${id}/aceptar`, {}, {
-        headers: {
-          Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      })
+      .post(
+        `http://127.0.0.1:8000/api/solicitudes/${id}/aceptar`,
+        {},
+        {
+          headers: {
+            Authorization:
+              "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+            Accept: "*/*",
+            "Content-Type": "application/json",
+          },
+        }
+      )
       .then(() => {
         notification.success({
-          message: 'Solicitud Aprobada',
-          description: 'La solicitud ha sido aprobada y el estudiante será notificado.',
+          message: "Solicitud Aprobada",
+          description:
+            "La solicitud ha sido aprobada y el estudiante será notificado.",
         });
 
         // Recargar la lista de solicitudes
         fetchSolicitudes();
       })
-      .catch((error) => {
+      .catch(() => {
         notification.error({
-          message: 'Error',
-          description: 'No se pudo procesar la aprobación. Inténtalo de nuevo más tarde.',
+          message: "Error",
+          description:
+            "No se pudo procesar la aprobación. Inténtalo de nuevo más tarde.",
         });
       });
   };
@@ -115,20 +145,26 @@ function Solicitudes() {
       <div className="flex px-8">
         <ul className="list-none w-1/3">
           <li className="mb-4">
-            <span className="font-bold">Periodo:</span> {solicitud.Fecha_Inicio_Curso} -{" "}
-            {solicitud.Fecha_Fin_Curso}
+            <span className="font-bold">Periodo:</span>{" "}
+            {solicitud.Fecha_Inicio_Curso} - {solicitud.Fecha_Fin_Curso}
           </li>
           <li className="mb-4">
-            <span className="font-bold">Docente:</span> {solicitud.Docente_Curso}
+            <span className="font-bold">Docente:</span>{" "}
+            {solicitud.Docente_Curso}
           </li>
           <li className="mb-4">
-            <span className="font-bold">Requisitos:</span> {solicitud.Requisitos || "Ninguno"}
+            <span className="font-bold">Requisitos:</span>{" "}
+            {solicitud.Requisitos || "Ninguno"}
           </li>
           <li className="mb-4">
-            <span className="font-bold">Modalidad:</span> {solicitud.Modalidad_Curso}
+            <span className="font-bold">Modalidad:</span>{" "}
+            {solicitud.Modalidad_Curso}
           </li>
         </ul>
-        <div id="Visualizer" className="w-2/3 flex flex-col justify-center items-center">
+        <div
+          id="Visualizer"
+          className="w-2/3 flex flex-col justify-center items-center"
+        >
           <img className="w-24" src="/Opt/SVG/pdf.svg" alt="icon" />
           <Button type="link">Descargar archivo</Button>
           <div id="Actions" className="m-8 gap-5 flex self-end">
@@ -188,9 +224,22 @@ function Solicitudes() {
           <Spin size="large" />
         </div>
       ) : error ? (
-        <Alert message={error} type="error" showIcon />
-      ) : solicitudes.length === 0 ? (
-        <p className="text-center">No hay solicitudes pendientes.</p>
+        <div className="text-center py-4">
+          <Alert
+            message={error}
+            description={
+              error === "No se encontraron solicitudes pendientes"
+                ? "Actualmente no hay solicitudes de inscripción para procesar."
+                : undefined
+            }
+            type={
+              error === "No se encontraron solicitudes pendientes"
+                ? "info"
+                : "error"
+            }
+            showIcon
+          />
+        </div>
       ) : (
         <Collapse accordion items={items} />
       )}

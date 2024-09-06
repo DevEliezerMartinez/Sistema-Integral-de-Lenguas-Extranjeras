@@ -88,7 +88,7 @@ function App() {
           />
           <Route
             path="/Coordinador/Alumnos/:AlumnoId"
-            element={< DetalleAlumno />}
+            element={<DetalleAlumno/>}
           />
         </Route>
       </Routes>
