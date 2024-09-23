@@ -70,33 +70,34 @@ class Solicitudes extends Controller
         try {
             // Obtener las solicitudes del curso especificado con estado "aceptada"
             $solicitudes = Solicitud::where('curso_id', $cursoId)
-                ->where('status', 'Aceptada') // Filtrar por el estado "Aceptada"
-                ->with(['curso', 'alumno.usuario']) // Cargar las relaciones necesarias
+                ->where('status', 'Aceptada')
+                ->with(['curso', 'alumno']) // Asegúrate de incluir la relación alumno
                 ->get();
-
+    
             if ($solicitudes->isEmpty()) {
                 return response()->json(['error' => 'No se encontraron solicitudes aceptadas para este curso'], 404);
             }
-
+    
             // Mapear la respuesta con los datos correctos
             $solicitudes = $solicitudes->map(function ($solicitud) {
                 return [
                     'ID_Inscripcion' => $solicitud->id ?? 'No disponible',
+                    'alumno_id' => $solicitud->alumno->id ?? 'No disponible', // Agregar el ID del alumno
                     'Nombre_Alumno' => $solicitud->alumno->usuario->nombre ?? 'No disponible',
                     'Apellidos_Alumno' => $solicitud->alumno->usuario->apellidos ?? 'No disponible',
                     'Nombre_Curso' => $solicitud->curso->nombre ?? 'No disponible',
                     'Fecha_Inscripcion' => $solicitud->fecha_inscripcion ?? 'No disponible',
                     'Estado_Solicitud' => $solicitud->status ?? 'No disponible',
-                    'PDF_Solicitud' => $solicitud->pdf ?? 'No disponible'
+                    'PDF_Solicitud' => $solicitud->pdf ?? 'No disponible',
                 ];
             });
-
+    
             return response()->json($solicitudes);
         } catch (\Exception $e) {
-            // Capturar cualquier excepción y devolver un error 500 con el mensaje de la excepción
             return response()->json(['error' => 'Error en el servidor: ' . $e->getMessage()], 500);
         }
     }
+    
 
 
     //Rechazar solicitud

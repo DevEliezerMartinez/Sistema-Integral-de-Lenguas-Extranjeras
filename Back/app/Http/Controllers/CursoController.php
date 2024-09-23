@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Curso;
 use App\Models\Solicitud;
+use App\Models\Notificacion;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -108,18 +109,32 @@ class CursoController extends Controller
 
         // Verificar si el curso existe
         if ($curso) {
-            // Incluir el nombre del docente en la respuesta
             return response()->json([
-                'curso' => $curso,
-                'docente' => $curso->docente ? [
-                    'id' => $curso->docente->id,
-                    'nombre' => $curso->docente->usuario->nombre,  // Asegúrate de que el campo sea correcto en Usuario
-                ] : null,
+                'curso' => [
+                    'id' => $curso->id,
+                    'nombre' => $curso->nombre,
+                    'descripcion' => $curso->descripcion,
+                    'modalidad' => $curso->modalidad,
+                    'nivel' => $curso->nivel,
+                    'estado' => $curso->estado,
+                    'horario' => $curso->horario,
+                    'maestro_id' => $curso->maestro_id,
+                    'coordinador_id' => $curso->coordinador_id,
+                    'created_at' => $curso->created_at,
+                    'updated_at' => $curso->updated_at,
+                    'fecha_inicio' => $curso->fecha_inicio,
+                    'fecha_fin' => $curso->fecha_fin,
+                    'docente' => $curso->docente ? [
+                        'id' => $curso->docente->id,
+                        'nombre' => $curso->docente->usuario->nombre,
+                    ] : null,
+                ],
             ], 200);
         } else {
             return response()->json(['error' => 'Curso no encontrado'], 404);
         }
     }
+
 
     public function ArchiveCourse($id)
     {
@@ -134,16 +149,24 @@ class CursoController extends Controller
             // Guardar los cambios en la base de datos
             $curso->save();
 
+            // Crear la notificación para el usuario con ID 1
+            $notificacion = new Notificacion();
+            $notificacion->usuario_id = 1; // ID del usuario que recibirá la notificación
+            $notificacion->mensaje = "El curso '{$curso->nombre}' ha sido archivado."; // Asumiendo que tienes un campo 'nombre' en el curso
+            $notificacion->fecha_notificacion = now(); // Fecha y hora actuales
+            $notificacion->estado = "visible"; // Estado de la notificación
+            $notificacion->save();
+
             // Incluir el nombre del docente en la respuesta
             return response()->json([
                 'mensaje' => 'El curso ha sido archivado exitosamente.',
                 'success' => "true"
-
             ], 200);
         } else {
             return response()->json(['error' => 'Curso no encontrado', 'success' => "false"], 404);
         }
     }
+
 
 
 
@@ -252,7 +275,7 @@ class CursoController extends Controller
                 ->where('status', 'Aceptada')
                 ->with('curso.docente.usuario') // Cargar la relación del curso y el docente
                 ->get();
-    
+
             // Verificar si no se encontraron cursos para el alumno
             if ($solicitudes->isEmpty()) {
                 return response()->json([
@@ -261,7 +284,7 @@ class CursoController extends Controller
                     'cursos' => []
                 ], 200);
             }
-    
+
             // Mapear los cursos del alumno
             $cursosAlumno = $solicitudes->map(function ($solicitud) {
                 $curso = $solicitud->curso;
@@ -279,14 +302,13 @@ class CursoController extends Controller
                     ] : 'No disponible',
                 ];
             });
-    
+
             // Retornar la lista de cursos asociados al alumno
             return response()->json([
                 'mensaje' => 'Cursos asociados al alumno obtenidos exitosamente.',
                 'exito' => true,
                 'cursos' => $cursosAlumno
             ], 200);
-            
         } catch (\Exception $e) {
             // Manejar cualquier error inesperado
             return response()->json([
@@ -295,7 +317,7 @@ class CursoController extends Controller
             ], 500);
         }
     }
-    
+
 
 
 

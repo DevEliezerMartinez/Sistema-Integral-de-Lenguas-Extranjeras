@@ -1,48 +1,53 @@
 import React, { useState, useEffect } from "react";
 import { Breadcrumb, Button, Spin } from "antd";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../AuthContext";
 import axios from "axios";
 
 function Cursos() {
-  const [hasModules, setHasModules] = useState(false); // Initial state (adjust as needed)
+  const [hasModules, setHasModules] = useState(false);
   const [cursos, setCursos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { token } = useAuth();
-
-  console.log("🚀 ~ Notificaciones ~ token->", token);
-
   useEffect(() => {
     const fetchCursos = async () => {
+      const token = localStorage.getItem("token");
+      console.log("Token:", token); // Verifica el token
+
+      if (!token) {
+        setError("No autorizado, inicia sesión nuevamente.");
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const response = await axios.get(
-          "http://127.0.0.1:8000/api/cursosDisponibles",
+          "http://127.0.0.1:8000/api/cursos_activos",
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        if (response.data.cursos.length === 0) {
+
+        console.log("Respuesta de la API:", response.data); // Verifica la respuesta
+
+        if (response.data.cursos && response.data.cursos.length === 0) {
           setHasModules(false);
         } else {
           setHasModules(true);
-          setCursos(response.data.cursos); // Guarda todos los cursos en el estado
-          console.log(cursos)
+          setCursos(response.data.cursos);
         }
       } catch (err) {
-        setError(err);
+        console.error("Error en la solicitud:", err); // Muestra el error
+        setError(err.message || "Error desconocido");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchCursos();
-  }, [token]);
-
-  const content = <div />;
+  }, []);
 
   return (
     <div className="px-12 h-[18rem]">
@@ -52,7 +57,7 @@ function Cursos() {
             title: <p className="font-medium text-black">Estudiantes</p>,
           },
           {
-            title: <a href="">Cursos </a>,
+            title: <a href="">Cursos</a>,
           },
         ]}
       />
@@ -62,9 +67,7 @@ function Cursos() {
       </h2>
 
       {isLoading ? (
-        <Spin tip="Loading" size="large" className="mt-56">
-          {content}
-        </Spin>
+        <Spin tip="Loading" size="large" className="mt-56" />
       ) : (
         <div>
           <div
@@ -80,7 +83,7 @@ function Cursos() {
                 >
                   <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
                   <p className="Montserrat font-normal">{curso.nombre}</p>
-                  <p className="Montserrat font-light">{curso.descripción}</p> {/* Agrega la descripción del curso */}
+                  <p className="Montserrat font-light">{curso.descripcion}</p>
                   <Button type="primary" className="bg-green-500">
                     <Link to={`/Estudiantes/Cursos/${curso.id}`}>Detalles</Link>
                   </Button>
@@ -89,7 +92,7 @@ function Cursos() {
             ) : (
               <div
                 id="Card"
-                className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center "
+                className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center"
               >
                 <img alt="libro" src="/Opt/SVG/sad.svg" className="w-24" />
                 <p className="Montserrat font-normal">Sin módulos disponibles</p>

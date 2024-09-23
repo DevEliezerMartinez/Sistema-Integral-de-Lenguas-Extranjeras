@@ -16,8 +16,9 @@ function Header() {
     messageApi.open({
       key,
       type: "loading",
-      content: "Cerrando sesion",
+      content: "Cerrando sesión",
     });
+  
     setTimeout(() => {
       messageApi.open({
         key,
@@ -26,11 +27,16 @@ function Header() {
         duration: 2,
       });
     }, 1000);
-
+  
     setTimeout(() => {
-      navigate("/");
-    }, 2000); // 3000 milisegundos = 3 segundos
+      // Eliminar el token y el usuario del localStorage
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      
+      navigate("/"); // Redirigir al inicio
+    }, 2000); // 2000 milisegundos = 2 segundos
   };
+  
   return (
     <header className="flex bg-[#1B396A] m-auto md:m-0 justify-between items-center px-4">
       {contextHolder}
@@ -113,7 +119,7 @@ function Header() {
           </svg>
         </button>
         {showMenu && (
-          <Button className="absolute left-72 top-12" danger ghost>
+          <Button className="absolute left-72 top-12" onClick={cerrarsesion} danger ghost>
             Cerrar sesion
           </Button>
         )}

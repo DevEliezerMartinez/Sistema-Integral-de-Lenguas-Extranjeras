@@ -2,23 +2,18 @@ import React from 'react';
 import { Space, Table, message, Button } from 'antd';
 
 const TablaDocentes = ({ docentes, onDocenteEliminado }) => {
-  console.log("Render tabla docentes,", docentes);
+  console.log("Render tabla docentes:", docentes); // Ver los docentes en consola
 
   const columns = [
     {
-      title: 'Nombre',
-      dataIndex: 'nombre',
-      key: 'nombre',
-    },
-    {
-      title: 'Apellidos',
-      dataIndex: 'apellidos',
-      key: 'apellidos',
+      title: 'Nombre Completo',
+      key: 'nombreCompleto',
+      render: (text, record) => `${record.nombre} ${record.apellidos}`, // Combinar nombre y apellidos
     },
     {
       title: 'Correo Electrónico',
-      dataIndex: 'correo',
-      key: 'correo',
+      dataIndex: 'correo_electronico', // Asegúrate de que el campo se llama así en tus datos
+      key: 'correo_electronico',
     },
     {
       title: 'Acciones',

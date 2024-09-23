@@ -25,12 +25,12 @@ function Header() {
   };
 
   const cerrarsesion = () => {
-    console.log("Cerrando sesion");
     messageApi.open({
       key,
       type: "loading",
-      content: "Cerrando sesion",
+      content: "Cerrando sesión",
     });
+  
     setTimeout(() => {
       messageApi.open({
         key,
@@ -39,11 +39,16 @@ function Header() {
         duration: 2,
       });
     }, 1000);
-
+  
     setTimeout(() => {
-      navigate("/");
-    }, 2000); // 3000 milisegundos = 3 segundos
+      // Eliminar el token y el usuario del localStorage
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      
+      navigate("/"); // Redirigir al inicio
+    }, 2000); // 2000 milisegundos = 2 segundos
   };
+  
 
   return (
     <header className="flex bg-[#1B396A] m-auto md:m-0 justify-between items-center px-4 ">
@@ -151,7 +156,7 @@ function Header() {
           </svg>
         </button>
         {showMenu && (
-          <Button className="relative flex top-2 " type="link" danger>
+          <Button className="relative flex top-2 "   onClick={cerrarsesion} type="link" danger>
             Cerrar sesion
           </Button>
         )}

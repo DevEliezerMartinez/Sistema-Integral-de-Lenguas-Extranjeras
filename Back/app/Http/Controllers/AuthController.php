@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Usuario;
@@ -31,12 +32,12 @@ class AuthController extends Controller
             'historial_cursos' => 'nullable|required_if:tipo_usuario,estudiante|string',
             'perfil' => 'nullable|required_if:tipo_usuario,estudiante|string',
         ]);
-    
+
         // Verificar si la validación del usuario falla
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-    
+
         // Crear el usuario con la contraseña hasheada
         $usuario = Usuario::create([
             'nombre' => $request->input('nombre'),
@@ -49,14 +50,14 @@ class AuthController extends Controller
             'domicilio' => $request->input('domicilio'),
             'tipo_usuario' => $request->input('tipo_usuario'),
         ]);
-    
+
         $response = [
             'message' => 'Usuario registrado correctamente',
             'usuario' => $usuario,
             'condicional' => null, // Indicará a qué condicional entró
             'tipo_usuario_creado' => $request->input('tipo_usuario')
         ];
-    
+
         // Crear un estudiante, coordinador o docente según el tipo de usuario
         if ($request->input('tipo_usuario') === 'estudiante') {
             $estudiante = Estudiante::create([
@@ -86,17 +87,17 @@ class AuthController extends Controller
             $response['message'] = 'Docente registrado correctamente';
             $response['condicional'] = 'docente';
         }
-    
+
         // Responder con una respuesta JSON
         return response()->json($response, 201);
     }
-    
 
     public function login(Request $request)
     {
         $request->validate([
             'correo_electronico' => 'required|email',
-            'contrasena' => 'required'
+            'contrasena' => 'required',
+            'tipo_acceso' => 'nullable|string'
         ]);
     
         $user = Usuario::where('correo_electronico', $request->correo_electronico)->first();
@@ -105,14 +106,34 @@ class AuthController extends Controller
             return response()->json(['error' => 'Credenciales incorrectas'], 401);
         }
     
+        $docente = null;
+        $coordinador = null; // Inicializar variable para coordinador
+        if ($request->tipo_acceso === 'accesoDocente') {
+            $docente = Docente::where('usuario_id', $user->id)->first();
+            if (!$docente) {
+                return response()->json(['error' => 'No se encontró el docente asociado.'], 404);
+            }
+        } elseif ($request->tipo_acceso === 'accesoCoordinador') {
+            $coordinador = Coordinador::where('usuario_id', $user->id)->first(); // Busca al coordinador
+            if (!$coordinador) {
+                return response()->json(['error' => 'No se encontró el coordinador asociado.'], 404);
+            }
+        }
+    
         $token = $user->createToken('auth_token');
     
         return response()->json([
             'token' => $token->plainTextToken,
             'token_type' => 'Bearer',
-            'usuario' => $user
+            'usuario' => $user,
+            'docente' => $docente,
+            'coordinador' => $coordinador // Incluye el coordinador en la respuesta
         ]);
     }
+    
+    
+    
+
 
     public function logout(Request $request)
     {

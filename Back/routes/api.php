@@ -7,6 +7,7 @@ use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\Solicitudes;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\notificacions;
+use App\Http\Controllers\CalificacionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,7 +19,9 @@ Route::post('/register', [AuthController::class, 'registrar']); // Registro de u
 Route::middleware('auth:sanctum')->group(function () {
     // Gestión de usuarios
     Route::get('/users', [UserController::class, 'index']); // Obtener lista de usuarios
-    Route::get('/users/notificaciones/{id}', [notificacions::class, 'show']); // Obtener notificaciones por ID de usuario
+    Route::get('/infoUser/{id}', [UserController::class, 'show']); // Obtener lista de usuarios
+    Route::put('/updateUser/{id}', [UserController::class, 'update']);
+    Route::get('/users/notificaciones/{id}', [notificacions::class, 'show']); // Eliminar notificación por ID
     Route::delete('/users/notificaciones/{id}', [notificacions::class, 'destroy']); // Eliminar notificación por ID
 
     // Cerrar sesión
@@ -36,6 +39,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Gestión de docentes
     Route::get('/docentes', [DocenteController::class, 'show']); // Obtener lista de docentes
+    Route::get('/cursosAsignados/{docenteId}', [DocenteController::class, 'showCursos']); // Obtener lista de docentes 
+    Route::get('/cursosArchivados/{docenteId}', [DocenteController::class, 'showCursosArchivadosDocente']); // Obtener lista de docentes 
     Route::delete('/docentes/{docenteId}', [DocenteController::class, 'delete']); // Eliminar un docente por ID
 
 
@@ -46,10 +51,20 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Gestión de solicitudes
     Route::get('/solicitudes', [Solicitudes::class, 'show']); // Obtener lista de solicitudes
-    Route::get('/solicitudes/{cursoId}', [Solicitudes::class, 'showByCurso']); // Obtener solicitudes por ID de curso
+    Route::get('/solicitudes/{cursoId}', [Solicitudes::class, 'showByCurso']); // Obtener solicitudes por ID de curso aceptados
     Route::post('/crear_solicitud', [Solicitudes::class, 'create']); // Crear una nueva solicitud
     Route::post('/solicitudes/{solicitud_id}/rechazar', [Solicitudes::class, 'rechazar']); // Rechazar una solicitud específica por ID
     Route::post('/solicitudes/{solicitud_id}/aceptar', [Solicitudes::class, 'aceptar']); // Aceptar una solicitud específica por ID
+
+
+
+      // Rutas para gestionar calificaciones
+      Route::post('/calificaciones', [CalificacionController::class, 'store']); // Crear una nueva calificación
+      Route::get('/calificaciones/{cursoId}', [CalificacionController::class, 'index']); // Obtener calificaciones de un curso específico
+
+
+
+
 
     // Opcional: Rutas relacionadas con estudiantes (descomentarlas si es necesario)
     // Route::get('/estudiantes', [EstudianteController::class, 'index']); // Obtener lista de estudiantes

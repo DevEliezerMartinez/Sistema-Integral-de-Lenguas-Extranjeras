@@ -7,7 +7,7 @@ import {
   Select,
   notification,
   DatePicker,
-  Spin
+  Spin,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -19,7 +19,6 @@ function CursoActivo() {
   const [teachers, setTeachers] = useState([]); // Estado para almacenar los docentes
   const { RangePicker } = DatePicker;
   const [loading, setLoading] = useState(true);
-
 
   const [api, contextHolder] = notification.useNotification();
   const openNotificationWithIcon = (type) => {
@@ -49,7 +48,8 @@ function CursoActivo() {
     axios
       .get("http://127.0.0.1:8000/api/cursos_activos", {
         headers: {
-          Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+          Authorization:
+            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
           Accept: "*/*",
           "Content-Type": "application/json",
         },
@@ -69,17 +69,19 @@ function CursoActivo() {
         setHasModules(false);
         setLoading(false); // Datos cargados (con error)
       });
-  
+
     // Obtener docentes
     axios
       .get("http://127.0.0.1:8000/api/docentes", {
         headers: {
-          Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+          Authorization:
+            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
           Accept: "*/*",
           "Content-Type": "application/json",
         },
       })
       .then((response) => {
+        console.log(response.data.docentes);
         setTeachers(response.data.docentes); // Guardar los docentes
         setLoading(false); // Datos cargados
       })
@@ -88,7 +90,6 @@ function CursoActivo() {
         setLoading(false); // Datos cargados (con error)
       });
   }, []);
-  
 
   const handleOk = () => {
     form
@@ -174,9 +175,7 @@ function CursoActivo() {
         ]}
       />
       {contextHolder}
-  
-    
-  
+
       <Button
         className="md:self-end md:mr-10 my-4 max-w-7xl"
         type="primary"
@@ -184,7 +183,7 @@ function CursoActivo() {
       >
         Registrar un nuevo curso
       </Button>
-  
+
       {loading ? (
         <div className="flex justify-center items-center h-40">
           <Spin size="large" />
@@ -202,7 +201,9 @@ function CursoActivo() {
                 className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
               >
                 <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
-                <h4 className="Montserrat  my-2 font-medium">{course.nombre}</h4>
+                <h4 className="Montserrat  my-2 font-medium">
+                  {course.nombre}
+                </h4>
                 <p>{course.descripción}</p>
                 <Button type="primary" className="bg-green-500 my-4">
                   <Link to={`/Coordinador/Cursos/${course.id}`}>Detalles</Link>
@@ -220,7 +221,7 @@ function CursoActivo() {
           )}
         </div>
       )}
-  
+
       <Modal
         open={open}
         title="Registro de información del módulo"
@@ -248,11 +249,11 @@ function CursoActivo() {
           >
             <Input />
           </Form.Item>
-  
+
           <Form.Item label="Descripción" name="descripcion">
             <Input.TextArea rows={4} />
           </Form.Item>
-  
+
           <Form.Item
             label="Periodo"
             name="periodo"
@@ -265,7 +266,7 @@ function CursoActivo() {
           >
             <RangePicker />
           </Form.Item>
-  
+
           <Form.Item
             label="Modalidad"
             name="modalidad"
@@ -281,7 +282,7 @@ function CursoActivo() {
               <Select.Option value="Fines">Fines de semana</Select.Option>
             </Select>
           </Form.Item>
-  
+
           <Form.Item
             label="Horarios"
             name="horarios"
@@ -298,7 +299,28 @@ function CursoActivo() {
               <Select.Option value="3">12:00 - 2:00</Select.Option>
             </Select>
           </Form.Item>
-  
+
+
+          <Form.Item
+            label="Nivel"
+            name="nivel"
+            rules={[
+              {
+                required: true,
+                message: "Por favor selecciona el nivel del curso.",
+              },
+            ]}
+          >
+            <Select>
+              <Select.Option value="1">Nivel 1</Select.Option>
+              <Select.Option value="2">Nivel 2</Select.Option>
+              <Select.Option value="3">Nivel 3</Select.Option>
+              <Select.Option value="4">Nivel 4</Select.Option>
+              <Select.Option value="5">Nivel 5</Select.Option>
+            </Select>
+          </Form.Item>
+
+
           <Form.Item
             label="Docente"
             name="docente"
@@ -309,10 +331,18 @@ function CursoActivo() {
               },
             ]}
           >
-            <Select>
+            <Select
+              placeholder="Selecciona un docente"
+              onChange={(value) => {
+                form.setFieldsValue({ docente: value });
+              }}
+            >
               {teachers.map((teacher) => (
-                <Select.Option key={teacher.id} value={teacher.id}>
-                  {teacher.nombre}
+                <Select.Option
+                  key={teacher.docente_id}
+                  value={teacher.docente_id}
+                >
+                  {teacher.nombre} {teacher.apellidos}
                 </Select.Option>
               ))}
             </Select>
@@ -321,7 +351,6 @@ function CursoActivo() {
       </Modal>
     </div>
   );
-  
 }
 
 export default CursoActivo;
