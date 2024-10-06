@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cursos', [CursoController::class, 'index']); // Obtener lista de cursos disponibles
     Route::get('/cursosArchivados', [CursoController::class, 'showArchived']); // Obtener lista de cursos archivados
     Route::get('/cursos/{id}', [CursoController::class, 'show']); // Obtener detalles de un curso específico por ID
+    Route::get('/infocurso_alumno/{id}/{alumno}', [CursoController::class, 'showInfobyStudent']); // Obtener detalles de un curso específico por ID
     Route::post('/archivarCurso/{id}', [CursoController::class, 'ArchiveCourse']); // Archivar un curso específico por ID
     Route::get('/cursos_activos', [CursoController::class, 'active']); // Obtener lista de cursos activos
     Route::post('/crear_curso', [CursoController::class, 'create']); // Crear un nuevo curso
@@ -45,8 +46,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // Gestión de alumnos
-    Route::get('/estudiante/{id}', [EstudianteController::class, 'show']); // Obtener lista de docentes
+    Route::get('/estudiante/{id}', action: [EstudianteController::class, 'show']); // Obtener lista de docentes
     Route::get('/estudiante/{id}/cursos', [CursoController::class, 'cursosDeAlumno']); // Obtener cursos de un estudiante por ID
+    Route::get('/progreso/estudiante/{id}', [CursoController::class, 'ProgresoEstudiante']); // Obtener cursos Archivados o en progreso
+    
 
 
     // Gestión de solicitudes
@@ -55,6 +58,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/crear_solicitud', [Solicitudes::class, 'create']); // Crear una nueva solicitud
     Route::post('/solicitudes/{solicitud_id}/rechazar', [Solicitudes::class, 'rechazar']); // Rechazar una solicitud específica por ID
     Route::post('/solicitudes/{solicitud_id}/aceptar', [Solicitudes::class, 'aceptar']); // Aceptar una solicitud específica por ID
+
+    
 
 
 

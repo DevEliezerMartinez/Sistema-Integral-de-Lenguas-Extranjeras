@@ -1,47 +1,93 @@
-import { Breadcrumb, Timeline } from 'antd';
-import React, { useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Breadcrumb, Timeline, message } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
-import { useAuth } from "../../AuthContext";
 
 function Notificaciones() {
+  const [notificaciones, setNotificaciones] = useState([]);
+  const [success, setSuccess] = useState(true); // Estado para manejar el éxito de la respuesta
 
-  const { token } = useAuth();
+  useEffect(() => {
+    fetchNotificaciones();
+  }, []);
 
-  console.log("🚀 ~ Notificaciones ~ token->", token)
+  const fetchNotificaciones = async () => {
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    const token = localStorage.getItem("token");
 
-  const [notifications, setNotifications] = useState([
-    {
-      content: 'Create a services site',
-      date: '2015-09-01',
-    },
-    {
-      content: 'Solve initial network problems',
-      date: '2015-09-01',
-    },
-    {
-      content: 'Technical testing',
-      date: '2015-09-01',
-    },
-  ]);
+    if (!usuario || !token) {
+      message.error("No se encontró el usuario o el token.");
+      return;
+    }
 
+    const usuarioId = usuario.id;
 
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/users/notificaciones/${usuarioId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-  const handleNotificationDelete = (index) => {
-    // Update notifications state to remove the deleted item
-    setNotifications((prevNotifications) =>
-      prevNotifications.filter((_, notificationIndex) => notificationIndex !== index)
-    );
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(data.success); // Asignar el valor de 'success'
+        setNotificaciones(data.notificaciones);
+        
+        // Si no hay notificaciones pero el success es true
+        if (data.success && data.notificaciones.length === 0) {
+          message.info('No hay notificaciones disponibles.');
+        }
+      } else {
+        setSuccess(false);
+        message.error(data.message || 'Error al cargar las notificaciones');
+      }
+    } catch (error) {
+      setSuccess(false);
+      message.error('Ocurrió un error al cargar las notificaciones');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      message.error("Token no encontrado, por favor inicia sesión.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/users/notificaciones/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        message.success("Notificación eliminada correctamente");
+        fetchNotificaciones(); // Volver a cargar la lista de notificaciones
+      } else {
+        const errorData = await response.json();
+        message.error(errorData.message || "Error al eliminar la notificación");
+      }
+    } catch (error) {
+      message.error("Ocurrió un error al eliminar la notificación");
+    }
   };
 
   return (
-    <div className='px-12'>
-    <Breadcrumb
+    <div className='px-4'>
+      <Breadcrumb
         items={[
           {
-            title: <p className="font-medium text-black">Estudiantes</p>,
+            title: <p className="font-medium text-black">Docente</p>,
           },
           {
-            title: <a href="">Mis notificaciones</a>,
+            title: <a href="">Notificaciones Docente</a>,
           },
         ]}
       />
@@ -49,15 +95,28 @@ function Notificaciones() {
         Mis Notificaciones
       </h2>
 
-      <Timeline className="mt-8 px-8">
-        {notifications.map((notification, index) => (
-          <Timeline.Item key={notification.content}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              {notification.content}
-              <DeleteOutlined onClick={() => handleNotificationDelete(index)} />
-            </div>
+      <Timeline className='mt-8 px-8'>
+        {/* Mostrar mensaje si success es false */}
+        {!success ? (
+          <Timeline.Item>
+            <div>Hubo un problema al cargar las notificaciones.</div>
           </Timeline.Item>
-        ))}
+        ) : (
+          notificaciones.length > 0 ? (
+            notificaciones.map((notificacion) => (
+              <Timeline.Item key={notificacion.id}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{notificacion.mensaje} - {notificacion.fecha_notificacion}</span>
+                  <DeleteOutlined onClick={() => handleDelete(notificacion.id)} />
+                </div>
+              </Timeline.Item>
+            ))
+          ) : (
+            <Timeline.Item>
+              <div>No hay notificaciones.</div>
+            </Timeline.Item>
+          )
+        )}
       </Timeline>
     </div>
   );

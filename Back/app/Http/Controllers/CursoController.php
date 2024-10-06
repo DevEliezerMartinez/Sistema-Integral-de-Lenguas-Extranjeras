@@ -102,6 +102,48 @@ class CursoController extends Controller
     /**
      * Display the specified resource.
      */
+    public function showInfobyStudent($curso_id, $alumno_id)
+    {
+        // Buscar el curso por su ID y cargar la relación con las calificaciones del estudiante
+        $curso = Curso::with(['docente.usuario', 'calificaciones' => function ($query) use ($alumno_id) {
+            // Filtrar las calificaciones por el alumno específico
+            $query->where('alumno_id', $alumno_id);
+        }])->find($curso_id);
+    
+        // Verificar si el curso existe
+        if (!$curso) {
+            return response()->json(['error' => 'Curso no encontrado'], 404);
+        }
+    
+        // Verificar si el alumno tiene una calificación en este curso
+        $calificacion = $curso->calificaciones->first();
+        $nota = $calificacion ? $calificacion->calificacion : 'No disponible';
+    
+        // Devolver los detalles del curso junto con la calificación del alumno
+        return response()->json([
+            'curso' => [
+                'id' => $curso->id,
+                'nombre' => $curso->nombre,
+                'descripcion' => $curso->descripcion,
+                'modalidad' => $curso->modalidad,
+                'nivel' => $curso->nivel,
+                'estado' => $curso->estado,
+                'horario' => $curso->horario,
+                'maestro_id' => $curso->maestro_id,
+                'coordinador_id' => $curso->coordinador_id,
+                'fecha_inicio' => $curso->fecha_inicio,
+                'fecha_fin' => $curso->fecha_fin,
+                'docente' => $curso->docente ? [
+                    'id' => $curso->docente->id,
+                    'nombre' => $curso->docente->usuario->nombre,
+                ] : null,
+                'calificacion_alumno' => $nota,
+            ],
+        ], 200);
+    }
+    
+
+    
     public function show($id)
     {
         // Buscar el curso por su ID y cargar la relación del docente
@@ -113,7 +155,7 @@ class CursoController extends Controller
                 'curso' => [
                     'id' => $curso->id,
                     'nombre' => $curso->nombre,
-                    'descripcion' => $curso->descripcion,
+                    'descripcion' => $curso->descripción,
                     'modalidad' => $curso->modalidad,
                     'nivel' => $curso->nivel,
                     'estado' => $curso->estado,
@@ -318,21 +360,76 @@ class CursoController extends Controller
         }
     }
 
+    public function ProgresoEstudiante($alumnoId)
+    {
+        try {
+            // Obtener las solicitudes aceptadas para el alumno
+            $solicitudes = Solicitud::where('alumno_id', $alumnoId)
+                ->where('status', 'Aceptada')
+                ->with('curso') // Cargar la relación del curso
+                ->get();
+
+            // Verificar si no se encontraron solicitudes
+            if ($solicitudes->isEmpty()) {
+                return response()->json([
+                    'mensaje' => 'El alumno no tiene cursos asociados.',
+                    'exito' => true, // Indicar que la operación fue exitosa pero no hay datos
+                    'progreso' => []
+                ], 200);
+            }
+
+            // Mapear el progreso del estudiante en cada curso
+            $progresoEstudiante = $solicitudes->map(function ($solicitud) {
+                $curso = $solicitud->curso;
+
+                // Aquí podrías calcular el progreso del estudiante (puedes personalizar esta lógica)
+                // Por ejemplo, podrías tener un campo en la solicitud que indique el progreso
+                $progreso = $solicitud->progreso ?? 0; // Suponiendo que hay un campo 'progreso' en la solicitud
+
+                return [
+                    'Curso_ID' => $curso->id,
+                    'Nombre_Curso' => $curso->nombre,
+                    'Descripcion_Curso' => $curso->descripcion,
+                    'Fecha_Inicio' => $curso->fecha_inicio,
+                    'Fecha_Fin' => $curso->fecha_fin,
+                    'Horario' => $curso->horario,
+                    'Progreso' => $progreso,
+                ];
+            });
+
+            // Retornar el progreso del estudiante
+            return response()->json([
+                'mensaje' => 'Progreso del estudiante obtenido exitosamente.',
+                'exito' => true,
+                'progreso' => $progresoEstudiante
+            ], 200);
+        } catch (\Exception $e) {
+            // Manejar cualquier error inesperado
+            return response()->json([
+                'mensaje' => 'Ocurrió un error al obtener el progreso del estudiante.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
 
 
 
     // Método para obtener todos los cursos activos
     public function active()
     {
-        // Obtener todos los cursos cuyo estado sea "Activo"
-        $cursosActivos = Curso::where('estado', 'Disponible')->get();
-
+        // Obtener todos los cursos cuyo estado sea "Disponible" o "En curso"
+        $cursosActivos = Curso::whereIn('estado', ['Disponible', 'En curso'])->get();
+    
         // Verificar si hay cursos activos
         if ($cursosActivos->isEmpty()) {
             return response()->json(['message' => 'No hay cursos activos en este momento'], 404);
         }
-
+    
         // Responder con una respuesta JSON
         return response()->json(['cursos' => $cursosActivos], 200);
     }
+    
 }

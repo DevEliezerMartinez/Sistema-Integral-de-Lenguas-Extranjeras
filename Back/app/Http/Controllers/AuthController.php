@@ -99,40 +99,49 @@ class AuthController extends Controller
             'contrasena' => 'required',
             'tipo_acceso' => 'nullable|string'
         ]);
-    
+
         $user = Usuario::where('correo_electronico', $request->correo_electronico)->first();
-    
+
         if (!$user || !Hash::check($request->contrasena, $user->contrasena)) {
             return response()->json(['error' => 'Credenciales incorrectas'], 401);
         }
-    
+
         $docente = null;
-        $coordinador = null; // Inicializar variable para coordinador
+        $coordinador = null;
+        $estudiante = null; // Inicializar variable para estudiante
+
         if ($request->tipo_acceso === 'accesoDocente') {
             $docente = Docente::where('usuario_id', $user->id)->first();
             if (!$docente) {
                 return response()->json(['error' => 'No se encontró el docente asociado.'], 404);
             }
         } elseif ($request->tipo_acceso === 'accesoCoordinador') {
-            $coordinador = Coordinador::where('usuario_id', $user->id)->first(); // Busca al coordinador
+            $coordinador = Coordinador::where('usuario_id', $user->id)->first();
             if (!$coordinador) {
                 return response()->json(['error' => 'No se encontró el coordinador asociado.'], 404);
             }
+        } elseif ($request->tipo_acceso === 'accesoEstudiante') {
+            $estudiante = Estudiante::where('usuario_id', $user->id)->first(); // Busca al estudiante
+            if (!$estudiante) {
+                return response()->json(['error' => 'No se encontró el estudiante asociado.'], 404);
+            }
         }
-    
+
         $token = $user->createToken('auth_token');
-    
+
         return response()->json([
             'token' => $token->plainTextToken,
             'token_type' => 'Bearer',
             'usuario' => $user,
             'docente' => $docente,
-            'coordinador' => $coordinador // Incluye el coordinador en la respuesta
+            'coordinador' => $coordinador,
+            'estudiante' => $estudiante // Incluye el estudiante en la respuesta
         ]);
     }
-    
-    
-    
+
+
+
+
 
 
     public function logout(Request $request)

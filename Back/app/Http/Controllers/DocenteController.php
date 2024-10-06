@@ -36,7 +36,7 @@ class DocenteController extends Controller
 
     public function showCursos($docenteId)
     {
-        // Encuentra el docente por ID
+        // Encuentra el docente por ID junto con sus cursos
         $docente = Docente::with('cursos')->find($docenteId);
     
         // Verifica si el docente existe
@@ -46,17 +46,18 @@ class DocenteController extends Controller
             ], 404);
         }
     
-        // Obtiene los cursos del docente y filtra solo los que están disponibles
-        $cursosDisponibles = $docente->cursos->filter(function ($curso) {
-            return $curso->estado === 'Disponible';
+        // Filtra los cursos del docente para obtener los que están en "Disponible" o "En curso"
+        $cursosFiltrados = $docente->cursos->filter(function ($curso) {
+            return in_array($curso->estado, ['Disponible', 'En curso']);
         });
     
-        // Retornar los cursos disponibles como respuesta JSON
+        // Retornar los cursos filtrados como respuesta JSON
         return response()->json([
             'docente_id' => $docenteId,
-            'cursos' => $cursosDisponibles
+            'cursos' => $cursosFiltrados
         ]);
     }
+    
 
     public function showCursosArchivadosDocente($docenteId)
     {

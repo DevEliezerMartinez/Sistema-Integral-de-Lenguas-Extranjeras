@@ -9,6 +9,7 @@ import Documentacion from "./pages/public/Documentacion";
 import Dashboard from "./pages/estudiantes/Dashboard";
 import Cursos from "./pages/estudiantes/Cursos";
 import DetalleCurso from "./pages/estudiantes/DetalleCurso";
+import InfoCurso from "./pages/estudiantes/InfoCurso";
 import Progreso from "./pages/estudiantes/Progreso";
 import Perfil from "./pages/estudiantes/Perfil";
 import Notificaciones from "./pages/estudiantes/Notificaciones";
@@ -63,6 +64,10 @@ function App() {
           <Route
             path="/Estudiantes/Cursos/:cursoId"
             element={<DetalleCurso />}
+          />
+          <Route
+            path="/Estudiantes/CursoInfo/:cursoId/:id_estudiante"
+            element={<InfoCurso />}
           />
           <Route path="/Estudiantes/Progreso" element={<Progreso />} />
           <Route path="/Estudiantes/Perfil" element={<Perfil />} />

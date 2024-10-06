@@ -16,8 +16,9 @@ function Solicitudes() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [visibleTextarea, setVisibleTextarea] = useState(null); // Estado para manejar el textarea visible
-  const [rejectionText, setRejectionText] = useState(""); // Estado para manejar el texto de rechazo
+  const [visibleTextarea, setVisibleTextarea] = useState(null);
+  const [rejectionText, setRejectionText] = useState("");
+  const [actionError, setActionError] = useState(null);
 
   useEffect(() => {
     fetchSolicitudes();
@@ -36,24 +37,25 @@ function Solicitudes() {
       })
       .then((response) => {
         if (response.status === 404 || response.data.solicitudes.length === 0) {
-          // Si no hay solicitudes pendientes, manejarlo sin error
           setError("No se encontraron solicitudes pendientes");
           setSolicitudes([]);
         } else {
-          // Hay solicitudes, establecerlas en el estado
-          setSolicitudes(response.data);
-          setError(null); // Limpiar cualquier mensaje de error
+          setSolicitudes(response.data.solicitudes);
+          setError(null);
         }
         setLoading(false);
       })
-      .catch(() => {
-        setError("Error al cargar las solicitudes");
+      .catch((err) => {
+        const errorMsg =
+          err.response?.data?.message || "Error al cargar las solicitudes";
+        setError(errorMsg);
         setLoading(false);
       });
   };
 
   const handleRechazarClick = (id) => {
     setVisibleTextarea(id);
+    setActionError(null);
   };
 
   const handleEnviarClick = (id) => {
@@ -75,19 +77,18 @@ function Solicitudes() {
           message: "Solicitud Rechazada",
           description: "El rechazo será notificado al estudiante.",
         });
-
-        // Resetear el textarea y ocultarlo
         setRejectionText("");
         setVisibleTextarea(null);
-
-        // Recargar la lista de solicitudes
         fetchSolicitudes();
       })
-      .catch(() => {
+      .catch((err) => {
+        const errorMsg =
+          err.response?.data?.message ||
+          "No se pudo procesar el rechazo. Inténtalo de nuevo más tarde.";
+        setActionError(errorMsg);
         notification.error({
           message: "Error",
-          description:
-            "No se pudo procesar el rechazo. Inténtalo de nuevo más tarde.",
+          description: errorMsg,
         });
       });
   };
@@ -112,15 +113,16 @@ function Solicitudes() {
           description:
             "La solicitud ha sido aprobada y el estudiante será notificado.",
         });
-
-        // Recargar la lista de solicitudes
         fetchSolicitudes();
       })
-      .catch(() => {
+      .catch((err) => {
+        const errorMsg =
+          err.response?.data?.message ||
+          "No se pudo procesar la aprobación. Inténtalo de nuevo más tarde.";
+        setActionError(errorMsg);
         notification.error({
           message: "Error",
-          description:
-            "No se pudo procesar la aprobación. Inténtalo de nuevo más tarde.",
+          description: errorMsg,
         });
       });
   };
@@ -165,8 +167,21 @@ function Solicitudes() {
           id="Visualizer"
           className="w-2/3 flex flex-col justify-center items-center"
         >
-          <img className="w-24" src="/Opt/SVG/pdf.svg" alt="icon" />
-          <Button type="link">Descargar archivo</Button>
+          {/* Vista previa del PDF */}
+          <iframe
+            src={`http://127.0.0.1:8000/storage/${solicitud.PDF_Solicitud}`} // Ajustar según sea necesario            width="100%"
+            height="400px"
+            title="Vista previa del PDF"
+            style={{ border: "none", marginBottom: "16px" }}
+          />
+          <Button
+            type="link"
+            href={`http://127.0.0.1:8000/storage/${solicitud.PDF_Solicitud}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Descargar archivo
+          </Button>
           <div id="Actions" className="m-8 gap-5 flex self-end">
             <Button
               type="primary"
@@ -196,6 +211,15 @@ function Solicitudes() {
               >
                 Enviar
               </Button>
+              {actionError && (
+                <Alert
+                  message="Error"
+                  description={actionError}
+                  type="error"
+                  showIcon
+                  className="mt-2"
+                />
+              )}
             </div>
           )}
         </div>

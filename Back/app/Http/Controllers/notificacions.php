@@ -11,28 +11,32 @@ class notificacions extends Controller
         try {
             // Buscar las notificaciones del usuario
             $notificaciones = Notificacion::where('usuario_id', $user_id)->get();
-
+    
             // Verificar si se encontraron notificaciones
             if ($notificaciones->isEmpty()) {
                 return response()->json([
+                    'success' => true,
                     'mensaje' => 'No se encontraron notificaciones para este usuario.',
                     'notificaciones' => []
-                ], 404);
+                ], 200);
             }
-
+    
             // Retornar las notificaciones en formato JSON
             return response()->json([
+                'success' => true,
                 'notificaciones' => $notificaciones
             ], 200);
-
+    
         } catch (\Exception $e) {
             // Manejar cualquier error inesperado
             return response()->json([
+                'success' => false,
                 'mensaje' => 'Ocurrió un error al intentar obtener las notificaciones.',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
+    
 
     public function destroy($id)
 {

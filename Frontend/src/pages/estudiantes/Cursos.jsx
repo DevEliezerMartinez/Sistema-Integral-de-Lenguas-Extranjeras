@@ -50,7 +50,7 @@ function Cursos() {
   }, []);
 
   return (
-    <div className="px-12 h-[18rem]">
+    <div className=" h-[18rem] mb-52">
       <Breadcrumb
         items={[
           {
@@ -67,12 +67,12 @@ function Cursos() {
       </h2>
 
       {isLoading ? (
-        <Spin tip="Loading" size="large" className="mt-56" />
+        <Spin tip="Loading" size="large" className="" />
       ) : (
         <div>
           <div
             id="Contenedor de CARDS"
-            className="flex gap-3 justify-center mt-5 flex-wrap"
+            className="flex gap-3 justify-center m-5 flex-wrap mb-42  pb-20"
           >
             {hasModules ? (
               cursos.map((curso) => (

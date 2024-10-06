@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 function Tabbar() {
   return (
-    <div className="bg-[#1B396A] flex justify-between fixed bottom-0 w-full p-5 rounded gap-3 sm:hidden items-center ">
+    <div className="bg-[#1B396A] flex justify-between fixed bottom-0 w-full p-5 rounded gap-3 md:hidden items-center ">
       <Link
         to="/Estudiantes/Perfil"
         className="Montserrat font-thin text-white flex flex-col items-center"
@@ -18,7 +18,7 @@ function Tabbar() {
         className="Montserrat font-thin text-white flex flex-col items-center"
       >
         <img alt="icon" className="w-6" src="/Opt/SVG/Progress.svg" />
-        Progreso
+       Mi Progreso
       </Link>
 
       <Link
@@ -26,7 +26,7 @@ function Tabbar() {
         className="Montserrat font-thin text-white flex flex-col items-center"
       >
         <img alt="icon" className="w-6" src="/Opt/SVG/Curso.svg" />
-        Cursos
+        Cursos disp.
       </Link>
 
       <Link
