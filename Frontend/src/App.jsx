@@ -9,6 +9,7 @@ import Documentacion from "./pages/public/Documentacion";
 import Dashboard from "./pages/estudiantes/Dashboard";
 import Cursos from "./pages/estudiantes/Cursos";
 import DetalleCurso from "./pages/estudiantes/DetalleCurso";
+import InfoCurso from "./pages/estudiantes/InfoCurso";
 import Progreso from "./pages/estudiantes/Progreso";
 import Perfil from "./pages/estudiantes/Perfil";
 import Notificaciones from "./pages/estudiantes/Notificaciones";
@@ -21,7 +22,7 @@ import PerfilDocentes from "./pages/docentes/Perfil";
 import NotificacionesDocente from "./pages/docentes/Notificaciones";
 import LoginCoordinador from "./pages/coordinador/login";
 import DashboardCoordinador from './pages/coordinador/Dashboard_coordinador'
-import CursosCoordinador from './pages/coordinador/CursoActivo'
+import CursosCoordinador from './pages/coordinador/CursosActivos'
 import CursosArchivadosCoordinador from './pages/coordinador/CursosArchivados'
 import PerfilCoordinador from './pages/coordinador/Perfil'
 import NotificacionCoordinador from './pages/coordinador/Notificaciones'
@@ -64,6 +65,10 @@ function App() {
             path="/Estudiantes/Cursos/:cursoId"
             element={<DetalleCurso />}
           />
+          <Route
+            path="/Estudiantes/CursoInfo/:cursoId/:id_estudiante"
+            element={<InfoCurso />}
+          />
           <Route path="/Estudiantes/Progreso" element={<Progreso />} />
           <Route path="/Estudiantes/Perfil" element={<Perfil />} />
           <Route
@@ -84,11 +89,11 @@ function App() {
           <Route path="/Coordinador/Alumnos" element={<ListaAlumnos />} />
           <Route
             path="/Coordinador/Cursos/:cursoId"
-            element={< DetalleCursoCoordinador />}
+            element={<DetalleCursoCoordinador/>}
           />
           <Route
             path="/Coordinador/Alumnos/:AlumnoId"
-            element={< DetalleAlumno />}
+            element={<DetalleAlumno/>}
           />
         </Route>
       </Routes>

@@ -11,12 +11,14 @@ function Header() {
     setShowMenu(!showMenu);
   };
 
+
   const cerrarsesion = () => {
     messageApi.open({
       key,
       type: "loading",
-      content: "Cerrando sesion",
+      content: "Cerrando sesión",
     });
+  
     setTimeout(() => {
       messageApi.open({
         key,
@@ -25,27 +27,33 @@ function Header() {
         duration: 2,
       });
     }, 1000);
-
+  
     setTimeout(() => {
-      navigate("/");
-    }, 2000); // 3000 milisegundos = 3 segundos
+      // Eliminar el token y el usuario del localStorage
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      
+      navigate("/"); // Redirigir al inicio
+    }, 2000); // 2000 milisegundos = 2 segundos
   };
 
   return (
     <header className="flex bg-[#1B396A] m-auto md:m-0 justify-between items-center px-4">
       {contextHolder}
 
-      <div className="flex  text-white  md:items-center justify-center  md:mb-0 py-4 gap-3">
-        <Link to="/">
+      <div className="flex items-center  text-white  md:items-center justify-center  md:mb-0 py-4 gap-3  ">
+      <Link to="/">
           <img
             alt="Logo CLE"
             src="/Opt/TecNMBig.png"
-            className="w-8 h-8 mb-4 md:mb-0"
+            className="w-12 mb-4 md:mb-0"
           />
         </Link>
         <div className="text-center md:text-left flex flex-col items-center ">
-          <p className="font-bold text-lg Poppins">TecNM | Campus San Marcos</p>
-          <span className="font-extralight text-lg">
+          <p className="font-bold text-sm xl:text-base  Poppins md:hidden lg:block">
+            TecNM | Campus San Marcos
+          </p>
+          <span className="font-extralight text-sm xl:text-base md:hidden lg:block">
             Centro de Lenguas Extranjeras
           </span>
         </div>
@@ -66,11 +74,11 @@ function Header() {
             alt="Logo notification"
             src="/Opt/SVG/Curso.svg"
           />
-          <span className="text-sm font-thin">Mis cursos</span>
+          <span className="text-sm font-thin">Cursos disp.</span>
         </Link>
         <Link to="/Estudiantes/Perfil" className="flex flex-col items-center">
           <img className="w-6" alt="Logo profile" src="/Opt/SVG/profile-.svg" />
-          <span className="text-sm font-thin">Mi Perfil</span>
+          <span className="text-sm font-thin">Perfil</span>
         </Link>
         <Link
           to="/Estudiantes/Notificaciones"
@@ -81,7 +89,7 @@ function Header() {
             alt="Logo notification"
             src="/Opt/SVG/notification.svg"
           />
-          <span className="text-sm font-thin">Mis notficaciones</span>
+          <span className="text-sm font-thin">Notficaciones</span>
         </Link>
 
         <Button danger ghost onClick={cerrarsesion}>

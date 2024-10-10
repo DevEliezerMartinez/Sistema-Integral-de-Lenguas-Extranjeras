@@ -1,230 +1,116 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Button, Form, Input, Popconfirm, Table } from 'antd';
+import React, { useState, useEffect } from "react";
+import { Table, Input, Button, Empty } from "antd";
 
-const EditableContext = React.createContext(null);
+const TablaAlumnos = ({ alumnos, isLoading, onSaveGrade }) => {
+  console.log("recibido en el componente de tabla", alumnos);
 
-const EditableRow = ({ index, ...props }) => {
-  const [form] = Form.useForm();
-  return (
-    <Form form={form} component={false}>
-      <EditableContext.Provider value={form}>
-        <tr {...props} />
-      </EditableContext.Provider>
-    </Form>
-  );
-};
-
-const EditableCell = ({
-  title,
-  editable,
-  children,
-  dataIndex,
-  record,
-  handleSave,
-  ...restProps
-}) => {
-  const [editing, setEditing] = useState(false);
-  const inputRef = useRef(null);
-  const form = useContext(EditableContext);
+  const [calificaciones, setCalificaciones] = useState([]);
 
   useEffect(() => {
-    if (editing) {
-      inputRef.current?.focus();
+    if (alumnos.length > 0) {
+      const inicializadas = alumnos.map(alumno => ({
+        ...alumno,
+        calificacion: alumno.calificacion || "",
+      }));
+      setCalificaciones(inicializadas);
     }
-  }, [editing]);
+  }, [alumnos]);
 
-  const toggleEdit = () => {
-    setEditing(!editing);
-    form.setFieldsValue({
-      [dataIndex]: record[dataIndex],
-    });
-  };
+  console.log("calificaciones estado:", calificaciones);
 
-  const save = async () => {
-    try {
-      const values = await form.validateFields();
-      toggleEdit();
-      handleSave({
-        ...record,
-        ...values,
-      });
-    } catch (errInfo) {
-      console.log('Save failed:', errInfo);
-    }
-  };
-
-  let childNode = children;
-
-  if (editable) {
-    childNode = editing ? (
-      <Form.Item
-        style={{
-          margin: 0,
-        }}
-        name={dataIndex}
-        rules={[
-          {
-            required: true,
-            message: `${title} is required.`,
-          },
-        ]}
-      >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} />
-      </Form.Item>
-    ) : (
-      <div
-        className="editable-cell-value-wrap"
-        style={{
-          paddingRight: 24,
-        }}
-        onClick={toggleEdit}
-      >
-        {children}
-      </div>
+  const handleCalificacionChange = (value, record) => {
+    setCalificaciones(prevState =>
+      prevState.map(alumno =>
+        alumno.ID_Inscripcion === record.ID_Inscripcion
+          ? { ...alumno, calificacion: value === "" ? "" : Number(value) }
+          : alumno
+      )
     );
-  }
-
-  return <td {...restProps}>{childNode}</td>;
-};
-
-const App = () => {
-  const [dataSource, setDataSource] = useState([
-    {
-      key: '0',
-      name: 'Eliezer',
-      lastName: 'Solano Martinez',
-      studentId: '191230060',
-      career: 'INF',
-      grade: 85,
-    },
-    {
-      key: '1',
-      name: 'Mariam 1',
-      lastName: 'Solano Martinez',
-      studentId: '191230061',
-      career: 'TUR',
-      grade: 60,
-    },
-    {
-      key: '2',
-      name: 'Chely',
-      lastName: 'Martinez ',
-      studentId: '191230062',
-      career: 'IGE',
-      grade: 92,
-    },
-  ]);
-
-  const handleDelete = (key) => {
-    const newData = dataSource.filter((item) => item.key !== key);
-    setDataSource(newData);
   };
 
-  const handleGenerate = (key) => {
-    console.log(`Generar constancia para el registro con key: ${key}`);
-  };
+  const columns = [
+    {
+      title: "Nombre",
+      dataIndex: "Nombre_Alumno",
+      key: "Nombre_Alumno",
+    },
+    {
+      title: "Apellidos",
+      dataIndex: "Apellidos_Alumno",
+      key: "Apellidos_Alumno",
+    },
+    {
+      title: "Curso",
+      dataIndex: "Nombre_Curso",
+      key: "Nombre_Curso",
+    },
+    {
+      title: "Fecha de Inscripción",
+      dataIndex: "Fecha_Inscripcion",
+      key: "Fecha_Inscripcion",
+    },
+    {
+      title: "Estado de Solicitud",
+      dataIndex: "Estado_Solicitud",
+      key: "Estado_Solicitud",
+    },
+    {
+      title: "Calificación",
+      dataIndex: "calificacion",
+      key: "calificacion",
+      render: (text, record) => {
+        const alumno = calificaciones.find(alumno => alumno.ID_Inscripcion === record.ID_Inscripcion);
+        return (
+          <Input
+            type="number"
+            min="0"
+            max="100"
+            value={alumno ? alumno.calificacion : ""}
+            onChange={(e) => handleCalificacionChange(e.target.value, record)}
+          />
+        );
+      },
+    },
+    {
+      title: "Acciones",
+      key: "acciones",
+      render: (text, record) => (
+        <Button onClick={() => {
+          const payload = {
+            curso_id: record.Nombre_Curso,
+            alumno_id: record.alumno_id,
+            calificacion: calificaciones.find(alumno => alumno.ID_Inscripcion === record.ID_Inscripcion).calificacion
+          };
 
-  const defaultColumns = [
-    {
-      title: 'ID',
-      dataIndex: 'key',
-      width: '5%',
-      editable: false,
-    },
-    {
-      title: 'Nombre',
-      dataIndex: 'name',
-    },
-    {
-      title: 'Apellidos',
-      dataIndex: 'lastName',
-    },
-    {
-      title: 'Numero de control',
-      dataIndex: 'studentId',
-    },
-    {
-      title: 'Carrera',
-      dataIndex: 'career',
-    },
-    {
-      title: 'Calificacion',
-      dataIndex: 'grade',
-      editable: true,
-      width: '3%',
-    },
-    {
-      title: 'Acciones',
-      dataIndex: 'operation',
-      render: (_, record) =>
-        dataSource.length >= 1 ? (
-          <div className="flex gap-5">
-            <Popconfirm
-              title="Seguro que deseas borrar?"
-              onConfirm={() => handleDelete(record.key)}
-            >
-              <Button danger type="link">
-                Eliminar
-              </Button>
-            </Popconfirm>
-            <Popconfirm
-              title="Seguro que deseas generar constancia?"
-              onConfirm={() => handleGenerate(record.key)}
-            >
-              {/* <Button type="default">
-                Generar constancia
-              </Button> */}
-            </Popconfirm>
-          </div>
-        ) : null,
+          if (payload.alumno_id) {
+            onSaveGrade(payload);
+          } else {
+            console.error("El alumno_id no está definido", record);
+          }
+        }}>
+          Guardar
+        </Button>
+      ),
     },
   ];
 
-  const handleSave = (row) => {
-    const newData = [...dataSource];
-    const index = newData.findIndex((item) => row.key === item.key);
-    const item = newData[index];
-    newData.splice(index, 1, {
-      ...item,
-      ...row,
-    });
-    setDataSource(newData);
-  };
-
-  const components = {
-    body: {
-      row: EditableRow,
-      cell: EditableCell,
-    },
-  };
-
-  const columns = defaultColumns.map((col) => {
-    if (!col.editable) {
-      return col;
-    }
-    return {
-      ...col,
-      onCell: (record) => ({
-        record,
-        editable: col.editable,
-        dataIndex: col.dataIndex,
-        title: col.title,
-        handleSave,
-      }),
-    };
-  });
-
   return (
-    <div>
-      <Table
-        components={components}
-        rowClassName={() => 'editable-row'}
-        bordered
-        dataSource={dataSource}
-        columns={columns}
-      />
-    </div>
+    <>
+      {isLoading ? (
+        <div>Cargando...</div>
+      ) : calificaciones.length > 0 ? (
+        <Table
+          dataSource={calificaciones}
+          columns={columns}
+          loading={isLoading}
+          rowKey="ID_Inscripcion"
+          pagination={false}
+        />
+      ) : (
+        <Empty description="Sin alumnos aún" />
+      )}
+    </>
   );
 };
 
-export default App;
+export default TablaAlumnos;

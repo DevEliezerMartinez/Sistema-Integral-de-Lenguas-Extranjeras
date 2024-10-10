@@ -11,13 +11,13 @@ class Solicitud extends Model
 
     protected $fillable = ['curso_id', 'alumno_id', 'fecha_inscripcion', 'status', 'pdf'];
 
-    public function curso()
-    {
-        return $this->belongsTo(Curso::class);
-    }
-
     public function alumno()
     {
-        return $this->belongsTo(Estudiante::class);
+        return $this->belongsTo(Estudiante::class, 'alumno_id');
+    }
+
+    public function curso()
+    {
+        return $this->belongsTo(Curso::class, 'curso_id');
     }
 }

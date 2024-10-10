@@ -13,7 +13,7 @@ class Estudiante extends Model
 
     public function usuario()
     {
-        return $this->belongsTo(Usuario::class);
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
     public function calificaciones()
@@ -23,7 +23,7 @@ class Estudiante extends Model
 
     public function solicitudes()
     {
-        return $this->hasMany(Solicitud::class);
+        return $this->hasMany(Solicitud::class, 'alumno_id');
     }
 
     public function constancias()

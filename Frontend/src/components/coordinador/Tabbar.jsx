@@ -1,39 +1,72 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Dropdown } from "antd";
+
+const items = [
+  {
+    label: <Link to="/Coordinador/CursosActivos">Activos</Link>,
+    key: "0",
+  },
+  {
+    label: <Link to="/Coordinador/CursosArchivados">Archivados</Link>,
+    key: "1",
+  },
+];
 
 function Tabbar() {
   return (
-    <div className="bg-[#1B396A] flex justify-between fixed bottom-0 w-full p-5 rounded gap-3 sm:hidden items-center ">
-      <Link
-        to="/Docentes/CursosActivos"
-        className="Montserrat font-thin text-white flex flex-col items-center text-center"
+    <div className="bg-[#1B396A] flex justify-between fixed bottom-0 w-full p-5 rounded gap-3 md:hidden items-center ">
+      <div
+        to="/Coordinador/CursosActivos"
+        className="Montserrat font-thin text-white "
       >
-        <img alt="icon" className="w-6" src="/Opt/SVG/classroom.svg" />
-        Cursos Activos
-      </Link>
+        <Dropdown
+          menu={{
+            items,
+          }}
+          trigger={["click"]}
+        >
+          <a
+            className=" flex  items-center text-center"
+            onClick={(e) => e.preventDefault()}
+          >
+            <div className=" flex flex-col justify-center items-center text-center ">
+              <img alt="icon" className="w-5" src="/Opt/SVG/classroom.svg" />
+              <span className="text-sm font-thin">Cursos </span>
+            </div>
+            <img
+              className="rotate-180"
+              alt="Logo profile"
+              src="/Opt/SVG/arrow-down.svg"
+            />
+          </a>
+        </Dropdown>
+      </div>
+
+  
 
       <Link
-        to="/Docentes/CursosArchivados"
-        className="Montserrat font-thin text-white flex flex-col items-center text-center"
+        to="/Coordinador/Perfil"
+        className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm "
       >
-        <img alt="icon" className="w-6" src="/Opt/SVG/Curso.svg" />
-        Cursos Archivados
-      </Link>
-
-      <Link
-        to="/Docentes/Perfil"
-        className="Montserrat font-thin text-white flex flex-col items-center text-center"
-      >
-        <img alt="icon" className="w-6" src="/Opt/SVG/profile-.svg" />
+        <img alt="icon" className="w-5" src="/Opt/SVG/profile-.svg" />
         Perfil
       </Link>
 
       <Link
-        to="/Docentes/Notificaciones"
-        className="Montserrat font-thin text-white flex flex-col items-center text-center"
+        to="/Coordinador/Notificaciones"
+        className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm"
       >
-        <img alt="icon" className="w-6" src="/Opt/SVG/notification.svg" />
-        Notificaciones
+        <img alt="icon" className="w-5" src="/Opt/SVG/notification.svg" />
+        Notif.
+      </Link>
+
+      <Link
+        to="/Coordinador/Alumnos"
+        className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm"
+      >
+        <img alt="icon" className="w-5" src="/Opt/SVG/student.svg" />
+        Alumnos
       </Link>
     </div>
   );

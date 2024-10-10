@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Button, Form, Input, Popconfirm, Table } from 'antd';
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { Form, Input, Table } from "antd";
 
 const EditableContext = React.createContext(null);
 
@@ -49,7 +49,7 @@ const EditableCell = ({
         ...values,
       });
     } catch (errInfo) {
-      console.log('Save failed:', errInfo);
+      console.log("Save failed:", errInfo);
     }
   };
 
@@ -58,9 +58,7 @@ const EditableCell = ({
   if (editable) {
     childNode = editing ? (
       <Form.Item
-        style={{
-          margin: 0,
-        }}
+        style={{ margin: 0 }}
         name={dataIndex}
         rules={[
           {
@@ -74,9 +72,7 @@ const EditableCell = ({
     ) : (
       <div
         className="editable-cell-value-wrap"
-        style={{
-          paddingRight: 24,
-        }}
+        style={{ paddingRight: 24 }}
         onClick={toggleEdit}
       >
         {children}
@@ -87,98 +83,18 @@ const EditableCell = ({
   return <td {...restProps}>{childNode}</td>;
 };
 
-const App = () => {
-  const [dataSource, setDataSource] = useState([
-    {
-      key: '0',
-      name: 'Eliezer',
-      lastName: 'Solano Martinez',
-      studentId: '191230060',
-      career: 'INF',
-      grade: 85,
-    },
-    {
-      key: '1',
-      name: 'Mariam 1',
-      lastName: 'Solano Martinez',
-      studentId: '191230061',
-      career: 'TUR',
-      grade: 60,
-    },
-    {
-      key: '2',
-      name: 'Chely',
-      lastName: 'Martinez ',
-      studentId: '191230062',
-      career: 'IGE',
-      grade: 92,
-    },
-  ]);
+const App = ({ solicitudes }) => {
+  const [dataSource, setDataSource] = useState([]);
 
-  const handleDelete = (key) => {
-    const newData = dataSource.filter((item) => item.key !== key);
-    setDataSource(newData);
-  };
-
-  const handleGenerate = (key) => {
-    console.log(`Generar constancia para el registro con key: ${key}`);
-  };
-
-  const defaultColumns = [
-    {
-      title: 'ID',
-      dataIndex: 'key',
-      width: '5%',
-      editable: false,
-    },
-    {
-      title: 'Nombre',
-      dataIndex: 'name',
-    },
-    {
-      title: 'Apellidos',
-      dataIndex: 'lastName',
-    },
-    {
-      title: 'Numero de control',
-      dataIndex: 'studentId',
-    },
-    {
-      title: 'Carrera',
-      dataIndex: 'career',
-    },
-    {
-      title: 'Calificacion',
-      dataIndex: 'grade',
-      editable: true,
-      width: '3%',
-    },
-    {
-      title: 'Acciones',
-      dataIndex: 'operation',
-      render: (_, record) =>
-        dataSource.length >= 1 ? (
-          <div className="flex gap-5">
-            <Popconfirm
-              title="Seguro que deseas borrar?"
-              onConfirm={() => handleDelete(record.key)}
-            >
-              <Button danger type="link">
-                Eliminar
-              </Button>
-            </Popconfirm>
-            <Popconfirm
-              title="Seguro que deseas generar constancia?"
-              onConfirm={() => handleGenerate(record.key)}
-            >
-              <Button type="default">
-                Generar constancia
-              </Button>
-            </Popconfirm>
-          </div>
-        ) : null,
-    },
-  ];
+  useEffect(() => {
+    if (solicitudes) {
+      const formattedData = solicitudes.map((item, index) => ({
+        key: item.ID_Inscripcion || index.toString(),
+        ...item,
+      }));
+      setDataSource(formattedData);
+    }
+  }, [solicitudes]);
 
   const handleSave = (row) => {
     const newData = [...dataSource];
@@ -198,30 +114,56 @@ const App = () => {
     },
   };
 
-  const columns = defaultColumns.map((col) => {
-    if (!col.editable) {
-      return col;
-    }
-    return {
-      ...col,
-      onCell: (record) => ({
-        record,
-        editable: col.editable,
-        dataIndex: col.dataIndex,
-        title: col.title,
-        handleSave,
-      }),
-    };
-  });
+  const defaultColumns = [
+    {
+      title: "ID de Inscripción",
+      dataIndex: "ID_Inscripcion",
+      key: "ID_Inscripcion",
+    },
+    {
+      title: "Nombre Completo",
+      dataIndex: "NombreCompleto",
+      key: "NombreCompleto",
+      render: (_, record) =>
+        `${record.Nombre_Alumno} ${record.Apellidos_Alumno}`,
+    },
+    {
+      title: "Fecha de Inscripción",
+      dataIndex: "Fecha_Inscripcion",
+      key: "Fecha_Inscripcion",
+    },
+    {
+      title: "Estado de la Solicitud",
+      dataIndex: "Estado_Solicitud",
+      key: "Estado_Solicitud",
+    },
+    {
+      title: "PDF de la Solicitud",
+      dataIndex: "PDF_Solicitud",
+      key: "PDF_Solicitud",
+    },
+  ];
+
+  const columns = defaultColumns.map((col) => ({
+    ...col,
+    onCell: (record) => ({
+      record,
+      editable: col.editable,
+      dataIndex: col.dataIndex,
+      title: col.title,
+      handleSave,
+    }),
+  }));
 
   return (
     <div>
       <Table
         components={components}
-        rowClassName={() => 'editable-row'}
+        rowClassName={() => "editable-row"}
         bordered
         dataSource={dataSource}
         columns={columns}
+        locale={{ emptyText: 'No se encontraron solicitudes para este curso' }}
       />
     </div>
   );

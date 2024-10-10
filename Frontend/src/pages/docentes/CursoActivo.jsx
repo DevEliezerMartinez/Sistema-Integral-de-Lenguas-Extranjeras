@@ -1,9 +1,54 @@
 import { Breadcrumb, Button } from "antd";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 function CursoActivo() {
-  const [hasModules, setHasModules] = useState(true); // Initial state (adjust as needed)
+  const [cursos, setCursos] = useState([]);
+  const [usuario, setUsuario] = useState(null);
+  const [docente, setDocente] = useState(null);
+  const [token, setToken] = useState("");
+  const [hasModules, setHasModules] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const usuarioData = localStorage.getItem("usuario");
+    const docenteData = localStorage.getItem("docente");
+    const tokenData = localStorage.getItem("token");
+
+    if (usuarioData) {
+      setUsuario(JSON.parse(usuarioData));
+    }
+    if (docenteData) {
+      setDocente(JSON.parse(docenteData));
+    }
+    if (tokenData) {
+      setToken(tokenData);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (docente && token && isLoading) {
+      const fetchCursos = async () => {
+        try {
+          const response = await axios.get(`http://127.0.0.1:8000/api/cursosAsignados/${docente.id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          setCursos(response.data.cursos);
+          setHasModules(response.data.cursos.length > 0);
+          setIsLoading(false);
+        } catch (error) {
+          console.error("Error al obtener los cursos:", error);
+          setIsLoading(false);
+        }
+      };
+
+      fetchCursos();
+    }
+  }, [docente, token, isLoading]);
 
   return (
     <div className="px-4">
@@ -13,33 +58,47 @@ function CursoActivo() {
             title: <p className="font-medium text-black">Docente</p>,
           },
           {
-            title: <a href="">Mis cursos activos</a>,
+            title: <a href="">Cursos asignados</a>,
           },
         ]}
       />
       <h2 className="Montserrat font-semibold text-2xl text-center">
-        Cursos activos
+        Mis cursos asignados:
       </h2>
+
+      {usuario && (
+        <p className="text-center mt-2">
+          Bienvenido, {usuario.nombre} {usuario.apellidos}!
+        </p>
+      )}
 
       <div
         id="Contenedor de CARDS"
         className="flex gap-3 justify-center mt-5 flex-wrap"
       >
         {hasModules ? (
-          <div
-            id="Card"
-            className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
-          >
-            <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
-            <p className="Montserrat font-normal">Modulo en curso</p>
-            <Button type="primary" className="bg-green-500">
-              <Link to="/Docentes/Cursos/55"> Detalles</Link>
-            </Button>
-          </div>
+          cursos.map((curso) => (
+            <div
+              key={curso.id}
+              id="Card"
+              className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
+            >
+              <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
+              <p className="Montserrat font-normal">{curso.nombre}</p>
+              <p className="Montserrat font-light">{curso.descripcion}</p> {/* Descripción del curso */}
+              <p className="Montserrat font-light">Modalidad: {curso.modalidad}</p> {/* Modalidad */}
+             
+              <p className="Montserrat font-light">Inicio: {curso.fecha_inicio}</p> {/* Fecha de inicio */}
+              <p className="Montserrat font-light">Fin: {curso.fecha_fin}</p> {/* Fecha de fin */}
+              <Button type="primary" className="bg-green-500 my-4">
+                <Link to={`/Docentes/Cursos/${curso.id}`}>Detalles</Link>
+              </Button>
+            </div>
+          ))
         ) : (
           <div
             id="Card"
-            className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center "
+            className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center"
           >
             <img alt="libro" src="/Opt/SVG/sad.svg" className="w-24" />
             <p className="Montserrat font-normal">Sin cursos disponibles</p>
