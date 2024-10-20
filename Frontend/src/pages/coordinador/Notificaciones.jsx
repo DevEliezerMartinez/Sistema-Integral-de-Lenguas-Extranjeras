@@ -21,15 +21,27 @@ function Notificaciones() {
           }
         );
 
-        setNotificaciones(response.data.notificaciones);
-        setLoading(false);
+        // Asegúrate de que la respuesta sea procesada como JSON
+        const data = await response.json();
+
+        // Manejo de la respuesta cuando no hay notificaciones
+        if (data.success) {
+          if (data.notificaciones && data.notificaciones.length > 0) {
+            setNotificaciones(data.notificaciones); // Si hay notificaciones, actualiza el estado
+          } else {
+            setNotificaciones([]); // Si no hay notificaciones, establece un arreglo vacío
+          }
+        } else {
+          setError("Error: " + data.mensaje); // En caso de error lógico
+        }
       } catch (err) {
         setError(
           err.response
             ? err.response.data.mensaje
             : "Error al obtener notificaciones"
         );
-        setLoading(false);
+      } finally {
+        setLoading(false); // Siempre desactivar el estado de carga
       }
     };
 
