@@ -24,21 +24,27 @@ function LoginDocentes() {
           tipo_acceso: "accesoDocente" // Añadido el tipo de acceso
         }),
       });
-
+  
+      // Verifica si la respuesta fue exitosa
       if (response.ok) {
         const data = await response.json();
-
-        // Guardar el token en localStorage
-        localStorage.setItem("token", data.token);
-        // Guardar el usuario si es necesario
-        localStorage.setItem("usuario", JSON.stringify(data.usuario));
-        localStorage.setItem("docente", JSON.stringify(data.docente));
-
-        // Navegar a la ruta de Cursos Activos
-        navigate('/Docentes/CursosActivos');
+  
+        // Verifica si la respuesta indica éxito
+        if (data.success) {
+          // Guardar el token y los datos del usuario en localStorage
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("usuario", JSON.stringify(data.usuario));
+          localStorage.setItem("docente", JSON.stringify(data.docente));
+  
+          // Navegar a la ruta de Cursos Activos
+          navigate('/Docentes/CursosActivos');
+        } else {
+          // Manejo de errores en caso de que success sea false
+          message.error("Error desconocido, intenta nuevamente.");
+        }
       } else {
         const errorData = await response.json();
-
+  
         // Manejo de errores para credenciales incorrectas
         if (errorData.error === "Credenciales incorrectas") {
           message.error("Credenciales incorrectas. Por favor, verifica tu correo y contraseña.");
@@ -51,6 +57,7 @@ function LoginDocentes() {
       message.error("Hubo un problema con la solicitud de inicio de sesión.");
     }
   };
+  
 
   return (
     <>

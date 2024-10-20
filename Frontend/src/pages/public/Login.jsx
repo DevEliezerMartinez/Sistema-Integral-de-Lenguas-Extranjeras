@@ -26,9 +26,7 @@ function Login() {
         `${import.meta.env.VITE_API_URL}/api/login`,
         {
           method: "POST",
-          headers: {
-            // No necesitas especificar "Content-Type" cuando usas FormData, ya que el navegador lo configura automáticamente
-          },
+          // No necesitas especificar "Content-Type" cuando usas FormData, ya que el navegador lo configura automáticamente
           body: formData, // Enviar el FormData en lugar de JSON
         }
       );
@@ -36,29 +34,38 @@ function Login() {
       if (response.ok) {
         const responseData = await response.json();
 
-        console.log("Petición POST exitosa");
-        console.log(responseData.estudiante);
-        console.log("Token:", responseData.token);
+        // Verifica si la respuesta indica éxito
+        if (responseData.success) {
+          console.log("Petición POST exitosa");
+          console.log(responseData.estudiante);
+          console.log("Token:", responseData.token);
 
-        // Almacenar el token y los datos en localStorage
-        localStorage.setItem("token", responseData.token);
-        localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
-        localStorage.setItem(
-          "estudiante",
-          JSON.stringify(responseData.estudiante)
-        );
+          // Almacenar el token y los datos en localStorage
+          localStorage.setItem("token", responseData.token);
+          localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
+          localStorage.setItem(
+            "estudiante",
+            JSON.stringify(responseData.estudiante)
+          );
 
-        // Almacenar el token en el contexto de autenticación
-        setToken(responseData.token);
+          // Almacenar el token en el contexto de autenticación
+          setToken(responseData.token);
 
-        messageApi.open({
-          type: "success",
-          content: "Inicio de sesión exitoso!",
-        });
+          messageApi.open({
+            type: "success",
+            content: "Inicio de sesión exitoso!",
+          });
 
-        setTimeout(() => {
-          navigate("/Estudiantes/Cursos");
-        }, 2000);
+          setTimeout(() => {
+            navigate("/Estudiantes/Cursos");
+          }, 2000);
+        } else {
+          // Manejo de errores en caso de que success sea false
+          messageApi.open({
+            type: "error",
+            content: "Error desconocido, intenta nuevamente.",
+          });
+        }
       } else {
         const errorData = await response.json();
         console.log("Error:", errorData);
