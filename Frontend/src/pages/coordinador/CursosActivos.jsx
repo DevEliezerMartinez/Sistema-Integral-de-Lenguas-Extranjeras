@@ -77,8 +77,12 @@ function CursoActivo() {
       },
     })
       .then((response) => {
-        console.log(response.data.docentes);
-        setTeachers(response.data.docentes); // Guardar los docentes
+        console.log("respuesta de docentes:", response); // Esto te mostrará el objeto de respuesta
+        return response.json(); // Convierte la respuesta a JSON
+      })
+      .then((data) => {
+        console.log("Datos de docentes:", data.docentes); // Ahora accedes a data.docentes
+        setTeachers(data.docentes); // Guardar los docentes
         setLoading(false); // Datos cargados
       })
       .catch((error) => {

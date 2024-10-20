@@ -135,7 +135,7 @@ function CursosArchivados() {
             <img alt="libro" src="/Opt/SVG/sad.svg" className="w-24" />
             <p className="Montserrat font-normal">Sin cursos disponibles</p>
             <span>
-              Si crees que hay un error, notifica al coordinador del CLE
+              Si crees que hay un error, notificalo.
             </span>
           </div>
         )}
