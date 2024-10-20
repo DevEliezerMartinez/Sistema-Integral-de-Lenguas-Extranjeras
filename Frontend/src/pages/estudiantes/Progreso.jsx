@@ -16,8 +16,29 @@ const obtenerHorarioTexto = (horario) => {
   }
 };
 
-const estudiante = JSON.parse(localStorage.getItem("estudiante"));
-const id_estudiante = estudiante.id; // Extraer el id del estudiante
+// Intentar recuperar el objeto 'estudiante' del localStorage
+const estudianteString = localStorage.getItem("estudiante");
+
+// Comprobar si el objeto 'estudiante' existe
+if (estudianteString) {
+    try {
+        // Parsear el string a un objeto JSON
+        const estudiante = JSON.parse(estudianteString);
+        
+        // Comprobar si 'id' existe en el objeto
+        if (estudiante && estudiante.id) {
+            const id_estudiante = estudiante.id; // Extraer el id del estudiante
+            console.log("ID del estudiante:", id_estudiante);
+        } else {
+            console.error("El objeto estudiante no contiene un ID válido.");
+        }
+    } catch (error) {
+        console.error("Error al parsear el objeto estudiante:", error);
+    }
+} else {
+    console.error("No se encontró el objeto 'estudiante' en localStorage.");
+}
+
 
 const CursoCard = ({ curso }) => (
   <div
