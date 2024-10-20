@@ -219,11 +219,12 @@ class CursoController extends Controller
         $cursos = Curso::with('docente.usuario')
             ->where('estado', 'Archivado')  // Filtrar por estado
             ->get();
-
+    
         // Verificar si se encontraron cursos
         if ($cursos->isNotEmpty()) {
-            // Incluir los detalles del docente y el período en la respuesta
+            // Retornar respuesta con success true y los cursos
             return response()->json([
+                'success' => true,  // Indicar que la operación fue exitosa
                 'cursos' => $cursos->map(function ($curso) {
                     return [
                         'id' => $curso->id,
@@ -241,9 +242,14 @@ class CursoController extends Controller
                 }),
             ], 200);
         } else {
-            return response()->json(['error' => 'No se encontraron cursos archivados'], 404);
+            // Retornar respuesta con success true, pero sin cursos
+            return response()->json([
+                'success' => true,  // La operación fue exitosa, pero no hay datos
+                'cursos' => [],  // Enviar un array vacío
+            ], 200);  // Mantener el código de respuesta 200 ya que la solicitud fue exitosa
         }
     }
+    
 
 
 

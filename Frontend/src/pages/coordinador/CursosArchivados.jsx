@@ -15,24 +15,29 @@ function CursosArchivados() {
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
               Accept: "*/*",
               "Content-Type": "application/json",
             },
           }
         );
-        
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
         const data = await response.json();
-        setCursos(data.cursos);
+
+        // Verificar si hay cursos en la respuesta
+        if (data.cursos && data.cursos.length > 0) {
+          setCursos(data.cursos); // Asignar cursos si existen
+        } else {
+          setCursos([]); // Si no hay cursos, asignar un array vacío
+        }
       } catch (error) {
-        setError(error.message);
+        setError(error.message); // Asignar el mensaje de error
       } finally {
-        setLoading(false);
+        setLoading(false); // Detener el estado de carga
       }
     };
 
