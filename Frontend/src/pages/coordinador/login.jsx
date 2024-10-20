@@ -23,27 +23,36 @@ const LoginCoordinador = () => {
         }
       );
 
-      // Guardar el token en localStorage
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("usuario", JSON.stringify(response.data.usuario));
-
-      // Redirigir al usuario a Cursos Activos
-      navigate("/Coordinador/CursosActivos");
-    } catch (error) {
-      if (error.response) {
-        // Manejar errores de respuesta del servidor
-        const { status, data } = error.response;
-        if (status === 401) {
+      // Verifica si la respuesta fue exitosa
+      if (!response.ok) {
+        const data = await response.json();
+        if (response.status === 401) {
           message.error(data.error || "Credenciales incorrectas");
-        } else if (status === 404) {
+        } else if (response.status === 404) {
           message.error(data.error || "Usuario no encontrado");
         } else {
           message.error("Error en el servidor, intenta más tarde.");
         }
-      } else {
-        // Error de red o de configuración
-        message.error("Error en la conexión, intenta más tarde.");
+        return; // Salir de la función si la respuesta no es exitosa
       }
+
+      // Si la respuesta es exitosa, procesar los datos
+      const data = await response.json();
+      if (data.success) {
+        // Guardar el token y el usuario en localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("usuario", JSON.stringify(data.usuario));
+
+        // Redirigir al usuario a Cursos Activos
+        navigate("/Coordinador/CursosActivos");
+        console.log("ya debio redirigir")
+      } else {
+        // Manejar caso donde success es false
+        message.error("Error desconocido, intenta nuevamente.");
+      }
+    } catch (error) {
+      // Error de red o de configuración
+      message.error("Error en la conexión, intenta más tarde.");
     }
   };
 
