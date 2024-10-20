@@ -13,7 +13,6 @@ function Registro() {
   };
 
   const onFinish = async (values) => {
-    // Convertir los datos a formato JSON
     const data = {
       nombre: values.Nombre,
       apellidos: values.Apellidos,
@@ -24,7 +23,6 @@ function Registro() {
     };
 
     try {
-      // Hacer la solicitud POST a la API
       const response = await fetch(
         "http://localhost:8000/api/registroEstudiante",
         {
@@ -32,7 +30,7 @@ function Registro() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data), // Convierte a JSON
+          body: JSON.stringify(data),
         }
       );
 
@@ -72,6 +70,36 @@ function Registro() {
         );
       }
     } catch (error) {
+      // Manejo del error CORS
+      if (error.message === "Failed to fetch") {
+        Modal.error({
+          title: "Error de conexión",
+          content: (
+            <Result
+              status="error"
+              title="Error de CORS"
+              subTitle="Parece que hay un problema de CORS. Asegúrate de que el servidor esté configurado correctamente para aceptar solicitudes desde tu origen."
+            />
+          ),
+          onOk() {
+            console.log("Error de CORS");
+          },
+        });
+      } else {
+        Modal.error({
+          title: "Error de red",
+          content: (
+            <Result
+              status="error"
+              title="Error de red"
+              subTitle={`Error: ${error.message}`}
+            />
+          ),
+          onOk() {
+            console.log("Error de red:", error);
+          },
+        });
+      }
       console.error("Error de red:", error);
     }
   };
@@ -84,11 +112,8 @@ function Registro() {
     <>
       <Headeeer />
 
-      <main className="w-full flex flex-col  md:h-screen md:flex-row ">
-        <section
-          id="Left"
-          className="w-full px-8 flex flex-col items-center md:w-1/2"
-        >
+      <main className="w-full flex flex-col md:h-screen md:flex-row ">
+        <section id="Left" className="w-full px-8 flex flex-col items-center md:w-1/2">
           <img alt="Logo" className="w-28 my-4" src="/LogoTransparente.png" />
           <h2 className="Montserrat font-bold text-2xl text-center">
             ¡Bienvenido a tu nueva aventura como alumno!
@@ -111,12 +136,7 @@ function Registro() {
               <Form.Item
                 name="Nombre"
                 label="Nombre"
-                rules={[
-                  {
-                    required: true,
-                    message: "Ingresa tu nombre",
-                  },
-                ]}
+                rules={[{ required: true, message: "Ingresa tu nombre" }]}
               >
                 <Input />
               </Form.Item>
@@ -124,24 +144,15 @@ function Registro() {
               <Form.Item
                 name="Apellidos"
                 label="Apellidos"
-                rules={[
-                  {
-                    required: true,
-                    message: "Ingresa tus Apellidos",
-                  },
-                ]}
+                rules={[{ required: true, message: "Ingresa tus Apellidos" }]}
               >
                 <Input />
               </Form.Item>
 
               <Form.Item label="Carrera">
                 <Select onChange={handleChange}>
-                  <Select.Option value="INF">
-                    Ingenieria Informatica
-                  </Select.Option>
-                  <Select.Option value="IGE">
-                    Ingenieria en Gestion empresarial
-                  </Select.Option>
+                  <Select.Option value="INF">Ingenieria Informatica</Select.Option>
+                  <Select.Option value="IGE">Ingenieria en Gestion empresarial</Select.Option>
                   <Select.Option value="TUR">Lic en Turismo</Select.Option>
                   <Select.Option value="EXT">Externo</Select.Option>
                 </Select>
@@ -151,12 +162,7 @@ function Registro() {
                 <Form.Item
                   name="Ncontrol"
                   label="Numero de control"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Ingresa tu Numero de control",
-                    },
-                  ]}
+                  rules={[{ required: true, message: "Ingresa tu Numero de control" }]}
                 >
                   <Space>
                     <Space.Compact>
@@ -169,12 +175,7 @@ function Registro() {
               <Form.Item
                 name="Correo"
                 label="Correo"
-                rules={[
-                  {
-                    required: true,
-                    message: "Ingresa un correo",
-                  },
-                ]}
+                rules={[{ required: true, message: "Ingresa un correo" }]}
               >
                 <Input />
               </Form.Item>
@@ -182,27 +183,15 @@ function Registro() {
               <Form.Item
                 name="Contraseña"
                 label="Contraseña"
-                rules={[
-                  {
-                    required: true,
-                    message: "Ingresa una Contraseña",
-                  },
-                ]}
+                rules={[{ required: true, message: "Ingresa una Contraseña" }]}
               >
-                <Input.Password
-                  prefix={<LockOutlined className="site-form-item-icon" />}
-                />
+                <Input.Password prefix={<LockOutlined className="site-form-item-icon" />} />
               </Form.Item>
 
               <Form.Item
                 name="Genero"
                 label="Género"
-                rules={[
-                  {
-                    required: true,
-                    message: "Selecciona tu género",
-                  },
-                ]}
+                rules={[{ required: true, message: "Selecciona tu género" }]}
               >
                 <Select>
                   <Select.Option value="Masculino">Masculino</Select.Option>
@@ -214,12 +203,7 @@ function Registro() {
               <Form.Item
                 name="Telefono"
                 label="Teléfono"
-                rules={[
-                  {
-                    required: true,
-                    message: "Ingresa tu número de teléfono",
-                  },
-                ]}
+                rules={[{ required: true, message: "Ingresa tu número de teléfono" }]}
               >
                 <Input />
               </Form.Item>
@@ -227,12 +211,7 @@ function Registro() {
               <Form.Item
                 name="Curp"
                 label="CURP"
-                rules={[
-                  {
-                    required: true,
-                    message: "Ingresa tu CURP",
-                  },
-                ]}
+                rules={[{ required: true, message: "Ingresa tu CURP" }]}
               >
                 <Input />
               </Form.Item>
@@ -240,12 +219,7 @@ function Registro() {
               <Form.Item
                 name="Domicilio"
                 label="Domicilio"
-                rules={[
-                  {
-                    required: true,
-                    message: "Ingresa tu domicilio",
-                  },
-                ]}
+                rules={[{ required: true, message: "Ingresa tu domicilio" }]}
               >
                 <Input />
               </Form.Item>
