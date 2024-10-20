@@ -24,7 +24,7 @@ function Registro() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/registroEstudiante",
+        "http://localhost:8000/api/register",
         {
           method: "POST",
           headers: {
