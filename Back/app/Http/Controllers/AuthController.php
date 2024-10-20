@@ -29,8 +29,8 @@ class AuthController extends Controller
             // Solo valida los campos del estudiante si el tipo_usuario es estudiante
             'carrera' => 'nullable|required_if:tipo_usuario,estudiante|string',
             'numero_control' => 'nullable|required_if:tipo_usuario,estudiante|string',
-            'historial_cursos' => 'nullable|required_if:tipo_usuario,estudiante|string',
-            'perfil' => 'nullable|required_if:tipo_usuario,estudiante|string',
+            'historial_cursos' => 'nullable',
+            'perfil' => 'nullable',
         ]);
 
         // Verificar si la validación del usuario falla

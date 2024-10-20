@@ -16,23 +16,31 @@ function Registro() {
     const data = {
       nombre: values.Nombre,
       apellidos: values.Apellidos,
-      numeroControl: values.Ncontrol,
+      numero_control: values.Ncontrol,
       carrera: selectedCarrera,
-      correo: values.Correo,
-      password: values.Contraseña,
+      correo_electronico: values.Correo, // Ajustado
+      contrasena: values.Contraseña, // Ajustado
+      genero: values.Genero,
+      telefono: values.Telefono,
+      curp: values.Curp,
+      domicilio: values.Domicilio,
+      tipo_usuario: "estudiante", // Añadido
+      historial_cursos: "", // Añadido
+      perfil: "", // Añadido
     };
 
+    // Imprimir los datos en consola antes de enviar
+    console.log("Datos a enviar:", data);
+
     try {
-      const response = await fetch(
-        "http://194.238.25.213:8000/api/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
+
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
       if (response.ok) {
         Modal.info({
@@ -63,14 +71,9 @@ function Registro() {
             console.log("Error en la creación de usuario");
           },
         });
-        console.error(
-          "Error al hacer la solicitud:",
-          response.status,
-          errorData
-        );
+        console.error("Error al hacer la solicitud:", response.status, errorData);
       }
     } catch (error) {
-      // Manejo del error CORS
       if (error.message === "Failed to fetch") {
         Modal.error({
           title: "Error de conexión",
@@ -111,7 +114,6 @@ function Registro() {
   return (
     <>
       <Headeeer />
-
       <main className="w-full flex flex-col md:h-screen md:flex-row ">
         <section id="Left" className="w-full px-8 flex flex-col items-center md:w-1/2">
           <img alt="Logo" className="w-28 my-4" src="/LogoTransparente.png" />
@@ -151,9 +153,9 @@ function Registro() {
 
               <Form.Item label="Carrera">
                 <Select onChange={handleChange}>
-                  <Select.Option value="INF">Ingenieria Informatica</Select.Option>
-                  <Select.Option value="IGE">Ingenieria en Gestion empresarial</Select.Option>
-                  <Select.Option value="TUR">Lic en Turismo</Select.Option>
+                  <Select.Option value="INF">Ingeniería Informática</Select.Option>
+                  <Select.Option value="IGE">Ingeniería en Gestión Empresarial</Select.Option>
+                  <Select.Option value="TUR">Lic. en Turismo</Select.Option>
                   <Select.Option value="EXT">Externo</Select.Option>
                 </Select>
               </Form.Item>
@@ -161,8 +163,8 @@ function Registro() {
               {selectedCarrera !== "EXT" && (
                 <Form.Item
                   name="Ncontrol"
-                  label="Numero de control"
-                  rules={[{ required: true, message: "Ingresa tu Numero de control" }]}
+                  label="Número de control"
+                  rules={[{ required: true, message: "Ingresa tu Número de control" }]}
                 >
                   <Space>
                     <Space.Compact>
@@ -241,11 +243,7 @@ function Registro() {
         </section>
 
         <section id="right" className="hidden w-1/2 h-full md:block ">
-          <img
-            alt="imagen Alumnos"
-            className="h-full"
-            src="/Opt/CoverLogin.webp"
-          />
+          <img alt="imagen Alumnos" className="h-full" src="/Opt/CoverLogin.webp" />
         </section>
       </main>
     </>

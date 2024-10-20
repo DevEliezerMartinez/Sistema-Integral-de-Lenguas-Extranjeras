@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, Breadcrumb, Collapse, Input, Table, Tag } from "antd";
-import axios from "axios";
 
 const { Panel } = Collapse;
 const { Search } = Input;
@@ -31,18 +30,25 @@ const ListaAlumno = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
     // Hacer la solicitud al endpoint
-    axios
-      .get("http://127.0.0.1:8000/api/cursos_con_estudiantes", {
-        headers: {
-          Authorization:
-            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      })
+    fetch(`${import.meta.env.VITE_API_URL}/api/cursos_con_estudiantes`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
-        const cursos = response.data.cursos;
+        if (!response.ok) {
+          throw new Error("Error en la respuesta de la red");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const cursos = data.cursos;
         // Procesar los datos para que coincidan con la estructura de la tabla
         const cursosFormateados = {};
         cursos.forEach((curso) => {

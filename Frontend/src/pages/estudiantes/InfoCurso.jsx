@@ -2,7 +2,6 @@ import { Button, Divider, Card, List, Typography, Spin } from "antd";
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
-import axios from "axios";
 
 const { Title, Text } = Typography;
 
@@ -35,8 +34,10 @@ function DetalleCurso() {
     const id_estudiante = estudiante.id; // Extraer el id del estudiante
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/api/infocurso_alumno/${cursoId}/${id_estudiante}`, // Actualiza la URL
+        const response = await fetch(
+          `${
+            import.meta.env.VITE_API_URL
+          }/api/infocurso_alumno/${cursoId}/${id_estudiante}`, // Actualiza la URL
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -102,7 +103,10 @@ function DetalleCurso() {
               label: "Docente",
               value: docente ? docente.nombre : "No asignado",
             },
-            { label: "Calificación del Alumno", value: curso.calificacion_alumno || "No disponible" }, // Nueva línea para la calificación
+            {
+              label: "Calificación del Alumno",
+              value: curso.calificacion_alumno || "No disponible",
+            }, // Nueva línea para la calificación
           ]}
           renderItem={(item) => (
             <List.Item>

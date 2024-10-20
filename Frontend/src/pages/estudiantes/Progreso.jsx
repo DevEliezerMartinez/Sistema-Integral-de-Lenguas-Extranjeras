@@ -70,7 +70,7 @@ function Progreso() {
         const id_estudiante = estudiante.id; // Extraer el id del estudiante
 
         const response = await fetch(
-          `http://127.0.0.1:8000/api/progreso/estudiante/${id_estudiante}`,
+          `${import.meta.env.VITE_API_URL}/api/progreso/estudiante/${id_estudiante}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

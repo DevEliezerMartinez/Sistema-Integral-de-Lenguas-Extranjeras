@@ -2,25 +2,33 @@ import { Button, Divider, Form, Input, message } from "antd";
 import Headeeer from "../../components/Shared/HeaderPublico";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios"; // Asegúrate de tener axios instalado
 
 const LoginCoordinador = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login', {
-        correo_electronico: values.correo,
-        contrasena: values.password,
-        tipo_acceso: 'accesoCoordinador'
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            correo_electronico: values.correo,
+            contrasena: values.password,
+            tipo_acceso: "accesoCoordinador",
+          }),
+        }
+      );
 
       // Guardar el token en localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("usuario", JSON.stringify(response.data.usuario));
 
       // Redirigir al usuario a Cursos Activos
-      navigate('/Coordinador/CursosActivos');
+      navigate("/Coordinador/CursosActivos");
     } catch (error) {
       if (error.response) {
         // Manejar errores de respuesta del servidor
@@ -125,7 +133,11 @@ const LoginCoordinador = () => {
         </section>
 
         <section id="right" className="hidden w-1/2 h-full md:block">
-          <img alt="imagen Alumnos" className="h-full" src="/Opt/coverDocentes.webp" />
+          <img
+            alt="imagen Alumnos"
+            className="h-full"
+            src="/Opt/coverDocentes.webp"
+          />
         </section>
       </main>
     </>

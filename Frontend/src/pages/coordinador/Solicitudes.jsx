@@ -8,7 +8,6 @@ import {
   Input,
   notification,
 } from "antd";
-import axios from "axios";
 
 const { TextArea } = Input;
 
@@ -26,15 +25,14 @@ function Solicitudes() {
 
   const fetchSolicitudes = () => {
     setLoading(true);
-    axios
-      .get("http://127.0.0.1:8000/api/solicitudes", {
-        headers: {
-          Authorization:
-            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      })
+    fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
         if (response.status === 404 || response.data.solicitudes.length === 0) {
           setError("No se encontraron solicitudes pendientes");
@@ -59,19 +57,15 @@ function Solicitudes() {
   };
 
   const handleEnviarClick = (id) => {
-    axios
-      .post(
-        `http://127.0.0.1:8000/api/solicitudes/${id}/rechazar`,
-        { motivo: rejectionText },
-        {
-          headers: {
-            Authorization:
-              "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-            Accept: "*/*",
-            "Content-Type": "application/json",
-          },
-        }
-      )
+    fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes/${id}/rechazar`, {
+      method: "POST",
+      body: JSON.stringify({ motivo: rejectionText }),
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    })
       .then(() => {
         notification.success({
           message: "Solicitud Rechazada",
@@ -94,19 +88,15 @@ function Solicitudes() {
   };
 
   const handleAprobarClick = (id) => {
-    axios
-      .post(
-        `http://127.0.0.1:8000/api/solicitudes/${id}/aceptar`,
-        {},
-        {
-          headers: {
-            Authorization:
-              "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-            Accept: "*/*",
-            "Content-Type": "application/json",
-          },
-        }
-      )
+    fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes/${id}/aceptar`, {
+      method: "POST",
+      body: JSON.stringify({}),
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    })
       .then(() => {
         notification.success({
           message: "Solicitud Aprobada",
@@ -169,14 +159,18 @@ function Solicitudes() {
         >
           {/* Vista previa del PDF */}
           <iframe
-            src={`http://127.0.0.1:8000/storage/${solicitud.PDF_Solicitud}`} // Ajustar según sea necesario            width="100%"
+            src={`${import.meta.env.VITE_API_URL}/storage/${
+              solicitud.PDF_Solicitud
+            }`} // Ajustar según sea necesario
             height="400px"
             title="Vista previa del PDF"
             style={{ border: "none", marginBottom: "16px" }}
           />
           <Button
             type="link"
-            href={`http://127.0.0.1:8000/storage/${solicitud.PDF_Solicitud}`}
+            href={`${import.meta.env.VITE_API_URL}/storage/${
+              solicitud.PDF_Solicitud
+            }`}
             target="_blank"
             rel="noopener noreferrer"
           >

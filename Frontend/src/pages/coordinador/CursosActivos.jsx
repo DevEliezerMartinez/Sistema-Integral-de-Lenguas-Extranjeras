@@ -11,7 +11,6 @@ import {
 } from "antd";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 
 function CursoActivo() {
   const [hasModules, setHasModules] = useState(false);
@@ -45,15 +44,14 @@ function CursoActivo() {
 
   useEffect(() => {
     // Obtener cursos activos
-    axios
-      .get("http://127.0.0.1:8000/api/cursos_activos", {
-        headers: {
-          Authorization:
-            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      })
+    fetch(`${import.meta.env.VITE_API_URL}/api/cursos_activos`, {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
         const cursos = response.data.cursos;
         if (cursos.length > 0) {
@@ -71,15 +69,13 @@ function CursoActivo() {
       });
 
     // Obtener docentes
-    axios
-      .get("http://127.0.0.1:8000/api/docentes", {
-        headers: {
-          Authorization:
-            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      })
+    fetch(`${import.meta.env.VITE_API_URL}/api/docentes`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
         console.log(response.data.docentes);
         setTeachers(response.data.docentes); // Guardar los docentes
@@ -114,15 +110,15 @@ function CursoActivo() {
         };
 
         // Enviar los datos del formulario al servidor
-        axios
-          .post("http://127.0.0.1:8000/api/crear_curso", requestData, {
-            headers: {
-              Authorization:
-                "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          })
+        fetch(`${import.meta.env.VITE_API_URL}/api/crear_curso`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        })
           .then((response) => {
             console.log("Curso creado:", response.data);
             setOpen(false);
@@ -130,17 +126,16 @@ function CursoActivo() {
             openNotificationWithIcon("success");
 
             // Recargar la lista de cursos activos
-            axios
-              .get("http://127.0.0.1:8000/api/cursos_activos", {
-                headers: {
-                  Authorization:
-                    "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-                  Accept: "*/*",
-                  "Content-Type": "application/json",
-                },
-              })
-              .then((response) => {
-                const cursos = response.data.cursos;
+            fetch(`${import.meta.env.VITE_API_URL}/api/cursos_activos`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                Accept: "*/*",
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                const cursos = data.cursos;
                 if (cursos.length > 0) {
                   setCourses(cursos); // Guardar los cursos activos
                   setHasModules(true); // Indicar que hay cursos activos
@@ -300,7 +295,6 @@ function CursoActivo() {
             </Select>
           </Form.Item>
 
-
           <Form.Item
             label="Nivel"
             name="nivel"
@@ -319,7 +313,6 @@ function CursoActivo() {
               <Select.Option value="5">Nivel 5</Select.Option>
             </Select>
           </Form.Item>
-
 
           <Form.Item
             label="Docente"

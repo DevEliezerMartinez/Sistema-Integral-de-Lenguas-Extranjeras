@@ -11,17 +11,17 @@ function CursosArchivados() {
     const fetchCursosArchivados = async () => {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/api/cursosArchivados",
+          `${import.meta.env.VITE_API_URL}/api/cursosArchivados`,
           {
             method: "GET",
             headers: {
-              Authorization:
-                "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
               Accept: "*/*",
               "Content-Type": "application/json",
             },
           }
         );
+        
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);

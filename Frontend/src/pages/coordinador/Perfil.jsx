@@ -18,11 +18,12 @@ function Perfil() {
   // Función para hacer la petición a la API y obtener docentes
   const fetchDocentes = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/docentes", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/docentes`, {
         headers: {
-          Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
+
       const data = await response.json();
       setDocentes(data.docentes);
     } catch (error) {
@@ -52,14 +53,15 @@ function Perfil() {
     values.tipo_usuario = "docente"; 
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/register", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(values),
       });
+
 
       if (response.ok) {
         const data = await response.json();
@@ -84,14 +86,15 @@ function Perfil() {
   const eliminarDocente = async (docente_id) => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/api/docentes/${docente_id}`,
+        `${import.meta.env.VITE_API_URL}/api/docentes/${docente_id}`,
         {
           method: "DELETE",
           headers: {
-            Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         }
       );
+
 
       if (response.ok) {
         message.success("Docente eliminado con éxito");

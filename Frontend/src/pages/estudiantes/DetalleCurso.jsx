@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { InboxOutlined } from "@ant-design/icons";
 import { useAuth } from "../../AuthContext"; // Asegúrate de que esta importación sea correcta
-import axios from "axios";
 
 function DetalleCurso() {
   const { cursoId } = useParams();
@@ -30,8 +29,8 @@ function DetalleCurso() {
 
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8000/api/cursos/${cursoId}`,
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/cursos/${cursoId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`, // Usar el token del contexto
@@ -73,8 +72,6 @@ function DetalleCurso() {
     return false; // Prevenir la carga automática
   };
 
-  
-
   // Manejar el envío del formulario
   const handleSubmit = (event) => {
     event.preventDefault(); // Evitar el comportamiento por defecto del formulario
@@ -84,7 +81,7 @@ function DetalleCurso() {
       return; // Detener el envío si faltan campos
     }
     let userid = localStorage.getItem("usuario");
-    userid = JSON.parse(userid)
+    userid = JSON.parse(userid);
     console.log("datosuser: ", userid.id);
 
     const formData = new FormData();
@@ -105,9 +102,9 @@ function DetalleCurso() {
     formData.append("file", pdfFile);
 
     console.log("Datos a enviar:", Array.from(formData.entries())); // Muestra los datos en un formato más legible
-  
+
     // Realiza la solicitud POST
-    fetch("http://localhost:8000/api/crear_solicitud", {
+    fetch(`${import.meta.env.VITE_API_URL}/api/crear_solicitud`, {
       method: "POST",
       body: formData,
       headers: {

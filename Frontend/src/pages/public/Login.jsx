@@ -3,7 +3,7 @@ import Header from "../../components/Shared/HeaderPublico";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
-import React from 'react';
+import React from "react";
 
 function Login() {
   const navigate = useNavigate();
@@ -15,33 +15,39 @@ function Login() {
     const formData = new FormData();
 
     // Agregar los valores del formulario
-    formData.append('correo_electronico', values.correo);
-    formData.append('contrasena', values.password);
+    formData.append("correo_electronico", values.correo);
+    formData.append("contrasena", values.password);
 
     // Inyectar el tipo de acceso como "accesoEstudiante"
-    formData.append('tipo_acceso', 'accesoEstudiante');
+    formData.append("tipo_acceso", "accesoEstudiante");
 
     try {
-      const response = await fetch("http://localhost:8000/api/login", {
-        method: "POST",
-        headers: {
-          // No necesitas especificar "Content-Type" cuando usas FormData, ya que el navegador lo configura automáticamente
-        },
-        body: formData, // Enviar el FormData en lugar de JSON
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/login`,
+        {
+          method: "POST",
+          headers: {
+            // No necesitas especificar "Content-Type" cuando usas FormData, ya que el navegador lo configura automáticamente
+          },
+          body: formData, // Enviar el FormData en lugar de JSON
+        }
+      );
 
       if (response.ok) {
         const responseData = await response.json();
 
         console.log("Petición POST exitosa");
-        console.log(responseData.estudiante)
+        console.log(responseData.estudiante);
         console.log("Token:", responseData.token);
 
         // Almacenar el token y los datos en localStorage
         localStorage.setItem("token", responseData.token);
         localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
-        localStorage.setItem("estudiante", JSON.stringify(responseData.estudiante));
-        
+        localStorage.setItem(
+          "estudiante",
+          JSON.stringify(responseData.estudiante)
+        );
+
         // Almacenar el token en el contexto de autenticación
         setToken(responseData.token);
 
@@ -56,7 +62,7 @@ function Login() {
       } else {
         const errorData = await response.json();
         console.log("Error:", errorData);
-        
+
         if (response.status === 401) {
           messageApi.open({
             type: "error",
@@ -65,7 +71,8 @@ function Login() {
         } else {
           messageApi.open({
             type: "error",
-            content: errorData.error || "Error al iniciar sesión. Intenta nuevamente.",
+            content:
+              errorData.error || "Error al iniciar sesión. Intenta nuevamente.",
           });
         }
       }
@@ -87,7 +94,10 @@ function Login() {
       {contextHolder}
       <Header />
       <main className="w-full flex flex-col md:h-screen md:flex-row">
-        <section id="Left" className="w-full px-8 flex flex-col items-center md:w-1/2">
+        <section
+          id="Left"
+          className="w-full px-8 flex flex-col items-center md:w-1/2"
+        >
           <img alt="Logo" className="w-32 my-8" src="/LogoTransparente.png" />
           <h2 className="Montserrat font-bold text-3xl text-center">
             ¡Nos alegra verte de nuevo!
@@ -142,7 +152,11 @@ function Login() {
           </div>
         </section>
         <section id="right" className="hidden w-1/2 h-full md:block">
-          <img alt="imagen Alumnos" className="h-full" src="/Opt/CoverLogin.webp" />
+          <img
+            alt="imagen Alumnos"
+            className="h-full"
+            src="/Opt/CoverLogin.webp"
+          />
         </section>
       </main>
     </>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Breadcrumb, Button, Spin } from "antd";
 import { Link } from "react-router-dom";
-import axios from "axios";
 
 function Cursos() {
   const [hasModules, setHasModules] = useState(false);
@@ -21,8 +20,8 @@ function Cursos() {
       }
 
       try {
-        const response = await axios.get(
-          "http://127.0.0.1:8000/api/cursos_activos",
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/cursos_activos`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -95,7 +94,9 @@ function Cursos() {
                 className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center"
               >
                 <img alt="libro" src="/Opt/SVG/sad.svg" className="w-24" />
-                <p className="Montserrat font-normal">Sin módulos disponibles</p>
+                <p className="Montserrat font-normal">
+                  Sin módulos disponibles
+                </p>
               </div>
             )}
           </div>

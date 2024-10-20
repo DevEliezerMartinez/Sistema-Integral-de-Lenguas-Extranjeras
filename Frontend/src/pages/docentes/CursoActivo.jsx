@@ -1,7 +1,6 @@
 import { Breadcrumb, Button } from "antd";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 
 function CursoActivo() {
   const [cursos, setCursos] = useState([]);
@@ -31,11 +30,15 @@ function CursoActivo() {
     if (docente && token && isLoading) {
       const fetchCursos = async () => {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/api/cursosAsignados/${docente.id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const response = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/cursosAsignados/${docente.id}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
 
           setCursos(response.data.cursos);
           setHasModules(response.data.cursos.length > 0);
@@ -85,11 +88,20 @@ function CursoActivo() {
             >
               <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
               <p className="Montserrat font-normal">{curso.nombre}</p>
-              <p className="Montserrat font-light">{curso.descripcion}</p> {/* Descripción del curso */}
-              <p className="Montserrat font-light">Modalidad: {curso.modalidad}</p> {/* Modalidad */}
-             
-              <p className="Montserrat font-light">Inicio: {curso.fecha_inicio}</p> {/* Fecha de inicio */}
-              <p className="Montserrat font-light">Fin: {curso.fecha_fin}</p> {/* Fecha de fin */}
+              <p className="Montserrat font-light">{curso.descripcion}</p>{" "}
+              {/* Descripción del curso */}
+              <p className="Montserrat font-light">
+                Modalidad: {curso.modalidad}
+              </p>{" "}
+              {/* Modalidad */}
+              <p className="Montserrat font-light">
+                Inicio: {curso.fecha_inicio}
+              </p>{" "}
+              {/* Fecha de inicio */}
+              <p className="Montserrat font-light">
+                Fin: {curso.fecha_fin}
+              </p>{" "}
+              {/* Fecha de fin */}
               <Button type="primary" className="bg-green-500 my-4">
                 <Link to={`/Docentes/Cursos/${curso.id}`}>Detalles</Link>
               </Button>

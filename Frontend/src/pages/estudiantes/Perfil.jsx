@@ -16,7 +16,7 @@ const Perfil = () => {
       
       const fetchUserData = async () => {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/api/infoUser/${userid}`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/infoUser/${userid}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ const Perfil = () => {
       const userid = userParse.id;
 
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/updateUser/${userid}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/updateUser/${userid}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
