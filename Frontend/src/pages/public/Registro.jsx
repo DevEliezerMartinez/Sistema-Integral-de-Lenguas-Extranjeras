@@ -24,7 +24,7 @@ function Registro() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/register",
+        "http://194.238.25.213:8000/api/register",
         {
           method: "POST",
           headers: {
