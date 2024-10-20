@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 // Rutas públicas (no requieren autenticación)
 Route::post('/login', [AuthController::class, 'login']); // Iniciar sesión
 Route::post('/register', [AuthController::class, 'registrar']); // Registro de usuario
+Route::get('/test', [AuthController::class, 'test']); // Registro de usuario
 
 // Rutas protegidas por autenticación
 Route::middleware('auth:sanctum')->group(function () {
