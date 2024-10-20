@@ -49,11 +49,20 @@ const ListaAlumno = () => {
       })
       .then((data) => {
         const cursos = data.cursos;
+
+        // Verificar si el array de cursos está vacío
+        if (!cursos || cursos.length === 0) {
+          console.log("No se encontraron cursos.");
+          setCursosData({}); // Establecer los datos de los cursos como un objeto vacío
+          setLoading(false);
+          return; // Salir de la función si no hay cursos
+        }
+
         // Procesar los datos para que coincidan con la estructura de la tabla
         const cursosFormateados = {};
         cursos.forEach((curso) => {
           const nombreCurso = curso.Curso.Nombre;
-          const estudiantes = curso.Estudiantes.map((estudiante, index) => ({
+          const estudiantes = curso.Estudiantes.map((estudiante) => ({
             key: estudiante.ID_Inscripcion,
             nombre: estudiante.Nombre_Alumno,
             apellidos: estudiante.Apellidos_Alumno,
@@ -61,6 +70,7 @@ const ListaAlumno = () => {
           }));
           cursosFormateados[nombreCurso] = estudiantes;
         });
+
         setCursosData(cursosFormateados);
         setLoading(false);
       })
@@ -88,23 +98,29 @@ const ListaAlumno = () => {
       {loading ? (
         <p>Cargando...</p>
       ) : (
-        <Collapse accordion>
-          {Object.keys(cursosData).map((curso) => (
-            <Panel header={curso} key={curso}>
-              <Search
-                placeholder="Buscar alumno"
-                onSearch={(value) => console.log(value)}
-                style={{ marginBottom: 8 }}
-              />
-              <Table
-                columns={columns}
-                dataSource={cursosData[curso]}
-                pagination={false}
-                rowKey="key"
-              />
-            </Panel>
-          ))}
-        </Collapse>
+        <>
+          {Object.keys(cursosData).length === 0 ? (
+            <p>No hay cursos disponibles.</p>
+          ) : (
+            <Collapse accordion>
+              {Object.keys(cursosData).map((curso) => (
+                <Panel header={curso} key={curso}>
+                  <Search
+                    placeholder="Buscar alumno"
+                    onSearch={(value) => console.log(value)}
+                    style={{ marginBottom: 8 }}
+                  />
+                  <Table
+                    columns={columns}
+                    dataSource={cursosData[curso]}
+                    pagination={false}
+                    rowKey="key"
+                  />
+                </Panel>
+              ))}
+            </Collapse>
+          )}
+        </>
       )}
     </div>
   );

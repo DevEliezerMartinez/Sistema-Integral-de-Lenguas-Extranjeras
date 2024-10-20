@@ -109,16 +109,16 @@ class CursoController extends Controller
             // Filtrar las calificaciones por el alumno específico
             $query->where('alumno_id', $alumno_id);
         }])->find($curso_id);
-    
+
         // Verificar si el curso existe
         if (!$curso) {
             return response()->json(['error' => 'Curso no encontrado'], 404);
         }
-    
+
         // Verificar si el alumno tiene una calificación en este curso
         $calificacion = $curso->calificaciones->first();
         $nota = $calificacion ? $calificacion->calificacion : 'No disponible';
-    
+
         // Devolver los detalles del curso junto con la calificación del alumno
         return response()->json([
             'curso' => [
@@ -141,9 +141,9 @@ class CursoController extends Controller
             ],
         ], 200);
     }
-    
 
-    
+
+
     public function show($id)
     {
         // Buscar el curso por su ID y cargar la relación del docente
@@ -219,7 +219,7 @@ class CursoController extends Controller
         $cursos = Curso::with('docente.usuario')
             ->where('estado', 'Archivado')  // Filtrar por estado
             ->get();
-    
+
         // Verificar si se encontraron cursos
         if ($cursos->isNotEmpty()) {
             // Retornar respuesta con success true y los cursos
@@ -249,7 +249,7 @@ class CursoController extends Controller
             ], 200);  // Mantener el código de respuesta 200 ya que la solicitud fue exitosa
         }
     }
-    
+
 
 
 
@@ -261,7 +261,11 @@ class CursoController extends Controller
 
             // Verificar si se encontraron cursos
             if ($cursos->isEmpty()) {
-                return response()->json(['error' => 'No se encontraron cursos'], 404);
+                return response()->json([
+                    'success' => true,  // No hubo error, pero no se encontraron cursos
+                    'mensaje' => 'No se encontraron cursos.',
+                    'cursos' => []  // Devuelve un array vacío en lugar de null
+                ], 200);
             }
 
             // Mapear la respuesta con los datos correctos
@@ -284,7 +288,6 @@ class CursoController extends Controller
                     ];
                 });
 
-
                 // Retornar los datos del curso con su docente y estudiantes
                 return [
                     'Curso' => [
@@ -304,15 +307,20 @@ class CursoController extends Controller
                 ];
             });
 
-            return response()->json(['cursos' => $cursosConEstudiantes], 200);
+            return response()->json([
+                'success' => true,  // Operación exitosa
+                'cursos' => $cursosConEstudiantes
+            ], 200);
         } catch (\Exception $e) {
             // Manejar cualquier error inesperado
             return response()->json([
+                'success' => false,  // Operación fallida
                 'mensaje' => 'Ocurrió un error al intentar obtener los cursos con estudiantes.',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
+
 
 
     public function cursosDeAlumno($alumnoId)
@@ -428,14 +436,13 @@ class CursoController extends Controller
     {
         // Obtener todos los cursos cuyo estado sea "Disponible" o "En curso"
         $cursosActivos = Curso::whereIn('estado', ['Disponible', 'En curso'])->get();
-    
+
         // Verificar si hay cursos activos
         if ($cursosActivos->isEmpty()) {
             return response()->json(['message' => 'No hay cursos activos en este momento'], 404);
         }
-    
+
         // Responder con una respuesta JSON
         return response()->json(['cursos' => $cursosActivos], 200);
     }
-    
 }
