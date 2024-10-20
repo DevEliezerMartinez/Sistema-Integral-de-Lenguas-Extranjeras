@@ -92,6 +92,22 @@ class AuthController extends Controller
         return response()->json($response, 201);
     }
 
+    public function test (Request $request)
+    {
+       
+
+      
+        $response = [
+            'message' => 'Funcionando correctamente',
+            'condicional' => null, // Indicará a qué condicional entró
+          
+        ];
+
+        
+        // Responder con una respuesta JSON
+        return response()->json($response, 201);
+    }
+
     public function login(Request $request)
     {
         $request->validate([
