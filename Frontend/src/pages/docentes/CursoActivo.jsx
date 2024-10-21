@@ -30,19 +30,21 @@ function CursoActivo() {
     if (docente && token && isLoading) {
       const fetchCursos = async () => {
         try {
-          const response = await fetch($`import.meta.env.VITE_API_URL}/api/cursosAsignados/${docente.id}`, {
-           //  `${import.meta.env.VITE_API_URL}/api/cursosArchivados/${
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-  
+          const response = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/cursosAsignados/${docente.id}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
           if (!response.ok) {
-            throw new Error('Error en la red');
+            throw new Error("Error en la red");
           }
-  
+
           const data = await response.json();
           setCursos(Object.values(data.cursos)); // Convertir a array
           setHasModules(data.cursos && Object.keys(data.cursos).length > 0); // Verificar si hay cursos
@@ -52,11 +54,10 @@ function CursoActivo() {
           setIsLoading(false);
         }
       };
-  
+
       fetchCursos();
     }
   }, [docente, token, isLoading]);
-  
 
   return (
     <div className="px-4">
@@ -93,11 +94,20 @@ function CursoActivo() {
             >
               <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
               <p className="Montserrat font-normal">{curso.nombre}</p>
-              <p className="Montserrat font-light">{curso.descripcion}</p> {/* Descripción del curso */}
-              <p className="Montserrat font-light">Modalidad: {curso.modalidad}</p> {/* Modalidad */}
-             
-              <p className="Montserrat font-light">Inicio: {curso.fecha_inicio}</p> {/* Fecha de inicio */}
-              <p className="Montserrat font-light">Fin: {curso.fecha_fin}</p> {/* Fecha de fin */}
+              <p className="Montserrat font-light">{curso.descripcion}</p>{" "}
+              {/* Descripción del curso */}
+              <p className="Montserrat font-light">
+                Modalidad: {curso.modalidad}
+              </p>{" "}
+              {/* Modalidad */}
+              <p className="Montserrat font-light">
+                Inicio: {curso.fecha_inicio}
+              </p>{" "}
+              {/* Fecha de inicio */}
+              <p className="Montserrat font-light">
+                Fin: {curso.fecha_fin}
+              </p>{" "}
+              {/* Fecha de fin */}
               <Button type="primary" className="bg-green-500 my-4">
                 <Link to={`/Docentes/Cursos/${curso.id}`}>Detalles</Link>
               </Button>
