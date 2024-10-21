@@ -30,7 +30,8 @@ function CursoActivo() {
     if (docente && token && isLoading) {
       const fetchCursos = async () => {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/api/cursosAsignados/${docente.id}`, {
+          const response = await fetch($`import.meta.env.VITE_API_URL}/api/cursosAsignados/${docente.id}`, {
+           //  `${import.meta.env.VITE_API_URL}/api/cursosArchivados/${
             method: 'GET',
             headers: {
               Authorization: `Bearer ${token}`,
