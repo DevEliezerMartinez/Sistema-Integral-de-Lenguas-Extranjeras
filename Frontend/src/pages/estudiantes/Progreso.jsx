@@ -108,7 +108,7 @@ function Progreso() {
 
   // Renderizado del componente
   return (
-    <div className="md:px-8">
+    <div className="md:px-8 h-[50vh]">
       <Breadcrumb
         items={[
           {

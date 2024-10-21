@@ -51,7 +51,7 @@ function Cursos() {
   }, []);
 
   return (
-    <div className="h-[18rem] mb-52">
+    <div className=" h-[50vh] mb-52">
       <Breadcrumb
         items={[
           {

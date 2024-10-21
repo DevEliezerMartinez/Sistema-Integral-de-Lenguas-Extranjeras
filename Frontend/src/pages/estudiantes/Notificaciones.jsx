@@ -80,7 +80,7 @@ function Notificaciones() {
   };
 
   return (
-    <div className='px-4'>
+    <div className='px-4 h-[50vh]'>
       <Breadcrumb
         items={[
           {
