@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { Button, Divider, Form, Input, Result, Select, Space } from "antd";
 import Headeeer from "../../components/Shared/HeaderPublico";
 import { LockOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Modal from "antd/es/modal/Modal";
 
 function Registro() {
   const [selectedCarrera, setSelectedCarrera] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (value) => {
     setSelectedCarrera(value);
@@ -29,12 +30,8 @@ function Registro() {
       perfil: "", // Añadido
     };
 
-    // Imprimir los datos en consola antes de enviar
-    console.log("Datos a enviar:", data);
-
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
-
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -54,23 +51,42 @@ function Registro() {
           ),
           onOk() {
             console.log("Usuario creado con éxito");
+            navigate("/login"); // Redirigir al login
           },
         });
       } else {
         const errorData = await response.json();
-        Modal.error({
-          title: "Error",
-          content: (
-            <Result
-              status="error"
-              title="Lo sentimos, ocurrió un error"
-              subTitle={`Error: ${errorData.message || "Inténtalo más tarde"}`}
-            />
-          ),
-          onOk() {
-            console.log("Error en la creación de usuario");
-          },
-        });
+
+        // Verificar si el error está relacionado con el correo electrónico
+        if (errorData.errors && errorData.errors.correo_electronico) {
+          Modal.error({
+            title: "Error en el registro",
+            content: (
+              <Result
+                status="error"
+                title="Correo electrónico ya registrado"
+                subTitle={errorData.errors.correo_electronico[0]} // Mostramos el mensaje de error
+              />
+            ),
+            onOk() {
+              console.log("Correo electrónico ya registrado");
+            },
+          });
+        } else {
+          Modal.error({
+            title: "Error",
+            content: (
+              <Result
+                status="error"
+                title="Lo sentimos, ocurrió un error"
+                subTitle={`Error: ${errorData.message || "Inténtalo más tarde"}`}
+              />
+            ),
+            onOk() {
+              console.log("Error en la creación de usuario");
+            },
+          });
+        }
         console.error("Error al hacer la solicitud:", response.status, errorData);
       }
     } catch (error) {
@@ -114,6 +130,7 @@ function Registro() {
   return (
     <>
       <Headeeer />
+
       <main className="w-full flex flex-col md:h-screen md:flex-row ">
         <section id="Left" className="w-full px-8 flex flex-col items-center md:w-1/2">
           <img alt="Logo" className="w-28 my-4" src="/LogoTransparente.png" />
@@ -153,9 +170,9 @@ function Registro() {
 
               <Form.Item label="Carrera">
                 <Select onChange={handleChange}>
-                  <Select.Option value="INF">Ingeniería Informática</Select.Option>
-                  <Select.Option value="IGE">Ingeniería en Gestión Empresarial</Select.Option>
-                  <Select.Option value="TUR">Lic. en Turismo</Select.Option>
+                  <Select.Option value="INF">Ingenieria Informatica</Select.Option>
+                  <Select.Option value="IGE">Ingenieria en Gestion empresarial</Select.Option>
+                  <Select.Option value="TUR">Lic en Turismo</Select.Option>
                   <Select.Option value="EXT">Externo</Select.Option>
                 </Select>
               </Form.Item>
@@ -163,8 +180,8 @@ function Registro() {
               {selectedCarrera !== "EXT" && (
                 <Form.Item
                   name="Ncontrol"
-                  label="Número de control"
-                  rules={[{ required: true, message: "Ingresa tu Número de control" }]}
+                  label="Numero de control"
+                  rules={[{ required: true, message: "Ingresa tu Numero de control" }]}
                 >
                   <Space>
                     <Space.Compact>
@@ -243,7 +260,11 @@ function Registro() {
         </section>
 
         <section id="right" className="hidden w-1/2 h-full md:block ">
-          <img alt="imagen Alumnos" className="h-full" src="/Opt/CoverLogin.webp" />
+          <img
+            alt="imagen Alumnos"
+            className="h-full"
+            src="/Opt/CoverLogin.webp"
+          />
         </section>
       </main>
     </>

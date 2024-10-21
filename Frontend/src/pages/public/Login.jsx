@@ -115,37 +115,45 @@ function Login() {
             Inicia sesión para continuar tu viaje educativo
           </p>
           <div id="bottom" className="w-5/6 px-4 m-0">
-            <Form
-              layout="vertical"
-              name="basic"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-            >
-              <Form.Item
-                label="Correo"
-                name="correo"
-                rules={[{ required: true, message: "Ingresa un correo" }]}
-              >
-                <Input
-                  prefix={<UserOutlined className="site-form-item-icon" />}
-                  placeholder="Correo electrónico"
-                />
-              </Form.Item>
-              <Form.Item
-                label="Contraseña"
-                name="password"
-                rules={[{ required: true, message: "Ingrese una contraseña!" }]}
-              >
-                <Input.Password
-                  prefix={<LockOutlined className="site-form-item-icon" />}
-                />
-              </Form.Item>
-              <Form.Item >
-                <Button type="primary" htmlType="submit">
-                  Ingresar
-                </Button>
-              </Form.Item>
-            </Form>
+          <Form
+      layout="vertical"
+      name="basic"
+      onFinish={onFinish}
+      onFinishFailed={onFinishFailed}
+    >
+      <Form.Item
+        label="Correo"
+        name="correo"
+        rules={[
+          { required: true, message: "Ingresa un correo" },
+          { type: 'email', message: "Ingresa un correo válido" },
+        ]}
+      >
+        <Input
+          prefix={<UserOutlined className="site-form-item-icon" />}
+          placeholder="Correo electrónico"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Contraseña"
+        name="password"
+        rules={[
+          { required: true, message: "Ingrese una contraseña" },
+          { min: 6, message: "La contraseña debe tener al menos 6 caracteres" },
+        ]}
+      >
+        <Input.Password
+          prefix={<LockOutlined className="site-form-item-icon" />}
+        />
+      </Form.Item>
+
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Ingresar
+        </Button>
+      </Form.Item>
+    </Form>
             <div id="Actions" className="flex flex-col items-end mt">
               <Link to="/Recuperar" className="text-right text-blue-600">
                 Olvidé mi contraseña
