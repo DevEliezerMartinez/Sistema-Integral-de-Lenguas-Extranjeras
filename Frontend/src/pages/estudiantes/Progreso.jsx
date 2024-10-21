@@ -16,31 +16,7 @@ const obtenerHorarioTexto = (horario) => {
   }
 };
 
-// Intentar recuperar el objeto 'estudiante' del localStorage
-const estudianteString = localStorage.getItem("estudiante");
-
-// Comprobar si el objeto 'estudiante' existe
-if (estudianteString) {
-    try {
-        // Parsear el string a un objeto JSON
-        const estudiante = JSON.parse(estudianteString);
-        
-        // Comprobar si 'id' existe en el objeto
-        if (estudiante && estudiante.id) {
-            const id_estudiante = estudiante.id; // Extraer el id del estudiante
-            console.log("ID del estudiante:", id_estudiante);
-        } else {
-            console.error("El objeto estudiante no contiene un ID válido.");
-        }
-    } catch (error) {
-        console.error("Error al parsear el objeto estudiante:", error);
-    }
-} else {
-    console.error("No se encontró el objeto 'estudiante' en localStorage.");
-}
-
-
-const CursoCard = ({ curso }) => (
+const CursoCard = ({ curso, id_estudiante }) => (
   <div
     key={curso.Curso_ID}
     className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5"
@@ -62,15 +38,36 @@ function Progreso() {
   const [cursos, setCursos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [idEstudiante, setIdEstudiante] = useState(null); // Estado para almacenar el ID del estudiante
+
+  useEffect(() => {
+    // Intentar recuperar el objeto 'estudiante' del localStorage
+    const estudianteString = localStorage.getItem("estudiante");
+
+    if (estudianteString) {
+      try {
+        const estudiante = JSON.parse(estudianteString);
+        if (estudiante && estudiante.id) {
+          setIdEstudiante(estudiante.id); // Establecer el ID del estudiante
+        } else {
+          throw new Error("El objeto estudiante no contiene un ID válido.");
+        }
+      } catch (error) {
+        console.error("Error al parsear el objeto estudiante:", error);
+        setError("No se pudo recuperar la información del estudiante.");
+      }
+    } else {
+      setError("No se encontró el objeto 'estudiante' en localStorage.");
+    }
+  }, []);
 
   useEffect(() => {
     const obtenerCursos = async () => {
-      try {
-        const estudiante = JSON.parse(localStorage.getItem("estudiante"));
-        const id_estudiante = estudiante.id; // Extraer el id del estudiante
+      if (!idEstudiante) return; // No proceder si no hay ID de estudiante
 
+      try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/progreso/estudiante/${id_estudiante}`,
+          `${import.meta.env.VITE_API_URL}/api/progreso/estudiante/${idEstudiante}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -79,6 +76,10 @@ function Progreso() {
             },
           }
         );
+
+        if (!response.ok) {
+          throw new Error("Error en la respuesta del servidor");
+        }
 
         const data = await response.json();
 
@@ -96,12 +97,14 @@ function Progreso() {
     };
 
     obtenerCursos();
-  }, []);
+  }, [idEstudiante]); // Añadir idEstudiante como dependencia
 
   // Muestra un mensaje si hay un error
-  if (error) {
-    message.error(error);
-  }
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
 
   // Renderizado del componente
   return (
@@ -140,7 +143,7 @@ function Progreso() {
           className="flex gap-3 justify-center mt-5 flex-wrap"
         >
           {cursos.map((curso) => (
-            <CursoCard curso={curso} key={curso.Curso_ID} />
+            <CursoCard curso={curso} key={curso.Curso_ID} id_estudiante={idEstudiante} />
           ))}
         </div>
       )}

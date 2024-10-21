@@ -39,6 +39,7 @@ const LoginCoordinador = () => {
       // Si la respuesta es exitosa, procesar los datos
       const data = await response.json();
       if (data.success) {
+        localStorage.clear();
         // Guardar el token y el usuario en localStorage
         localStorage.setItem("token", data.token);
         localStorage.setItem("usuario", JSON.stringify(data.usuario));

@@ -133,7 +133,7 @@ function CursosArchivados() {
             className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center"
           >
             <img alt="libro" src="/Opt/SVG/sad.svg" className="w-24" />
-            <p className="Montserrat font-normal">Sin cursos disponibles</p>
+            <p className="Montserrat font-normal">Sin cursos archivados</p>
             <span>
               Si crees que hay un error, notificalo.
             </span>

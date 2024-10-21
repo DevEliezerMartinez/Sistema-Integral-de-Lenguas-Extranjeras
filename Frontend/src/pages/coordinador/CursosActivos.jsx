@@ -41,7 +41,6 @@ function CursoActivo() {
   const handleChange = (value) => {
     setSelectedCarrera(value);
   };
-
   useEffect(() => {
     // Obtener cursos activos
     fetch(`${import.meta.env.VITE_API_URL}/api/cursos_activos`, {
@@ -53,8 +52,15 @@ function CursoActivo() {
       },
     })
       .then((response) => {
-        const cursos = response.data.cursos;
-        if (cursos.length > 0) {
+        if (!response.ok) {
+          throw new Error("Error en la respuesta de la API");
+        }
+        return response.json(); // Convierte la respuesta a JSON
+      })
+      .then((data) => {
+        const cursos = data.cursos; // Asegúrate de acceder a los datos correctamente
+
+        if (cursos && cursos.length > 0) {
           setCourses(cursos); // Guardar los cursos activos
           setHasModules(true); // Indicar que hay cursos activos
         } else {
@@ -77,7 +83,9 @@ function CursoActivo() {
       },
     })
       .then((response) => {
-        console.log("respuesta de docentes:", response); // Esto te mostrará el objeto de respuesta
+        if (!response.ok) {
+          throw new Error("Error en la respuesta de la API");
+        }
         return response.json(); // Convierte la respuesta a JSON
       })
       .then((data) => {
@@ -204,9 +212,11 @@ function CursoActivo() {
                   {course.nombre}
                 </h4>
                 <p>{course.descripción}</p>
-                <Button type="primary" className="bg-green-500 my-4">
-                  <Link to={`/Coordinador/Cursos/${course.id}`}>Detalles</Link>
-                </Button>
+                <Link to={`/Coordinador/Cursos/${course.id}`}>
+                  <Button type="primary" className="bg-green-500 my-4">
+                    Detalles
+                  </Button>
+                </Link>
               </div>
             ))
           ) : (

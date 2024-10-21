@@ -31,6 +31,7 @@ function LoginDocentes() {
   
         // Verifica si la respuesta indica éxito
         if (data.success) {
+          localStorage.clear();
           // Guardar el token y los datos del usuario en localStorage
           localStorage.setItem("token", data.token);
           localStorage.setItem("usuario", JSON.stringify(data.usuario));

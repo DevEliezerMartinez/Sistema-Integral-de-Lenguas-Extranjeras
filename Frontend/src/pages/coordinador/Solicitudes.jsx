@@ -24,32 +24,50 @@ function Solicitudes() {
   }, []);
 
   const fetchSolicitudes = () => {
-    setLoading(true);
+    setLoading(true); // Establecer el estado de carga
     fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        Accept: "*/*",
-        "Content-Type": "application/json",
-      },
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Accept: "*/*",
+            "Content-Type": "application/json",
+        },
     })
-      .then((response) => {
-        if (response.status === 404 || response.data.solicitudes.length === 0) {
-          setError("No se encontraron solicitudes pendientes");
-          setSolicitudes([]);
-        } else {
-          setSolicitudes(response.data.solicitudes);
-          setError(null);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        const errorMsg =
-          err.response?.data?.message || "Error al cargar las solicitudes";
-        setError(errorMsg);
-        setLoading(false);
-      });
-  };
+        .then((response) => {
+            setLoading(false); // Detener el estado de carga al recibir la respuesta
+
+            if (!response.ok) {
+                // Manejar errores de respuesta
+                if (response.status === 404) {
+                    setError("No se encontraron solicitudes pendientes");
+                } else {
+                    setError("Error al cargar las solicitudes");
+                }
+                setSolicitudes([]); // Limpiar solicitudes en caso de error
+                return; // Detener la ejecución si hay un error
+            }
+
+            return response.json(); // Convertir la respuesta a JSON si es exitosa
+        })
+        .then((data) => {
+            // Verifica si hay solicitudes
+            if (data.solicitudes && data.solicitudes.length > 0) {
+                setSolicitudes(data.solicitudes); // Establecer las solicitudes
+                setError(null); // Limpiar el error
+            } else {
+                setError("No se encontraron solicitudes pendientes"); // Si no hay solicitudes
+                setSolicitudes([]); // Limpiar solicitudes
+            }
+        })
+        .catch((err) => {
+            // Manejar errores de la solicitud
+            const errorMsg =
+                err.response?.data?.message || "Error al cargar las solicitudes";
+            setError(errorMsg); // Establecer mensaje de error
+            setLoading(false); // Detener el estado de carga
+        });
+};
+
 
   const handleRechazarClick = (id) => {
     setVisibleTextarea(id);

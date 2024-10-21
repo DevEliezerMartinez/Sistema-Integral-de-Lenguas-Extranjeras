@@ -41,6 +41,7 @@ function Login() {
           console.log("Token:", responseData.token);
 
           // Almacenar el token y los datos en localStorage
+          localStorage.clear();
           localStorage.setItem("token", responseData.token);
           localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
           localStorage.setItem(
@@ -139,7 +140,7 @@ function Login() {
                   prefix={<LockOutlined className="site-form-item-icon" />}
                 />
               </Form.Item>
-              <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+              <Form.Item >
                 <Button type="primary" htmlType="submit">
                   Ingresar
                 </Button>

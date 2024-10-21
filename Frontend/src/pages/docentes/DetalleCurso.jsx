@@ -30,7 +30,8 @@ function DetalleCurso() {
           }
         );
 
-        setCurso(cursoResponse.data.curso);
+        const cursoData = await cursoResponse.json(); // Convertir la respuesta a JSON
+        setCurso(cursoData.curso); // Acceder al objeto 'curso' directamente
 
         const alumnosResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/solicitudes/${cursoId}`,
@@ -41,6 +42,8 @@ function DetalleCurso() {
           }
         );
 
+        const alumnosData = await alumnosResponse.json(); // Convertir a JSON
+
         const calificacionesResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/calificaciones/${cursoId}`,
           {
@@ -50,8 +53,10 @@ function DetalleCurso() {
           }
         );
 
-        const alumnosConCalificaciones = alumnosResponse.data.map((alumno) => {
-          const calificacion = calificacionesResponse.data.find(
+        const calificacionesData = await calificacionesResponse.json(); // Convertir a JSON
+
+        const alumnosConCalificaciones = alumnosData.map((alumno) => {
+          const calificacion = calificacionesData.find(
             (c) => c.alumno_id === alumno.alumno_id
           );
           return {
@@ -126,9 +131,11 @@ function DetalleCurso() {
         }
       );
 
+      const data = await response.json(); // Convertir a JSON
+
       notification.success({
         message: "Curso Archivado",
-        description: response.data.mensaje,
+        description: data.mensaje,
       });
 
       // Opcional: Puedes redirigir o actualizar el estado si es necesario
@@ -203,9 +210,9 @@ function DetalleCurso() {
                 </p>
 
                 <Button
-                  primaryq
                   onClick={onArchiveCourse}
                   className="flex flex-col items-center h-auto"
+                  type="text"
                 >
                   <img className="w-8" alt="icon" src="/Opt/SVG/archivar.svg" />
                   <span>Marcar como terminado</span>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
+use App\Models\Docente;
 use App\Models\Solicitud;
 use App\Models\Notificacion;
 
@@ -33,14 +34,14 @@ class CursoController extends Controller
             'nombre_modulo' => 'required|string',
             'descripcion' => 'string',
             'modalidad' => 'required|string',
-            'nivel' => 'required|boolean',
+            'nivel' => 'required',
             'estado' => 'required|boolean',
             'horarios' => 'required|string',
             'periodo' => 'required|array',
             'docente' => 'required|integer|exists:docentes,id',
             'coordinador' => 'required|integer',
             'periodo.inicio' => 'required|date',
-            'periodo.fin' => 'required|date',
+            'periodo.fin' => 'required|date|after_or_equal:periodo.inicio',
         ]);
 
         // Si hay errores en la validación, responder con error 400
@@ -53,8 +54,8 @@ class CursoController extends Controller
 
         try {
             // Procesar las fechas
-            $startDate = $request->input('periodo.inicio');
-            $endDate = $request->input('periodo.fin');
+            $startDate = Carbon::parse($request->input('periodo.inicio'));
+            $endDate = Carbon::parse($request->input('periodo.fin'));
 
             // Crear el nuevo curso
             $curso = new Curso();
@@ -62,33 +63,46 @@ class CursoController extends Controller
             $curso->descripción = $request->input('descripcion');
             $curso->modalidad = $request->input('modalidad');
             $curso->nivel = $request->input('nivel');
-            $curso->estado = 'Disponible'; // Puedes establecer el estado predeterminado
+            $curso->estado = 'Disponible'; // Establecer el estado predeterminado
             $curso->horario = $request->input('horarios');
             $curso->maestro_id = $request->input('docente');
-            $curso->coordinador_id  = $request->input('coordinador');
-            $curso->created_at = Carbon::now(); // Asigna la fecha y hora actuales a created_at
-            $curso->updated_at = Carbon::now(); // Asigna la fecha y hora actuales a created_at
-            $curso->fecha_inicio = $startDate;
-            $curso->fecha_fin = $endDate;
+            $curso->coordinador_id = $request->input('coordinador');
+            $curso->created_at = now(); // Asigna la fecha y hora actuales a created_at
+            $curso->updated_at = now(); // Asigna la fecha y hora actuales a updated_at
+            $curso->fecha_inicio = $startDate; // Asigna la fecha de inicio
+            $curso->fecha_fin = $endDate; // Asigna la fecha de fin
+
+            // Guardar el curso
             $curso->save();
 
-            // Responder con el curso creado
-            return response()->json(['curso' => $curso], 201);
-        } catch (\Exception $e) {
-            // Registrar el error con detalles
-            Log::error('Error en creaaar: ' . $e->getMessage(), [
-                'request' => $request->all(),
-                'stack' => $e->getTraceAsString(),
-            ]);
+            // Buscar el docente y obtener su ID en la tabla usuarios
+            $docente = Docente::with('usuario')->find($request->input('docente'));
+            $usuarioId = $docente->usuario->id ?? null; // Asegúrate de que exista
 
-            // Responder con los detalles del error
+
+            // Crear la notificación para el docente
+            $notificacion = new Notificacion();
+            $notificacion->usuario_id = $usuarioId; // ID del usuario que recibirá la notificación
+            $notificacion->mensaje = "Se le ha asignado el curso: '{$curso->nombre}'."; // Mensaje de notificación
+            $notificacion->fecha_notificacion = now(); // Fecha y hora actuales
+            $notificacion->estado = 'no_leido'; // Estado de la notificación
+            $notificacion->created_at = now(); // Asignar fecha y hora actuales
+            $notificacion->updated_at = now(); // Asignar fecha y hora actuales
+            $notificacion->save();
+
+            // Respuesta exitosa
             return response()->json([
-                'error' => 'Error al crear curso',
-                'message' => $e->getMessage(),
-                'stack' => $e->getTraceAsString(),
-            ], 500);
+                'mensaje' => 'Curso creado y notificación enviada exitosamente.',
+                'curso' => $curso,
+                'success' => true
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores
+            return response()->json(['error' => 'Error al crear el curso: ' . $e->getMessage(), 'success' => false], 500);
         }
     }
+
+
 
 
     /**

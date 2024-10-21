@@ -40,13 +40,17 @@ function DetalleCurso() {
           }
         );
 
-        const { curso } = response.data;
+        const data = await response.json(); // Convierte la respuesta a JSON
+        console.log("Respuesta de la API:", data); // Verifica la respuesta
+
+        const { curso } = data; // Asegúrate de acceder a los datos correctamente
+
         setCurso(curso);
         setDocente(curso.docente);
         setDetalles(curso.descripcion); // O cualquier otro campo que quieras usar
         setPrioridad(curso.nivel); // O cualquier otro campo que quieras usar
       } catch (err) {
-        setError(err.response?.data?.error || "Error al cargar los datos.");
+        setError(err.message || "Error al cargar los datos."); // Manejo de errores
       }
     };
 
@@ -80,6 +84,7 @@ function DetalleCurso() {
       message.error("Por favor completa todos los campos requeridos.");
       return; // Detener el envío si faltan campos
     }
+
     let userid = localStorage.getItem("usuario");
     userid = JSON.parse(userid);
     console.log("datosuser: ", userid.id);
@@ -103,7 +108,7 @@ function DetalleCurso() {
 
     console.log("Datos a enviar:", Array.from(formData.entries())); // Muestra los datos en un formato más legible
 
-    // Realiza la solicitud POST
+    // Realiza la solicitud POST para crear la nueva solicitud
     fetch(`${import.meta.env.VITE_API_URL}/api/crear_solicitud`, {
       method: "POST",
       body: formData,
@@ -113,7 +118,17 @@ function DetalleCurso() {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Error en la solicitud.");
+          // Maneja la respuesta en caso de que ya exista una solicitud
+          return response.json().then((data) => {
+            // Si hay un mensaje de conflicto, lo manejamos aquí
+            if (response.status === 409) {
+              message.error(
+                data.message || "Ya existe una solicitud para este curso."
+              );
+              throw new Error(data.message || "Conflicto en la solicitud.");
+            }
+            throw new Error("Error en la solicitud.");
+          });
         }
         return response.json();
       })
@@ -121,9 +136,9 @@ function DetalleCurso() {
         console.log("Respuesta del servidor:", data);
         if (data.success) {
           message.success(
-            "Solicitud enviada con éxito se notificara al coordinador de tu solicitud"
+            "Solicitud enviada con éxito, se notificará al coordinador de tu solicitud."
           );
-          //navigate(-1);
+          // navigate(-1); // Descomentar si se desea navegar después del éxito
         } else {
           if (data.errors) {
             const errorMessages = Object.values(data.errors).flat();
@@ -162,11 +177,11 @@ function DetalleCurso() {
             className="w-full flex justify-between items-center"
           >
             <div id="Actions" className="self-start flex gap-2">
-              <img alt="icon" className="w-4" src="/Opt/SVG/LighArrow.svg" />
               <button
                 onClick={() => navigate(-1)}
-                className="Popins font-semibold text-blue-500"
+                className="Popins font-semibold text-blue-500 flex gap-2"
               >
+              <img alt="icon" className="w-4" src="/Opt/SVG/LighArrow.svg" />
                 Volver
               </button>
             </div>

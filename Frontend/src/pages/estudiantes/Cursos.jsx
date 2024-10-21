@@ -29,13 +29,15 @@ function Cursos() {
           }
         );
 
-        console.log("Respuesta de la API:", response.data); // Verifica la respuesta
+        console.log("Respuesta de la API:", response); // Verifica la respuesta
 
-        if (response.data.cursos && response.data.cursos.length === 0) {
-          setHasModules(false);
-        } else {
+        const data = await response.json(); // Convierte la respuesta a JSON
+
+        if (data.cursos && data.cursos.length > 0) {
           setHasModules(true);
-          setCursos(response.data.cursos);
+          setCursos(data.cursos);
+        } else {
+          setHasModules(false);
         }
       } catch (err) {
         console.error("Error en la solicitud:", err); // Muestra el error
@@ -49,7 +51,7 @@ function Cursos() {
   }, []);
 
   return (
-    <div className=" h-[18rem] mb-52">
+    <div className="h-[18rem] mb-52">
       <Breadcrumb
         items={[
           {
@@ -71,7 +73,7 @@ function Cursos() {
         <div>
           <div
             id="Contenedor de CARDS"
-            className="flex gap-3 justify-center m-5 flex-wrap mb-42  pb-20"
+            className="flex gap-3 justify-center m-5 flex-wrap mb-42 pb-20"
           >
             {hasModules ? (
               cursos.map((curso) => (
@@ -82,7 +84,7 @@ function Cursos() {
                 >
                   <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
                   <p className="Montserrat font-normal">{curso.nombre}</p>
-                  <p className="Montserrat font-light">{curso.descripcion}</p>
+                  <p className="Montserrat font-light">{curso.descripción}</p>
                   <Button type="primary" className="bg-green-500">
                     <Link to={`/Estudiantes/Cursos/${curso.id}`}>Detalles</Link>
                   </Button>

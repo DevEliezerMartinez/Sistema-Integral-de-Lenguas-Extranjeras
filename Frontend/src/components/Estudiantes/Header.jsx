@@ -89,7 +89,7 @@ function Header() {
             alt="Logo notification"
             src="/Opt/SVG/notification.svg"
           />
-          <span className="text-sm font-thin">Notficaciones</span>
+          <span className="text-sm font-thin">Notificaciones</span>
         </Link>
 
         <Button danger ghost onClick={cerrarsesion}>

@@ -62,6 +62,18 @@ function Tabbar() {
       </Link>
 
       <Link
+          to="/Coordinador/Solicitudes"
+          className="flex flex-col items-center"
+        >
+          <img
+            className="w-6"
+            alt="Logo notification"
+            src="/Opt/SVG/request.svg"
+          />
+          <span className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm">Solicitudes</span>
+        </Link>
+
+      <Link
         to="/Coordinador/Alumnos"
         className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm"
       >

@@ -122,7 +122,7 @@ function Perfil() {
         ]}
       />
 
-      <div className="w-full flex justify-around items-center p-2">
+      <div className="w-full flex flex-col justify-around items-center p-2 lg:flex-row">
         <div className="col-span-4 sm:col-span-3">
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex flex-col items-center">
@@ -137,7 +137,7 @@ function Perfil() {
           </div>
         </div>
 
-        <div id="right" className="w-full">
+        <div id="right" className="w-full ">
           <h2 className="Montserrat self-start font-medium text-2xl">
             Docentes registrados
           </h2>

@@ -1,7 +1,6 @@
-import { Button, Divider, Card, List, Typography, Spin } from "antd";
+import { Button, Divider, Card, List, Typography, Spin, message } from "antd";
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../../AuthContext";
 
 const { Title, Text } = Typography;
 
@@ -21,7 +20,6 @@ const obtenerHorarioTexto = (horario) => {
 
 function DetalleCurso() {
   const { cursoId } = useParams(); // Extrae cursoId de los parámetros de la URL
-  const { token } = useAuth(); // Usando el token de autenticación
   const navigate = useNavigate(); // Hook para navegar a la página anterior
 
   const [curso, setCurso] = useState(null); // Estado para los detalles del curso
@@ -31,13 +29,13 @@ function DetalleCurso() {
 
   useEffect(() => {
     const estudiante = JSON.parse(localStorage.getItem("estudiante"));
-    const id_estudiante = estudiante.id; // Extraer el id del estudiante
+    const id_estudiante = estudiante?.id; // Extraer el id del estudiante
+
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem("token"); // Obtener el token de localStorage
         const response = await fetch(
-          `${
-            import.meta.env.VITE_API_URL
-          }/api/infocurso_alumno/${cursoId}/${id_estudiante}`, // Actualiza la URL
+          `${import.meta.env.VITE_API_URL}/api/infocurso_alumno/${cursoId}/${id_estudiante}`, // Actualiza la URL
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -47,18 +45,28 @@ function DetalleCurso() {
           }
         );
 
-        const { curso } = response.data; // Desestructura el curso de la respuesta
+        if (!response.ok) {
+          throw new Error('Error al obtener los detalles del curso.');
+        }
+
+        const data = await response.json(); // Espera la respuesta JSON
+        if (!data.curso) {
+          throw new Error('No se encontraron detalles del curso.');
+        }
+
+        const { curso } = data; // Desestructura el curso de la respuesta
         setCurso(curso);
         setDocente(curso.docente); // Asigna el docente desde el curso
       } catch (err) {
-        setError(err.response?.data?.error || "Error al cargar los datos.");
+        setError(err.message); // Establece el mensaje de error
+        message.error(err.message); // Muestra el mensaje de error
       } finally {
         setLoading(false); // Finaliza el estado de carga
       }
     };
 
     fetchData();
-  }, [cursoId, token]); // Se eliminó alumnoId de las dependencias ya que no se usa
+  }, [cursoId]); // Se elimina el token de las dependencias ya que se obtiene dentro del efecto
 
   if (loading) {
     return <Spin tip="Cargando..." />; // Muestra un spinner mientras carga

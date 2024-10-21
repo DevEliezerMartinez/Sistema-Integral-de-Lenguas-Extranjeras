@@ -25,9 +25,15 @@ function DetalleAlumno() {
             },
           }
         );
-        
-        console.log("Respuesta de la API:", response.data); // Verifica la respuesta de la API
-        setAlumno(response.data.estudiante);
+
+        // Verifica si la respuesta es exitosa
+        if (!response.ok) {
+          throw new Error('Error en la respuesta de la API');
+        }
+
+        const data = await response.json(); // Obtén los datos de la respuesta
+        console.log("Respuesta de la API:", data); // Verifica la respuesta de la API
+        setAlumno(data.estudiante); // Ajusta esta línea si la estructura de datos es diferente
         setLoading(false);
       } catch (err) {
         console.log(
@@ -60,7 +66,7 @@ function DetalleAlumno() {
             title: <p className="font-medium text-black">Coordinador</p>,
           },
           {
-            title: <a href="">DetalleAlumno</a>,
+            title: <a href="">Detalle Alumno</a>,
           },
         ]}
       />
