@@ -6,7 +6,7 @@ function Grupos() {
       </h2>
 
       <section className="my-4  w-10/12 m-auto px-4 md:m-0 md:w-full md:flex md:flex-row ">
-        <img className="w-full m-auto md:w-1/2  " src="/Opt/GrupoStand.webp" />
+        <img className="w-full m-auto md:w-1/2  " src="/CLE/Opt/GrupoStand.webp" />
 
         <div id="InfoGrupos" className="flex flex-col  p-4 md:px-12 ">
           <p className="Montserrat text-center px-2 my-4 md:text-left">

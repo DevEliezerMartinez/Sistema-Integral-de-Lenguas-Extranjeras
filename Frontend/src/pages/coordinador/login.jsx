@@ -146,7 +146,7 @@ const LoginCoordinador = () => {
           <img
             alt="imagen Alumnos"
             className="h-full"
-            src="/Opt/coverDocentes.webp"
+            src="/CLE/Opt/coverDocentes.webp"
           />
         </section>
       </main>

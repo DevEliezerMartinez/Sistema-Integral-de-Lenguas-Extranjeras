@@ -89,7 +89,7 @@ function CursosArchivados() {
               id="Card"
               className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
             >
-              <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
+              <img alt="libro" src="/CLE/Opt/SVG/book.svg" className="w-24" />
 
               <ul className="self-start text-left font-medium">
                 <li className="Montserrat text-xl text-center my-4">
@@ -132,7 +132,7 @@ function CursosArchivados() {
             id="Card"
             className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center"
           >
-            <img alt="libro" src="/Opt/SVG/sad.svg" className="w-24" />
+            <img alt="libro" src="/CLE/Opt/SVG/sad.svg" className="w-24" />
             <p className="Montserrat font-normal">Sin cursos archivados</p>
             <span>
               Si crees que hay un error, notificalo.

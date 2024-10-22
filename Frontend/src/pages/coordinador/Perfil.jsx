@@ -127,7 +127,7 @@ function Perfil() {
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex flex-col items-center">
               <img
-                src="../../../public/Opt/coverDocentes.webp"
+                src="../../../public/CLE/Opt/coverDocentes.webp"
                 className="w-20 h-20 bg-gray-300 rounded-full mb-4 shrink-0"
                 alt="Foto de perfil"
               />

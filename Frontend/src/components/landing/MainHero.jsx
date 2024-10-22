@@ -36,7 +36,7 @@ function MainHero() {
               className="bg-[#0F5DD2] px-6 py-3 Montserrat font-semibold text-white  flex justify-center gap-2"
             >
               Acceso estudiantes
-              <img alt="icon" src="/Opt/Go.svg" />
+              <img alt="icon" src="/CLE/Opt/Go.svg" />
             </Link>
             <Link
               to="/LoginDocentes"
@@ -54,7 +54,7 @@ function MainHero() {
           <img
             className="rounded-xl m-auto"
             alt="Imagen de alumnos"
-            src="/Opt/Salon.png"
+            src="/CLE/Opt/Salon.png"
           />
         </picture>
       </main>

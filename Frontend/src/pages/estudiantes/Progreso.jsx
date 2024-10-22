@@ -21,7 +21,7 @@ const CursoCard = ({ curso, id_estudiante }) => (
     key={curso.Curso_ID}
     className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5"
   >
-    <img alt="libro" src="/Opt/SVG/class.svg" className="w-24" />
+    <img alt="libro" src="/CLE/Opt/SVG/class.svg" className="w-24" />
     <Divider />
     <p className="Montserrat font-normal">{curso.Nombre_Curso}</p>
     <p className="Montserrat font-light">

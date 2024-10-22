@@ -147,7 +147,7 @@ function Solicitudes() {
         </p>
         <div className="flex gap-4 font-medium">
           <p>{solicitud.Nombre_Curso}</p>
-          <img alt="icon" className="w-6" src="/Opt/SVG/info.svg" />
+          <img alt="icon" className="w-6" src="/CLE/Opt/SVG/info.svg" />
         </div>
       </div>
     ),

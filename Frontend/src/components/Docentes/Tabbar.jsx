@@ -31,13 +31,13 @@ function Tabbar() {
             onClick={(e) => e.preventDefault()}
           >
             <div className=" flex flex-col justify-center items-center text-center ">
-              <img alt="icon" className="w-5" src="/Opt/SVG/classroom.svg" />
+              <img alt="icon" className="w-5" src="/CLE/Opt/SVG/classroom.svg" />
               <span className="text-sm font-thin">Cursos </span>
             </div>
             <img
               className="rotate-180"
               alt="Logo profile"
-              src="/Opt/SVG/arrow-down.svg"
+              src="/CLE/Opt/SVG/arrow-down.svg"
             />
           </a>
         </Dropdown>
@@ -49,7 +49,7 @@ function Tabbar() {
         to="/Docentes/Perfil"
         className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm "
       >
-        <img alt="icon" className="w-5" src="/Opt/SVG/profile-.svg" />
+        <img alt="icon" className="w-5" src="/CLE/Opt/SVG/profile-.svg" />
         Perfil
       </Link>
 
@@ -57,7 +57,7 @@ function Tabbar() {
         to="/Docentes/Notificaciones"
         className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm"
       >
-        <img alt="icon" className="w-5" src="/Opt/SVG/notification.svg" />
+        <img alt="icon" className="w-5" src="/CLE/Opt/SVG/notification.svg" />
         Notif.
       </Link>
 

@@ -263,7 +263,7 @@ function Registro() {
           <img
             alt="imagen Alumnos"
             className="h-full"
-            src="/Opt/CoverLogin.webp"
+            src="/CLE/Opt/CoverLogin.webp"
           />
         </section>
       </main>

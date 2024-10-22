@@ -9,7 +9,7 @@ function Tabbar() {
         to="/Estudiantes/Perfil"
         className="Montserrat font-thin text-white flex flex-col items-center"
       >
-        <img alt="icon" className="w-6" src="/Opt/SVG/profile-.svg" />
+        <img alt="icon" className="w-6" src="/CLE/Opt/SVG/profile-.svg" />
         Perfil
       </Link>
 
@@ -17,7 +17,7 @@ function Tabbar() {
         to="/Estudiantes/Progreso"
         className="Montserrat font-thin text-white flex flex-col items-center"
       >
-        <img alt="icon" className="w-6" src="/Opt/SVG/Progress.svg" />
+        <img alt="icon" className="w-6" src="/CLE/Opt/SVG/Progress.svg" />
        Mi Progreso
       </Link>
 
@@ -25,7 +25,7 @@ function Tabbar() {
         to="/Estudiantes/Cursos"
         className="Montserrat font-thin text-white flex flex-col items-center"
       >
-        <img alt="icon" className="w-6" src="/Opt/SVG/Curso.svg" />
+        <img alt="icon" className="w-6" src="/CLE/Opt/SVG/Curso.svg" />
         Cursos disp.
       </Link>
 
@@ -35,7 +35,7 @@ function Tabbar() {
         to="/Estudiantes/Notificaciones"
         className="Montserrat font-thin text-white flex flex-col items-center"
       >
-        <img alt="icon" className="w-6" src="/Opt/SVG/notification2.svg" />
+        <img alt="icon" className="w-6" src="/CLE/Opt/SVG/notification2.svg" />
         Notificaciones
       </Link>
     </div>

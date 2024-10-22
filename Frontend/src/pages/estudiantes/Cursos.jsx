@@ -82,7 +82,7 @@ function Cursos() {
                   id="Card"
                   className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
                 >
-                  <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
+                  <img alt="libro" src="/CLE/Opt/SVG/book.svg" className="w-24" />
                   <p className="Montserrat font-normal">{curso.nombre}</p>
                   <p className="Montserrat font-light">{curso.descripción}</p>
                   <Button type="primary" className="bg-green-500">
@@ -95,7 +95,7 @@ function Cursos() {
                 id="Card"
                 className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center"
               >
-                <img alt="libro" src="/Opt/SVG/sad.svg" className="w-24" />
+                <img alt="libro" src="/CLE/Opt/SVG/sad.svg" className="w-24" />
                 <p className="Montserrat font-normal">
                   Sin módulos disponibles
                 </p>

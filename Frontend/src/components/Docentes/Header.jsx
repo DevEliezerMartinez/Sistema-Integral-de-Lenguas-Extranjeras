@@ -45,7 +45,7 @@ function Header() {
         <Link to="/">
           <img
             alt="Logo CLE"
-            src="/Opt/TecNMBig.png"
+            src="/CLE/Opt/TecNMBig.png"
             className="w-8 h-8 mb-4 md:mb-0"
           />
         </Link>
@@ -65,7 +65,7 @@ function Header() {
           <img
             className="w-6"
             alt="Logo Progreso"
-            src="/Opt/SVG/classroom.svg"
+            src="/CLE/Opt/SVG/classroom.svg"
           />
           <span className="text-sm font-thin">Cursos Activos</span>
         </Link>
@@ -76,12 +76,12 @@ function Header() {
           <img
             className="w-6"
             alt="Logo Progreso"
-            src="/Opt/SVG/classroom.svg"
+            src="/CLE/Opt/SVG/classroom.svg"
           />
           <span className="text-sm font-thin">Cursos Archivados</span>
         </Link>
         <Link to="/Docentes/Perfil" className="flex flex-col items-center">
-          <img className="w-6" alt="Logo profile" src="/Opt/SVG/profile-.svg" />
+          <img className="w-6" alt="Logo profile" src="/CLE/Opt/SVG/profile-.svg" />
           <span className="text-sm font-thin">Perfil</span>
         </Link>
         <Link
@@ -91,7 +91,7 @@ function Header() {
           <img
             className="w-6"
             alt="Logo notification"
-            src="/Opt/SVG/notification.svg"
+            src="/CLE/Opt/SVG/notification.svg"
           />
           <span className="text-sm font-thin">Notificaciones</span>
         </Link>

@@ -151,7 +151,7 @@ function DetalleCurso() {
                 to="/Coordinador/CursosActivos"
                 className="flex items-center"
               >
-                <img alt="icon" className="w-4" src="/Opt/SVG/LighArrow.svg" />
+                <img alt="icon" className="w-4" src="/CLE/Opt/SVG/LighArrow.svg" />
                 <span className="Popins font-semibold ml-2">Volver</span>
               </Link>
             </div>
@@ -159,7 +159,7 @@ function DetalleCurso() {
             <h3 className="Montserrat font-extralight text-2xl">
               {curso.nombre}
             </h3>
-            <img alt="icon" className="w-8" src="/Opt/SVG/info.svg" />
+            <img alt="icon" className="w-8" src="/CLE/Opt/SVG/info.svg" />
           </div>
           <Divider />
 
@@ -206,7 +206,7 @@ function DetalleCurso() {
               className="flex flex-col items-center h-auto"
               onClick={handleArchive}
             >
-              <img className="w-8" alt="icon" src="/Opt/SVG/archivar.svg" />
+              <img className="w-8" alt="icon" src="/CLE/Opt/SVG/archivar.svg" />
               <span>Archivar</span>
             </Button>
           </div>
