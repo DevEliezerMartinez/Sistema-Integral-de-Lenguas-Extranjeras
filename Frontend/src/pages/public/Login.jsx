@@ -23,13 +23,21 @@ function Login() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/login`,
+        `${import.meta.env.VITE_API_URL}/api/login_cle`,
         {
-          method: "POST",
-          // No necesitas especificar "Content-Type" cuando usas FormData, ya que el navegador lo configura automáticamente
-          body: formData, // Enviar el FormData en lugar de JSON
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json", // Establecer el Content-Type a application/json
+            },
+            body: JSON.stringify({
+                // Aquí coloca los datos que deseas enviar en formato JSON
+                username: formData.get("username"),
+                password: formData.get("password"),
+                // Agrega otros campos según sea necesario
+            }),
         }
-      );
+    );
+    
 
       if (response.ok) {
         const responseData = await response.json();
