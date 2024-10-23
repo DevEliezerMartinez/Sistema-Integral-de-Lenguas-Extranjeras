@@ -166,7 +166,7 @@ function DetalleCurso() {
             className="w-full flex justify-between items-center"
           >
             <div id="Actions" className="self-start flex gap-2">
-              <img alt="icon" className="w-4" src="/CLE/Opt/SVG/LighArrow.svg" />
+              <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
               <Link
                 to="/Docentes/CursosActivos"
                 className="Popins font-semibold"
@@ -177,7 +177,7 @@ function DetalleCurso() {
             <h3 className="Montserrat font-extralight text-2xl">
               Detalles del curso
             </h3>
-            <img alt="icon" className="w-8" src="/CLE/Opt/SVG/info.svg" />
+            <img alt="icon" className="w-8" src="/Opt//SVG/info.svg" />
           </div>
           <Divider />
 
@@ -214,7 +214,7 @@ function DetalleCurso() {
                   className="flex flex-col items-center h-auto"
                   type="text"
                 >
-                  <img className="w-8" alt="icon" src="/CLE/Opt/SVG/archivar.svg" />
+                  <img className="w-8" alt="icon" src="/Opt//SVG/archivar.svg" />
                   <span>Marcar como terminado</span>
                 </Button>
               </div>

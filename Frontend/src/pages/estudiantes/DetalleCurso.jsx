@@ -181,12 +181,12 @@ function DetalleCurso() {
                 onClick={() => navigate(-1)}
                 className="Popins font-semibold text-blue-500 flex gap-2"
               >
-              <img alt="icon" className="w-4" src="/CLE/Opt/SVG/LighArrow.svg" />
+              <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
                 Volver
               </button>
             </div>
             <h3 className="Montserrat font-medium text-2xl">{curso.nombre}</h3>
-            <img alt="icon" className="w-8" src="/CLE/Opt/SVG/info.svg" />
+            <img alt="icon" className="w-8" src="/Opt//SVG/info.svg" />
           </div>
           <Divider />
 

@@ -14,7 +14,7 @@ function Header() {
       <Link to="/">
           <img
             alt="Logo CLE"
-            src="/CLE/Opt/TecNMBig.png"
+            src="/Opt//TecNMBig.png"
             className="w-8 h-8 mb-4 md:mb-0"
           />
         </Link>

@@ -171,7 +171,7 @@ function Login() {
           <img
             alt="imagen Alumnos"
             className="h-full"
-            src="/CLE/Opt/CoverLogin.webp"
+            src="/Opt//CoverLogin.webp"
           />
         </section>
       </main>

@@ -77,7 +77,7 @@ function DetalleAlumno() {
             className="w-full flex justify-between items-center"
           >
             <div id="Actions" className="self-start flex gap-2">
-              <img alt="icon" className="w-4" src="/CLE/Opt/SVG/LighArrow.svg" />
+              <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
               <Link to="/Coordinador/Alumnos" className="Popins font-semibold">
                 Volver
               </Link>
@@ -85,7 +85,7 @@ function DetalleAlumno() {
             <h3 className="Montserrat font-extralight text-2xl">
               Detalles del Alumno
             </h3>
-            <img alt="icon" className="w-8" src="/CLE/Opt/SVG/info.svg" />
+            <img alt="icon" className="w-8" src="/Opt//SVG/info.svg" />
           </div>
           <Divider />
           {/* Información del alumno */}
