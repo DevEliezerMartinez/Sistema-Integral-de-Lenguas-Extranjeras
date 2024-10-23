@@ -16,7 +16,7 @@ function Login() {
 
     // Agregar los valores del formulario
     formData.append("correo_electronico", values.correo);
-    formData.append("contrasena", values.password);
+    formData.append("correo_electronico", values.password);
 
     // Inyectar el tipo de acceso como "accesoEstudiante"
     formData.append("tipo_acceso", "accesoEstudiante");
@@ -29,12 +29,7 @@ function Login() {
             headers: {
                 "Content-Type": "application/json", // Establecer el Content-Type a application/json
             },
-            body: JSON.stringify({
-                // Aquí coloca los datos que deseas enviar en formato JSON
-                username: formData.get("username"),
-                password: formData.get("password"),
-                // Agrega otros campos según sea necesario
-            }),
+            body: formData, // o usa el formato JSON si lo decides
         }
     );
     
