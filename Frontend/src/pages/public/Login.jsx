@@ -11,28 +11,23 @@ function Login() {
   const { setToken } = useAuth();
 
   const onFinish = async (values) => {
-    // Crear un objeto FormData para manejar los valores del formulario
-    const formData = new FormData();
-
-    // Agregar los valores del formulario
-    formData.append("correo_electronico", values.correo);
-    formData.append("correo_electronico", values.password);
-
-    // Inyectar el tipo de acceso como "accesoEstudiante"
-    formData.append("tipo_acceso", "accesoEstudiante");
+    // Crear un objeto con los valores del formulario
+    const data = {
+      correo_electronico: values.correo,
+      contrasena: values.password,
+      tipo_acceso: "accesoEstudiante",
+    };
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/login_cle`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json", // Establecer el Content-Type a application/json
-            },
-            body: formData, // o usa el formato JSON si lo decides
-        }
-    );
-    
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Establecer el Content-Type a application/json
+        },
+        body: JSON.stringify(data), // Convertir el objeto a JSON
+      });
+
+      console.log("respuesta raw",response)
 
       if (response.ok) {
         const responseData = await response.json();
@@ -47,10 +42,7 @@ function Login() {
           localStorage.clear();
           localStorage.setItem("token", responseData.token);
           localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
-          localStorage.setItem(
-            "estudiante",
-            JSON.stringify(responseData.estudiante)
-          );
+          localStorage.setItem("estudiante", JSON.stringify(responseData.estudiante));
 
           // Almacenar el token en el contexto de autenticación
           setToken(responseData.token);
@@ -82,8 +74,7 @@ function Login() {
         } else {
           messageApi.open({
             type: "error",
-            content:
-              errorData.error || "Error al iniciar sesión. Intenta nuevamente.",
+            content: errorData.error || "Error al iniciar sesión. Intenta nuevamente.",
           });
         }
       }
@@ -118,45 +109,45 @@ function Login() {
             Inicia sesión para continuar tu viaje educativo
           </p>
           <div id="bottom" className="w-5/6 px-4 m-0">
-          <Form
-      layout="vertical"
-      name="basic"
-      onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
-    >
-      <Form.Item
-        label="Correo"
-        name="correo"
-        rules={[
-          { required: true, message: "Ingresa un correo" },
-          { type: 'email', message: "Ingresa un correo válido" },
-        ]}
-      >
-        <Input
-          prefix={<UserOutlined className="site-form-item-icon" />}
-          placeholder="Correo electrónico"
-        />
-      </Form.Item>
+            <Form
+              layout="vertical"
+              name="basic"
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+            >
+              <Form.Item
+                label="Correo"
+                name="correo"
+                rules={[
+                  { required: true, message: "Ingresa un correo" },
+                  { type: 'email', message: "Ingresa un correo válido" },
+                ]}
+              >
+                <Input
+                  prefix={<UserOutlined className="site-form-item-icon" />}
+                  placeholder="Correo electrónico"
+                />
+              </Form.Item>
 
-      <Form.Item
-        label="Contraseña"
-        name="password"
-        rules={[
-          { required: true, message: "Ingrese una contraseña" },
-          { min: 6, message: "La contraseña debe tener al menos 6 caracteres" },
-        ]}
-      >
-        <Input.Password
-          prefix={<LockOutlined className="site-form-item-icon" />}
-        />
-      </Form.Item>
+              <Form.Item
+                label="Contraseña"
+                name="password"
+                rules={[
+                  { required: true, message: "Ingrese una contraseña" },
+                  { min: 6, message: "La contraseña debe tener al menos 6 caracteres" },
+                ]}
+              >
+                <Input.Password
+                  prefix={<LockOutlined className="site-form-item-icon" />}
+                />
+              </Form.Item>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          Ingresar
-        </Button>
-      </Form.Item>
-    </Form>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Ingresar
+                </Button>
+              </Form.Item>
+            </Form>
             <div id="Actions" className="flex flex-col items-end mt">
               <Link to="/Recuperar" className="text-right text-blue-600">
                 Olvidé mi contraseña
