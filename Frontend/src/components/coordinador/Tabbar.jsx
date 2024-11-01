@@ -31,13 +31,13 @@ function Tabbar() {
             onClick={(e) => e.preventDefault()}
           >
             <div className=" flex flex-col justify-center items-center text-center ">
-              <img alt="icon" className="w-5" src="/Opt/SVG/classroom.svg" />
+              <img alt="icon" className="w-5" src="/Opt//SVG/classroom.svg" />
               <span className="text-sm font-thin">Cursos </span>
             </div>
             <img
               className="rotate-180"
               alt="Logo profile"
-              src="/Opt/SVG/arrow-down.svg"
+              src="/Opt//SVG/arrow-down.svg"
             />
           </a>
         </Dropdown>
@@ -49,7 +49,7 @@ function Tabbar() {
         to="/Coordinador/Perfil"
         className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm "
       >
-        <img alt="icon" className="w-5" src="/Opt/SVG/profile-.svg" />
+        <img alt="icon" className="w-5" src="/Opt//SVG/profile-.svg" />
         Perfil
       </Link>
 
@@ -57,15 +57,27 @@ function Tabbar() {
         to="/Coordinador/Notificaciones"
         className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm"
       >
-        <img alt="icon" className="w-5" src="/Opt/SVG/notification.svg" />
+        <img alt="icon" className="w-5" src="/Opt//SVG/notification.svg" />
         Notif.
       </Link>
+
+      <Link
+          to="/Coordinador/Solicitudes"
+          className="flex flex-col items-center"
+        >
+          <img
+            className="w-6"
+            alt="Logo notification"
+            src="/Opt//SVG/request.svg"
+          />
+          <span className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm">Solicitudes</span>
+        </Link>
 
       <Link
         to="/Coordinador/Alumnos"
         className="Montserrat font-thin text-white flex flex-col items-center text-center  text-sm"
       >
-        <img alt="icon" className="w-5" src="/Opt/SVG/student.svg" />
+        <img alt="icon" className="w-5" src="/Opt//SVG/student.svg" />
         Alumnos
       </Link>
     </div>

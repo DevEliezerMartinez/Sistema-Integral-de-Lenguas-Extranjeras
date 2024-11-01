@@ -11,12 +11,11 @@ function CursosArchivados() {
     const fetchCursosArchivados = async () => {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/api/cursosArchivados",
+          `${import.meta.env.VITE_API_URL}/api/cursosArchivados`,
           {
             method: "GET",
             headers: {
-              Authorization:
-                "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
               Accept: "*/*",
               "Content-Type": "application/json",
             },
@@ -28,11 +27,17 @@ function CursosArchivados() {
         }
 
         const data = await response.json();
-        setCursos(data.cursos);
+
+        // Verificar si hay cursos en la respuesta
+        if (data.cursos && data.cursos.length > 0) {
+          setCursos(data.cursos); // Asignar cursos si existen
+        } else {
+          setCursos([]); // Si no hay cursos, asignar un array vacío
+        }
       } catch (error) {
-        setError(error.message);
+        setError(error.message); // Asignar el mensaje de error
       } finally {
-        setLoading(false);
+        setLoading(false); // Detener el estado de carga
       }
     };
 
@@ -84,7 +89,7 @@ function CursosArchivados() {
               id="Card"
               className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
             >
-              <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
+              <img alt="libro" src="/Opt//SVG/book.svg" className="w-24" />
 
               <ul className="self-start text-left font-medium">
                 <li className="Montserrat text-xl text-center my-4">
@@ -127,10 +132,10 @@ function CursosArchivados() {
             id="Card"
             className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center"
           >
-            <img alt="libro" src="/Opt/SVG/sad.svg" className="w-24" />
-            <p className="Montserrat font-normal">Sin cursos disponibles</p>
+            <img alt="libro" src="/Opt//SVG/sad.svg" className="w-24" />
+            <p className="Montserrat font-normal">Sin cursos archivados</p>
             <span>
-              Si crees que hay un error, notifica al coordinador del CLE
+              Si crees que hay un error, notificalo.
             </span>
           </div>
         )}

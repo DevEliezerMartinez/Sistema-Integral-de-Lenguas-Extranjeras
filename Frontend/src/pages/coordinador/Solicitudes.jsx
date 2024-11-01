@@ -8,7 +8,6 @@ import {
   Input,
   notification,
 } from "antd";
-import axios from "axios";
 
 const { TextArea } = Input;
 
@@ -25,33 +24,50 @@ function Solicitudes() {
   }, []);
 
   const fetchSolicitudes = () => {
-    setLoading(true);
-    axios
-      .get("http://127.0.0.1:8000/api/solicitudes", {
+    setLoading(true); // Establecer el estado de carga
+    fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes`, {
+        method: "GET",
         headers: {
-          Authorization:
-            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-          Accept: "*/*",
-          "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Accept: "*/*",
+            "Content-Type": "application/json",
         },
-      })
-      .then((response) => {
-        if (response.status === 404 || response.data.solicitudes.length === 0) {
-          setError("No se encontraron solicitudes pendientes");
-          setSolicitudes([]);
-        } else {
-          setSolicitudes(response.data.solicitudes);
-          setError(null);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        const errorMsg =
-          err.response?.data?.message || "Error al cargar las solicitudes";
-        setError(errorMsg);
-        setLoading(false);
-      });
-  };
+    })
+        .then((response) => {
+            setLoading(false); // Detener el estado de carga al recibir la respuesta
+
+            if (!response.ok) {
+                // Manejar errores de respuesta
+                if (response.status === 404) {
+                    setError("No se encontraron solicitudes pendientes");
+                } else {
+                    setError("Error al cargar las solicitudes");
+                }
+                setSolicitudes([]); // Limpiar solicitudes en caso de error
+                return; // Detener la ejecución si hay un error
+            }
+
+            return response.json(); // Convertir la respuesta a JSON si es exitosa
+        })
+        .then((data) => {
+            // Verifica si hay solicitudes
+            if (data.solicitudes && data.solicitudes.length > 0) {
+                setSolicitudes(data.solicitudes); // Establecer las solicitudes
+                setError(null); // Limpiar el error
+            } else {
+                setError("No se encontraron solicitudes pendientes"); // Si no hay solicitudes
+                setSolicitudes([]); // Limpiar solicitudes
+            }
+        })
+        .catch((err) => {
+            // Manejar errores de la solicitud
+            const errorMsg =
+                err.response?.data?.message || "Error al cargar las solicitudes";
+            setError(errorMsg); // Establecer mensaje de error
+            setLoading(false); // Detener el estado de carga
+        });
+};
+
 
   const handleRechazarClick = (id) => {
     setVisibleTextarea(id);
@@ -59,19 +75,15 @@ function Solicitudes() {
   };
 
   const handleEnviarClick = (id) => {
-    axios
-      .post(
-        `http://127.0.0.1:8000/api/solicitudes/${id}/rechazar`,
-        { motivo: rejectionText },
-        {
-          headers: {
-            Authorization:
-              "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-            Accept: "*/*",
-            "Content-Type": "application/json",
-          },
-        }
-      )
+    fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes/${id}/rechazar`, {
+      method: "POST",
+      body: JSON.stringify({ motivo: rejectionText }),
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    })
       .then(() => {
         notification.success({
           message: "Solicitud Rechazada",
@@ -94,19 +106,15 @@ function Solicitudes() {
   };
 
   const handleAprobarClick = (id) => {
-    axios
-      .post(
-        `http://127.0.0.1:8000/api/solicitudes/${id}/aceptar`,
-        {},
-        {
-          headers: {
-            Authorization:
-              "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-            Accept: "*/*",
-            "Content-Type": "application/json",
-          },
-        }
-      )
+    fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes/${id}/aceptar`, {
+      method: "POST",
+      body: JSON.stringify({}),
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    })
       .then(() => {
         notification.success({
           message: "Solicitud Aprobada",
@@ -139,7 +147,7 @@ function Solicitudes() {
         </p>
         <div className="flex gap-4 font-medium">
           <p>{solicitud.Nombre_Curso}</p>
-          <img alt="icon" className="w-6" src="/Opt/SVG/info.svg" />
+          <img alt="icon" className="w-6" src="/Opt//SVG/info.svg" />
         </div>
       </div>
     ),
@@ -169,14 +177,18 @@ function Solicitudes() {
         >
           {/* Vista previa del PDF */}
           <iframe
-            src={`http://127.0.0.1:8000/storage/${solicitud.PDF_Solicitud}`} // Ajustar según sea necesario            width="100%"
+            src={`${import.meta.env.VITE_API_URL}/storage/${
+              solicitud.PDF_Solicitud
+            }`} // Ajustar según sea necesario
             height="400px"
             title="Vista previa del PDF"
             style={{ border: "none", marginBottom: "16px" }}
           />
           <Button
             type="link"
-            href={`http://127.0.0.1:8000/storage/${solicitud.PDF_Solicitud}`}
+            href={`${import.meta.env.VITE_API_URL}/storage/${
+              solicitud.PDF_Solicitud
+            }`}
             target="_blank"
             rel="noopener noreferrer"
           >

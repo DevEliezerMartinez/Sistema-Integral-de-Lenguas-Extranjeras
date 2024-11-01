@@ -22,7 +22,7 @@ function Notificaciones() {
     const usuarioId = usuario.id;
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/users/notificaciones/${usuarioId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/notificaciones/${usuarioId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ function Notificaciones() {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/users/notificaciones/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/notificaciones/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ function Notificaciones() {
   };
 
   return (
-    <div className='px-4'>
+    <div className='px-4 h-[50vh]'>
       <Breadcrumb
         items={[
           {

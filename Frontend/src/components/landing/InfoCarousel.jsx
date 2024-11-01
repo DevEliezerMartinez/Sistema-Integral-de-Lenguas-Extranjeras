@@ -12,10 +12,10 @@ const contentStyle = {
 };
 
 const images = [
-  { src: "/Opt/Carousel/1.webp", alt: "Alumnos del CLE" },
-  { src: "/Opt/Carousel/2.webp", alt: "Alumnos del CLE" },
-  { src: "/Opt/Carousel/3.webp", alt: "Alumnos del CLE" },
-  { src: "/Opt/Carousel/4.webp", alt: "Alumnos del CLE" },
+  { src: "/Opt//Carousel/1.webp", alt: "Alumnos del CLE" },
+  { src: "/Opt//Carousel/2.webp", alt: "Alumnos del CLE" },
+  { src: "/Opt//Carousel/3.webp", alt: "Alumnos del CLE" },
+  { src: "/Opt//Carousel/4.webp", alt: "Alumnos del CLE" },
   // Add more image objects as needed
 ];
 
@@ -53,15 +53,15 @@ function InfoCarousel() {
 
       <section id="Contenedor Minicards" className="flex  justify-around  p-4">
         <div id="DataCard" className="flex flex-col items-center  w-1/5">
-          <img className="w-12" alt="Logo escolar" src="/Opt/SVG/academic.svg"></img>
+          <img className="w-12" alt="Logo escolar" src="/Opt//SVG/academic.svg"></img>
           <p className="Montserrat font-normal text-center">Con el objetivo de fomentar el perfil academico</p>
         </div>
         <div id="DataCard" className="flex flex-col items-center  w-1/5">
-          <img className="w-12" alt="Logo escolar" src="/Opt/SVG/group.svg"></img>
+          <img className="w-12" alt="Logo escolar" src="/Opt//SVG/group.svg"></img>
           <p className="Montserrat font-normal text-center">Seguimiento por grupo para practicar sus habilidades</p>
         </div>
         <div id="DataCard" className="flex flex-col items-center  w-1/5">
-          <img className="w-12" alt="Logo escolar" src="/Opt/SVG/teacher.svg"></img>
+          <img className="w-12" alt="Logo escolar" src="/Opt//SVG/teacher.svg"></img>
           <p className="Montserrat font-normal text-center">Con docentes preparados y experiencia</p>
         </div>
         

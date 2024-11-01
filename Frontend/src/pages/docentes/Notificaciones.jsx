@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Breadcrumb, Timeline, message } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from "react";
+import { Breadcrumb, Timeline, message } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 
 function Notificaciones() {
   const [notificaciones, setNotificaciones] = useState([]);
@@ -21,23 +21,26 @@ function Notificaciones() {
     const usuarioId = usuario.id;
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/users/notificaciones/${usuarioId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/notificaciones/${usuarioId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok) {
         setNotificaciones(data.notificaciones);
       } else {
-        message.error(data.message || 'Error al cargar las notificaciones');
+        message.error(data.message || "Error al cargar las notificaciones");
       }
     } catch (error) {
-      message.error('Ocurrió un error al cargar las notificaciones');
+      message.error("Ocurrió un error al cargar las notificaciones");
     }
   };
 
@@ -50,13 +53,16 @@ function Notificaciones() {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/users/notificaciones/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/notificaciones/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         message.success("Notificación eliminada correctamente");
@@ -71,7 +77,7 @@ function Notificaciones() {
   };
 
   return (
-    <div className='px-4'>
+    <div className="px-4">
       <Breadcrumb
         items={[
           {
@@ -86,12 +92,14 @@ function Notificaciones() {
         Mis Notificaciones
       </h2>
 
-      <Timeline className='mt-8 px-8'>
+      <Timeline className="mt-8 px-8">
         {notificaciones.length > 0 ? (
           notificaciones.map((notificacion) => (
             <Timeline.Item key={notificacion.id}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>{notificacion.mensaje} - {notificacion.fecha_notificacion}</span>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>
+                  {notificacion.mensaje} - {notificacion.fecha_notificacion}
+                </span>
                 <DeleteOutlined onClick={() => handleDelete(notificacion.id)} />
               </div>
             </Timeline.Item>

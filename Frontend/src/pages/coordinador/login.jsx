@@ -2,40 +2,58 @@ import { Button, Divider, Form, Input, message } from "antd";
 import Headeeer from "../../components/Shared/HeaderPublico";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios"; // Asegúrate de tener axios instalado
 
 const LoginCoordinador = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login', {
-        correo_electronico: values.correo,
-        contrasena: values.password,
-        tipo_acceso: 'accesoCoordinador'
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            correo_electronico: values.correo,
+            contrasena: values.password,
+            tipo_acceso: "accesoCoordinador",
+          }),
+        }
+      );
 
-      // Guardar el token en localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
-
-      // Redirigir al usuario a Cursos Activos
-      navigate('/Coordinador/CursosActivos');
-    } catch (error) {
-      if (error.response) {
-        // Manejar errores de respuesta del servidor
-        const { status, data } = error.response;
-        if (status === 401) {
+      // Verifica si la respuesta fue exitosa
+      if (!response.ok) {
+        const data = await response.json();
+        if (response.status === 401) {
           message.error(data.error || "Credenciales incorrectas");
-        } else if (status === 404) {
+        } else if (response.status === 404) {
           message.error(data.error || "Usuario no encontrado");
         } else {
           message.error("Error en el servidor, intenta más tarde.");
         }
-      } else {
-        // Error de red o de configuración
-        message.error("Error en la conexión, intenta más tarde.");
+        return; // Salir de la función si la respuesta no es exitosa
       }
+
+      // Si la respuesta es exitosa, procesar los datos
+      const data = await response.json();
+      if (data.success) {
+        localStorage.clear();
+        // Guardar el token y el usuario en localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("usuario", JSON.stringify(data.usuario));
+
+        // Redirigir al usuario a Cursos Activos
+        navigate("/Coordinador/CursosActivos");
+        console.log("ya debio redirigir")
+      } else {
+        // Manejar caso donde success es false
+        message.error("Error desconocido, intenta nuevamente.");
+      }
+    } catch (error) {
+      // Error de red o de configuración
+      message.error("Error en la conexión, intenta más tarde.");
     }
   };
 
@@ -125,7 +143,11 @@ const LoginCoordinador = () => {
         </section>
 
         <section id="right" className="hidden w-1/2 h-full md:block">
-          <img alt="imagen Alumnos" className="h-full" src="/Opt/coverDocentes.webp" />
+          <img
+            alt="imagen Alumnos"
+            className="h-full"
+            src="/Opt//coverDocentes.webp"
+          />
         </section>
       </main>
     </>

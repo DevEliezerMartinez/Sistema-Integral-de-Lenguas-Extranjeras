@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
+use App\Models\Docente;
 use App\Models\Solicitud;
 use App\Models\Notificacion;
 
@@ -33,14 +34,14 @@ class CursoController extends Controller
             'nombre_modulo' => 'required|string',
             'descripcion' => 'string',
             'modalidad' => 'required|string',
-            'nivel' => 'required|boolean',
+            'nivel' => 'required',
             'estado' => 'required|boolean',
             'horarios' => 'required|string',
             'periodo' => 'required|array',
             'docente' => 'required|integer|exists:docentes,id',
             'coordinador' => 'required|integer',
             'periodo.inicio' => 'required|date',
-            'periodo.fin' => 'required|date',
+            'periodo.fin' => 'required|date|after_or_equal:periodo.inicio',
         ]);
 
         // Si hay errores en la validación, responder con error 400
@@ -53,8 +54,8 @@ class CursoController extends Controller
 
         try {
             // Procesar las fechas
-            $startDate = $request->input('periodo.inicio');
-            $endDate = $request->input('periodo.fin');
+            $startDate = Carbon::parse($request->input('periodo.inicio'));
+            $endDate = Carbon::parse($request->input('periodo.fin'));
 
             // Crear el nuevo curso
             $curso = new Curso();
@@ -62,33 +63,46 @@ class CursoController extends Controller
             $curso->descripción = $request->input('descripcion');
             $curso->modalidad = $request->input('modalidad');
             $curso->nivel = $request->input('nivel');
-            $curso->estado = 'Disponible'; // Puedes establecer el estado predeterminado
+            $curso->estado = 'Disponible'; // Establecer el estado predeterminado
             $curso->horario = $request->input('horarios');
             $curso->maestro_id = $request->input('docente');
-            $curso->coordinador_id  = $request->input('coordinador');
-            $curso->created_at = Carbon::now(); // Asigna la fecha y hora actuales a created_at
-            $curso->updated_at = Carbon::now(); // Asigna la fecha y hora actuales a created_at
-            $curso->fecha_inicio = $startDate;
-            $curso->fecha_fin = $endDate;
+            $curso->coordinador_id = $request->input('coordinador');
+            $curso->created_at = now(); // Asigna la fecha y hora actuales a created_at
+            $curso->updated_at = now(); // Asigna la fecha y hora actuales a updated_at
+            $curso->fecha_inicio = $startDate; // Asigna la fecha de inicio
+            $curso->fecha_fin = $endDate; // Asigna la fecha de fin
+
+            // Guardar el curso
             $curso->save();
 
-            // Responder con el curso creado
-            return response()->json(['curso' => $curso], 201);
-        } catch (\Exception $e) {
-            // Registrar el error con detalles
-            Log::error('Error en creaaar: ' . $e->getMessage(), [
-                'request' => $request->all(),
-                'stack' => $e->getTraceAsString(),
-            ]);
+            // Buscar el docente y obtener su ID en la tabla usuarios
+            $docente = Docente::with('usuario')->find($request->input('docente'));
+            $usuarioId = $docente->usuario->id ?? null; // Asegúrate de que exista
 
-            // Responder con los detalles del error
+
+            // Crear la notificación para el docente
+            $notificacion = new Notificacion();
+            $notificacion->usuario_id = $usuarioId; // ID del usuario que recibirá la notificación
+            $notificacion->mensaje = "Se le ha asignado el curso: '{$curso->nombre}'."; // Mensaje de notificación
+            $notificacion->fecha_notificacion = now(); // Fecha y hora actuales
+            $notificacion->estado = 'no_leido'; // Estado de la notificación
+            $notificacion->created_at = now(); // Asignar fecha y hora actuales
+            $notificacion->updated_at = now(); // Asignar fecha y hora actuales
+            $notificacion->save();
+
+            // Respuesta exitosa
             return response()->json([
-                'error' => 'Error al crear curso',
-                'message' => $e->getMessage(),
-                'stack' => $e->getTraceAsString(),
-            ], 500);
+                'mensaje' => 'Curso creado y notificación enviada exitosamente.',
+                'curso' => $curso,
+                'success' => true
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores
+            return response()->json(['error' => 'Error al crear el curso: ' . $e->getMessage(), 'success' => false], 500);
         }
     }
+
+
 
 
     /**
@@ -109,16 +123,16 @@ class CursoController extends Controller
             // Filtrar las calificaciones por el alumno específico
             $query->where('alumno_id', $alumno_id);
         }])->find($curso_id);
-    
+
         // Verificar si el curso existe
         if (!$curso) {
             return response()->json(['error' => 'Curso no encontrado'], 404);
         }
-    
+
         // Verificar si el alumno tiene una calificación en este curso
         $calificacion = $curso->calificaciones->first();
         $nota = $calificacion ? $calificacion->calificacion : 'No disponible';
-    
+
         // Devolver los detalles del curso junto con la calificación del alumno
         return response()->json([
             'curso' => [
@@ -141,9 +155,9 @@ class CursoController extends Controller
             ],
         ], 200);
     }
-    
 
-    
+
+
     public function show($id)
     {
         // Buscar el curso por su ID y cargar la relación del docente
@@ -222,8 +236,9 @@ class CursoController extends Controller
 
         // Verificar si se encontraron cursos
         if ($cursos->isNotEmpty()) {
-            // Incluir los detalles del docente y el período en la respuesta
+            // Retornar respuesta con success true y los cursos
             return response()->json([
+                'success' => true,  // Indicar que la operación fue exitosa
                 'cursos' => $cursos->map(function ($curso) {
                     return [
                         'id' => $curso->id,
@@ -241,9 +256,14 @@ class CursoController extends Controller
                 }),
             ], 200);
         } else {
-            return response()->json(['error' => 'No se encontraron cursos archivados'], 404);
+            // Retornar respuesta con success true, pero sin cursos
+            return response()->json([
+                'success' => true,  // La operación fue exitosa, pero no hay datos
+                'cursos' => [],  // Enviar un array vacío
+            ], 200);  // Mantener el código de respuesta 200 ya que la solicitud fue exitosa
         }
     }
+
 
 
 
@@ -255,7 +275,11 @@ class CursoController extends Controller
 
             // Verificar si se encontraron cursos
             if ($cursos->isEmpty()) {
-                return response()->json(['error' => 'No se encontraron cursos'], 404);
+                return response()->json([
+                    'success' => true,  // No hubo error, pero no se encontraron cursos
+                    'mensaje' => 'No se encontraron cursos.',
+                    'cursos' => []  // Devuelve un array vacío en lugar de null
+                ], 200);
             }
 
             // Mapear la respuesta con los datos correctos
@@ -278,7 +302,6 @@ class CursoController extends Controller
                     ];
                 });
 
-
                 // Retornar los datos del curso con su docente y estudiantes
                 return [
                     'Curso' => [
@@ -298,15 +321,20 @@ class CursoController extends Controller
                 ];
             });
 
-            return response()->json(['cursos' => $cursosConEstudiantes], 200);
+            return response()->json([
+                'success' => true,  // Operación exitosa
+                'cursos' => $cursosConEstudiantes
+            ], 200);
         } catch (\Exception $e) {
             // Manejar cualquier error inesperado
             return response()->json([
+                'success' => false,  // Operación fallida
                 'mensaje' => 'Ocurrió un error al intentar obtener los cursos con estudiantes.',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
+
 
 
     public function cursosDeAlumno($alumnoId)
@@ -422,14 +450,13 @@ class CursoController extends Controller
     {
         // Obtener todos los cursos cuyo estado sea "Disponible" o "En curso"
         $cursosActivos = Curso::whereIn('estado', ['Disponible', 'En curso'])->get();
-    
+
         // Verificar si hay cursos activos
         if ($cursosActivos->isEmpty()) {
             return response()->json(['message' => 'No hay cursos activos en este momento'], 404);
         }
-    
+
         // Responder con una respuesta JSON
         return response()->json(['cursos' => $cursosActivos], 200);
     }
-    
 }

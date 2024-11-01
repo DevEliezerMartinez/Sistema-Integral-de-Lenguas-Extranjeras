@@ -3,7 +3,7 @@ import Header from "../../components/Shared/HeaderPublico";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
-import React from 'react';
+import React from "react";
 
 function Login() {
   const navigate = useNavigate();
@@ -11,52 +11,62 @@ function Login() {
   const { setToken } = useAuth();
 
   const onFinish = async (values) => {
-    // Crear un objeto FormData para manejar los valores del formulario
-    const formData = new FormData();
-
-    // Agregar los valores del formulario
-    formData.append('correo_electronico', values.correo);
-    formData.append('contrasena', values.password);
-
-    // Inyectar el tipo de acceso como "accesoEstudiante"
-    formData.append('tipo_acceso', 'accesoEstudiante');
+    // Crear un objeto con los valores del formulario
+    const data = {
+      correo_electronico: values.correo,
+      contrasena: values.password,
+      tipo_acceso: "accesoEstudiante",
+    };
 
     try {
-      const response = await fetch("http://localhost:8000/api/login", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
         method: "POST",
         headers: {
-          // No necesitas especificar "Content-Type" cuando usas FormData, ya que el navegador lo configura automáticamente
+          "Content-Type": "application/json", // Establecer el Content-Type a application/json
         },
-        body: formData, // Enviar el FormData en lugar de JSON
+        body: JSON.stringify(data), // Convertir el objeto a JSON
+       
       });
+
+      console.log("respuesta raw",response)
 
       if (response.ok) {
         const responseData = await response.json();
 
-        console.log("Petición POST exitosa");
-        console.log(responseData.estudiante)
-        console.log("Token:", responseData.token);
+        // Verifica si la respuesta indica éxito
+        if (responseData.success) {
+          console.log("Petición POST exitosa");
+          console.log(responseData.estudiante);
+          console.log("Token:", responseData.token);
 
-        // Almacenar el token y los datos en localStorage
-        localStorage.setItem("token", responseData.token);
-        localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
-        localStorage.setItem("estudiante", JSON.stringify(responseData.estudiante));
-        
-        // Almacenar el token en el contexto de autenticación
-        setToken(responseData.token);
+          // Almacenar el token y los datos en localStorage
+          localStorage.clear();
+          localStorage.setItem("token", responseData.token);
+          localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
+          localStorage.setItem("estudiante", JSON.stringify(responseData.estudiante));
 
-        messageApi.open({
-          type: "success",
-          content: "Inicio de sesión exitoso!",
-        });
+          // Almacenar el token en el contexto de autenticación
+          setToken(responseData.token);
 
-        setTimeout(() => {
-          navigate("/Estudiantes/Cursos");
-        }, 2000);
+          messageApi.open({
+            type: "success",
+            content: "Inicio de sesión exitoso!",
+          });
+
+          setTimeout(() => {
+            navigate("/Estudiantes/Cursos");
+          }, 2000);
+        } else {
+          // Manejo de errores en caso de que success sea false
+          messageApi.open({
+            type: "error",
+            content: "Error desconocido, intenta nuevamente.",
+          });
+        }
       } else {
         const errorData = await response.json();
         console.log("Error:", errorData);
-        
+
         if (response.status === 401) {
           messageApi.open({
             type: "error",
@@ -87,7 +97,10 @@ function Login() {
       {contextHolder}
       <Header />
       <main className="w-full flex flex-col md:h-screen md:flex-row">
-        <section id="Left" className="w-full px-8 flex flex-col items-center md:w-1/2">
+        <section
+          id="Left"
+          className="w-full px-8 flex flex-col items-center md:w-1/2"
+        >
           <img alt="Logo" className="w-32 my-8" src="/LogoTransparente.png" />
           <h2 className="Montserrat font-bold text-3xl text-center">
             ¡Nos alegra verte de nuevo!
@@ -106,23 +119,31 @@ function Login() {
               <Form.Item
                 label="Correo"
                 name="correo"
-                rules={[{ required: true, message: "Ingresa un correo" }]}
+                rules={[
+                  { required: true, message: "Ingresa un correo" },
+                  { type: 'email', message: "Ingresa un correo válido" },
+                ]}
               >
                 <Input
                   prefix={<UserOutlined className="site-form-item-icon" />}
                   placeholder="Correo electrónico"
                 />
               </Form.Item>
+
               <Form.Item
                 label="Contraseña"
                 name="password"
-                rules={[{ required: true, message: "Ingrese una contraseña!" }]}
+                rules={[
+                  { required: true, message: "Ingrese una contraseña" },
+                  { min: 6, message: "La contraseña debe tener al menos 6 caracteres" },
+                ]}
               >
                 <Input.Password
                   prefix={<LockOutlined className="site-form-item-icon" />}
                 />
               </Form.Item>
-              <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+
+              <Form.Item>
                 <Button type="primary" htmlType="submit">
                   Ingresar
                 </Button>
@@ -142,7 +163,11 @@ function Login() {
           </div>
         </section>
         <section id="right" className="hidden w-1/2 h-full md:block">
-          <img alt="imagen Alumnos" className="h-full" src="/Opt/CoverLogin.webp" />
+          <img
+            alt="imagen Alumnos"
+            className="h-full"
+            src="/Opt//CoverLogin.webp"
+          />
         </section>
       </main>
     </>

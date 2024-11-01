@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { Button, Divider, Form, Input, Result, Select, Space } from "antd";
 import Headeeer from "../../components/Shared/HeaderPublico";
 import { LockOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Modal from "antd/es/modal/Modal";
 
 function Registro() {
   const [selectedCarrera, setSelectedCarrera] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (value) => {
     setSelectedCarrera(value);
@@ -16,23 +17,27 @@ function Registro() {
     const data = {
       nombre: values.Nombre,
       apellidos: values.Apellidos,
-      numeroControl: values.Ncontrol,
+      numero_control: values.Ncontrol,
       carrera: selectedCarrera,
-      correo: values.Correo,
-      password: values.Contraseña,
+      correo_electronico: values.Correo, // Ajustado
+      contrasena: values.Contraseña, // Ajustado
+      genero: values.Genero,
+      telefono: values.Telefono,
+      curp: values.Curp,
+      domicilio: values.Domicilio,
+      tipo_usuario: "estudiante", // Añadido
+      historial_cursos: "", // Añadido
+      perfil: "", // Añadido
     };
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
       if (response.ok) {
         Modal.info({
@@ -46,31 +51,45 @@ function Registro() {
           ),
           onOk() {
             console.log("Usuario creado con éxito");
+            navigate("/login"); // Redirigir al login
           },
         });
       } else {
         const errorData = await response.json();
-        Modal.error({
-          title: "Error",
-          content: (
-            <Result
-              status="error"
-              title="Lo sentimos, ocurrió un error"
-              subTitle={`Error: ${errorData.message || "Inténtalo más tarde"}`}
-            />
-          ),
-          onOk() {
-            console.log("Error en la creación de usuario");
-          },
-        });
-        console.error(
-          "Error al hacer la solicitud:",
-          response.status,
-          errorData
-        );
+
+        // Verificar si el error está relacionado con el correo electrónico
+        if (errorData.errors && errorData.errors.correo_electronico) {
+          Modal.error({
+            title: "Error en el registro",
+            content: (
+              <Result
+                status="error"
+                title="Correo electrónico ya registrado"
+                subTitle={errorData.errors.correo_electronico[0]} // Mostramos el mensaje de error
+              />
+            ),
+            onOk() {
+              console.log("Correo electrónico ya registrado");
+            },
+          });
+        } else {
+          Modal.error({
+            title: "Error",
+            content: (
+              <Result
+                status="error"
+                title="Lo sentimos, ocurrió un error"
+                subTitle={`Error: ${errorData.message || "Inténtalo más tarde"}`}
+              />
+            ),
+            onOk() {
+              console.log("Error en la creación de usuario");
+            },
+          });
+        }
+        console.error("Error al hacer la solicitud:", response.status, errorData);
       }
     } catch (error) {
-      // Manejo del error CORS
       if (error.message === "Failed to fetch") {
         Modal.error({
           title: "Error de conexión",
@@ -244,7 +263,7 @@ function Registro() {
           <img
             alt="imagen Alumnos"
             className="h-full"
-            src="/Opt/CoverLogin.webp"
+            src="/Opt//CoverLogin.webp"
           />
         </section>
       </main>

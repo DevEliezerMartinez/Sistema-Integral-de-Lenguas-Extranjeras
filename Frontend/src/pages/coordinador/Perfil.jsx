@@ -18,11 +18,12 @@ function Perfil() {
   // Función para hacer la petición a la API y obtener docentes
   const fetchDocentes = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/docentes", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/docentes`, {
         headers: {
-          Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
+
       const data = await response.json();
       setDocentes(data.docentes);
     } catch (error) {
@@ -52,14 +53,15 @@ function Perfil() {
     values.tipo_usuario = "docente"; 
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/register", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(values),
       });
+
 
       if (response.ok) {
         const data = await response.json();
@@ -84,14 +86,15 @@ function Perfil() {
   const eliminarDocente = async (docente_id) => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/api/docentes/${docente_id}`,
+        `${import.meta.env.VITE_API_URL}/api/docentes/${docente_id}`,
         {
           method: "DELETE",
           headers: {
-            Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         }
       );
+
 
       if (response.ok) {
         message.success("Docente eliminado con éxito");
@@ -119,12 +122,12 @@ function Perfil() {
         ]}
       />
 
-      <div className="w-full flex justify-around items-center p-2">
+      <div className="w-full flex flex-col justify-around items-center p-2 lg:flex-row">
         <div className="col-span-4 sm:col-span-3">
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex flex-col items-center">
               <img
-                src="../../../public/Opt/coverDocentes.webp"
+                src="../../../public/Opt//coverDocentes.webp"
                 className="w-20 h-20 bg-gray-300 rounded-full mb-4 shrink-0"
                 alt="Foto de perfil"
               />
@@ -134,7 +137,7 @@ function Perfil() {
           </div>
         </div>
 
-        <div id="right" className="w-full">
+        <div id="right" className="w-full ">
           <h2 className="Montserrat self-start font-medium text-2xl">
             Docentes registrados
           </h2>

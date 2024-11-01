@@ -1,7 +1,6 @@
 import { Button, Divider, Spin, notification } from "antd";
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import axios from "axios";
 import TablaAlumnos from "../../components/coordinador/TablaAlumnos";
 
 function DetalleCurso() {
@@ -23,20 +22,18 @@ function DetalleCurso() {
       try {
         setLoading(true);
         const [cursoResponse, solicitudesResponse] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/api/cursos/${cursoId}`, {
+          fetch(`${import.meta.env.VITE_API_URL}/api/cursos/${cursoId}`, {
             method: "GET",
             headers: {
-              Authorization:
-                "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
               Accept: "*/*",
               "Content-Type": "application/json",
             },
           }),
-          fetch(`http://127.0.0.1:8000/api/solicitudes/${cursoId}`, {
+          fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes/${cursoId}`, {
             method: "GET",
             headers: {
-              Authorization:
-                "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
               Accept: "*/*",
               "Content-Type": "application/json",
             },
@@ -71,17 +68,30 @@ function DetalleCurso() {
   const handleArchive = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`http://127.0.0.1:8000/api/archivarCurso/${cursoId}`, null, {
-        headers: {
-          Authorization:
-            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/archivarCurso/${cursoId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      if (response.data.success === "true") {
+      // Asegúrate de verificar que la respuesta es exitosa
+      if (!response.ok) {
+        throw new Error("Error en la respuesta de la API");
+      }
+
+      // Convierte la respuesta a JSON
+      const data = await response.json();
+
+      // Cambia aquí para verificar correctamente el valor de success
+      if (data.success === "true") {
         notification.success({
           message: "Curso Archivado",
-          description: "El curso ha sido archivado exitosamente.",
+          description: data.mensaje, // Muestra el mensaje de éxito
         });
       } else {
         notification.error({
@@ -130,7 +140,6 @@ function DetalleCurso() {
       <h2 className="Montserrat font-semibold text-2xl text-center my-6">
         Curso activo:
       </h2>
-
       <div id="Card" className="bg-slate-100 p-2 md:mx-16 md:p-16">
         <div id="cardContent" className="flex flex-col items-center">
           <div
@@ -138,18 +147,19 @@ function DetalleCurso() {
             className="w-full flex justify-between items-center"
           >
             <div id="Actions" className="self-start flex gap-2">
-              <img alt="icon" className="w-4" src="/Opt/SVG/LighArrow.svg" />
               <Link
                 to="/Coordinador/CursosActivos"
-                className="Popins font-semibold"
+                className="flex items-center"
               >
-                Volver
+                <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
+                <span className="Popins font-semibold ml-2">Volver</span>
               </Link>
             </div>
+
             <h3 className="Montserrat font-extralight text-2xl">
               {curso.nombre}
             </h3>
-            <img alt="icon" className="w-8" src="/Opt/SVG/info.svg" />
+            <img alt="icon" className="w-8" src="/Opt//SVG/info.svg" />
           </div>
           <Divider />
 
@@ -160,7 +170,7 @@ function DetalleCurso() {
 
           <section id="Info" className="px-4 self-start w-full">
             {solicitudes.length === 0 ? (
-              <p>No se encontraron solicitudes para este curso.</p>
+              <p className="my-5 text-xl">No se encontraron solicitudes para este curso.</p>
             ) : (
               <TablaAlumnos solicitudes={solicitudes} />
             )}
@@ -177,8 +187,8 @@ function DetalleCurso() {
             </p>
             <p>
               <span className="font-semibold">Docente:</span>{" "}
-              {curso && curso.docente && curso.docente.usuario
-                ? `${curso.docente.usuario.nombre} ${curso.docente.usuario.apellidos}`
+              {curso && curso.docente 
+                ? `${curso.docente.nombre}`
                 : "Desconocido"}
             </p>
             <p>
@@ -196,7 +206,7 @@ function DetalleCurso() {
               className="flex flex-col items-center h-auto"
               onClick={handleArchive}
             >
-              <img className="w-8" alt="icon" src="/Opt/SVG/archivar.svg" />
+              <img className="w-8" alt="icon" src="/Opt//SVG/archivar.svg" />
               <span>Archivar</span>
             </Button>
           </div>

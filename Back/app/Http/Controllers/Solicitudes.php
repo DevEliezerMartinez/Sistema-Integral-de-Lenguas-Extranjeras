@@ -105,31 +105,36 @@ class Solicitudes extends Controller
     {
         // Buscar la solicitud por ID
         $solicitud = Solicitud::find($solicitud_id);
-
+    
         // Verificar si la solicitud existe
         if (!$solicitud) {
             return response()->json(['error' => 'Solicitud no encontrada'], 404);
         }
-
+    
         // Actualizar el estado de la solicitud a "Rechazada"
         $solicitud->status = 'Rechazada';
-
+    
         // Guardar el motivo de rechazo (opcional)
         if ($request->has('motivo')) {
             $solicitud->notas = $request->input('motivo');
         }
-
+    
         $solicitud->save();
-
+    
         // Obtener el estudiante asociado a la solicitud
         $estudiante = $solicitud->alumno;
-
-        // Enviar notificación al estudiante (opcional)
-        /* if ($estudiante) {
+    
+        // Enviar notificación al estudiante con el motivo de rechazo
+        if ($estudiante) {
             // Notificar al estudiante
-            Notification::send($estudiante, new SolicitudRechazadaNotification($solicitud));
+            Notificacion::create([
+                'usuario_id' => $estudiante->usuario_id, // ID del usuario asociado al estudiante
+                'mensaje' => "Tu solicitud ha sido rechazada. Motivo: {$solicitud->notas}", // Incluye el motivo de rechazo
+                'fecha_notificacion' => now(), // Fecha actual
+                'estado' => 'No leída', // Establecer el estado de la notificación
+            ]);
         }
- */
+    
         // Responder con éxito
         return response()->json([
             'mensaje' => 'La solicitud ha sido rechazada exitosamente.',
@@ -147,20 +152,33 @@ class Solicitudes extends Controller
             return response()->json(['error' => 'Solicitud no encontrada'], 404);
         }
 
-        // Actualizar el estado de la solicitud a "Aprobada"
-        $solicitud->status = 'Aceptada';
-
-        // Guardar la solicitud (puedes añadir lógica adicional si es necesario)
-        $solicitud->save();
-
         // Obtener el estudiante asociado a la solicitud
         $estudiante = $solicitud->alumno;
 
-        // Enviar notificación al estudiante (opcional)
-        /*  if ($estudiante) {
-            // Notificar al estudiante
-            Notification::send($estudiante, new SolicitudAprobadaNotification($solicitud));
-        } */
+        // Verificar si el estudiante existe
+        if (!$estudiante) {
+            return response()->json(['error' => 'Estudiante no encontrado'], 404);
+        }
+
+        // Obtener el usuario asociado al estudiante
+        $usuario = $estudiante->usuario; // Asumiendo que tienes una relación en el modelo Estudiante
+
+        // Actualizar el estado de la solicitud a "Aceptada"
+        $solicitud->status = 'Aceptada';
+        $solicitud->save(); // Guardar la solicitud
+
+        // Obtener el curso asociado a la solicitud
+        $curso = $solicitud->curso; // Asegúrate de que tengas una relación en el modelo Solicitud
+
+        // Generar la notificación
+        if ($usuario) {
+            Notificacion::create([
+                'usuario_id' => $usuario->id, // ID del usuario asociado al estudiante
+                'mensaje' => "Tu solicitud para el curso '{$curso->nombre}' ha sido aprobada exitosamente.", // Incluye el nombre del curso
+                'fecha_notificacion' => now(), // Fecha actual
+                'estado' => 'No leída', // Establecer el estado de la notificación
+            ]);
+        }
 
         // Responder con éxito
         return response()->json([
@@ -172,6 +190,8 @@ class Solicitudes extends Controller
 
 
 
+
+
     public function create(Request $request)
     {
         // Validación de los campos
@@ -179,7 +199,6 @@ class Solicitudes extends Controller
             $validated = $request->validate([
                 'curso_id' => 'required|exists:cursos,id',
                 'alumno_id' => 'required|exists:estudiantes,id',
-
                 'fecha_inscripcion' => 'required|date',
                 'file' => 'required|file|mimes:pdf|max:2048', // Asegúrate de permitir solo PDFs
             ]);
@@ -190,6 +209,19 @@ class Solicitudes extends Controller
                 'errors' => $e->validator->errors(),
                 'success' => false,
             ], 422);
+        }
+
+        // Verificar si ya existe una solicitud pendiente o aceptada para el mismo curso y alumno
+        $existingSolicitud = Solicitud::where('curso_id', $validated['curso_id'])
+            ->where('alumno_id', $validated['alumno_id'])
+            ->whereIn('status', ['Pendiente', 'Aceptada'])
+            ->first();
+
+        if ($existingSolicitud) {
+            return response()->json([
+                'message' => 'Ya existe una solicitud Pendiente o Aceptada para este curso.',
+                'success' => false,
+            ], 409); // Conflicto
         }
 
         // Manejar la carga del archivo

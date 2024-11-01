@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Breadcrumb, Divider } from "antd";
 import { Link, useParams } from "react-router-dom";
-import axios from "axios";
 
 function DetalleAlumno() {
   const { AlumnoId } = useParams(); // Usa el nombre del parámetro de la URL
@@ -13,21 +12,34 @@ function DetalleAlumno() {
     console.log("ID desde useParams:", AlumnoId); // Verifica que el id se está capturando
     const fetchAlumno = async () => {
       try {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/api/estudiante/${AlumnoId}`,
+        const token = localStorage.getItem('token');
+
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/estudiante/${AlumnoId}`,
           {
+            method: "GET",
             headers: {
-              Authorization: "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
+              Authorization: `Bearer ${token}`,
               Accept: "*/*",
               "Content-Type": "application/json",
             },
           }
         );
-        console.log("Respuesta de la API:", response.data); // Verifica la respuesta de la API
-        setAlumno(response.data.estudiante);
+
+        // Verifica si la respuesta es exitosa
+        if (!response.ok) {
+          throw new Error('Error en la respuesta de la API');
+        }
+
+        const data = await response.json(); // Obtén los datos de la respuesta
+        console.log("Respuesta de la API:", data); // Verifica la respuesta de la API
+        setAlumno(data.estudiante); // Ajusta esta línea si la estructura de datos es diferente
         setLoading(false);
       } catch (err) {
-        console.log("Error en la petición:", err.response ? err.response.data : err.message); // Verifica el error
+        console.log(
+          "Error en la petición:",
+          err.response ? err.response.data : err.message
+        ); // Verifica el error
         setError("Error al cargar los datos del estudiante.");
         setLoading(false);
       }
@@ -54,15 +66,18 @@ function DetalleAlumno() {
             title: <p className="font-medium text-black">Coordinador</p>,
           },
           {
-            title: <a href="">DetalleAlumno</a>,
+            title: <a href="">Detalle Alumno</a>,
           },
         ]}
       />
       <div id="Card" className="bg-slate-100 p-2 md:mx-16 md:p-16 ">
         <div id="cardContent" className="flex flex-col items-center">
-          <div id="headerCard" className="w-full flex justify-between items-center">
+          <div
+            id="headerCard"
+            className="w-full flex justify-between items-center"
+          >
             <div id="Actions" className="self-start flex gap-2">
-              <img alt="icon" className="w-4" src="/Opt/SVG/LighArrow.svg" />
+              <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
               <Link to="/Coordinador/Alumnos" className="Popins font-semibold">
                 Volver
               </Link>
@@ -70,7 +85,7 @@ function DetalleAlumno() {
             <h3 className="Montserrat font-extralight text-2xl">
               Detalles del Alumno
             </h3>
-            <img alt="icon" className="w-8" src="/Opt/SVG/info.svg" />
+            <img alt="icon" className="w-8" src="/Opt//SVG/info.svg" />
           </div>
           <Divider />
           {/* Información del alumno */}
@@ -92,13 +107,16 @@ function DetalleAlumno() {
               <span className="font-semibold">CURP:</span> {alumno.curp}
             </p>
             <p className="Montserrat">
-              <span className="font-semibold">Domicilio:</span> {alumno.domicilio}
+              <span className="font-semibold">Domicilio:</span>{" "}
+              {alumno.domicilio}
             </p>
             <p className="Montserrat">
-              <span className="font-semibold">Correo:</span> {alumno.correo_electronico}
+              <span className="font-semibold">Correo:</span>{" "}
+              {alumno.correo_electronico}
             </p>
             <p className="Montserrat">
-              <span className="font-semibold">Historial de Cursos:</span> {alumno.historial_cursos}
+              <span className="font-semibold">Historial de Cursos:</span>{" "}
+              {alumno.historial_cursos}
             </p>
             <p className="Montserrat">
               <span className="font-semibold">Perfil:</span> {alumno.perfil}

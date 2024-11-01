@@ -11,7 +11,6 @@ import {
 } from "antd";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 
 function CursoActivo() {
   const [hasModules, setHasModules] = useState(false);
@@ -42,21 +41,26 @@ function CursoActivo() {
   const handleChange = (value) => {
     setSelectedCarrera(value);
   };
-
   useEffect(() => {
     // Obtener cursos activos
-    axios
-      .get("http://127.0.0.1:8000/api/cursos_activos", {
-        headers: {
-          Authorization:
-            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      })
+    fetch(`${import.meta.env.VITE_API_URL}/api/cursos_activos`, {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
-        const cursos = response.data.cursos;
-        if (cursos.length > 0) {
+        if (!response.ok) {
+          throw new Error("Error en la respuesta de la API");
+        }
+        return response.json(); // Convierte la respuesta a JSON
+      })
+      .then((data) => {
+        const cursos = data.cursos; // Asegúrate de acceder a los datos correctamente
+
+        if (cursos && cursos.length > 0) {
           setCourses(cursos); // Guardar los cursos activos
           setHasModules(true); // Indicar que hay cursos activos
         } else {
@@ -71,18 +75,22 @@ function CursoActivo() {
       });
 
     // Obtener docentes
-    axios
-      .get("http://127.0.0.1:8000/api/docentes", {
-        headers: {
-          Authorization:
-            "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      })
+    fetch(`${import.meta.env.VITE_API_URL}/api/docentes`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
-        console.log(response.data.docentes);
-        setTeachers(response.data.docentes); // Guardar los docentes
+        if (!response.ok) {
+          throw new Error("Error en la respuesta de la API");
+        }
+        return response.json(); // Convierte la respuesta a JSON
+      })
+      .then((data) => {
+        console.log("Datos de docentes:", data.docentes); // Ahora accedes a data.docentes
+        setTeachers(data.docentes); // Guardar los docentes
         setLoading(false); // Datos cargados
       })
       .catch((error) => {
@@ -114,15 +122,15 @@ function CursoActivo() {
         };
 
         // Enviar los datos del formulario al servidor
-        axios
-          .post("http://127.0.0.1:8000/api/crear_curso", requestData, {
-            headers: {
-              Authorization:
-                "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          })
+        fetch(`${import.meta.env.VITE_API_URL}/api/crear_curso`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        })
           .then((response) => {
             console.log("Curso creado:", response.data);
             setOpen(false);
@@ -130,17 +138,16 @@ function CursoActivo() {
             openNotificationWithIcon("success");
 
             // Recargar la lista de cursos activos
-            axios
-              .get("http://127.0.0.1:8000/api/cursos_activos", {
-                headers: {
-                  Authorization:
-                    "Bearer 1|AFPPXEHDEUyWz1mnsszBCzo3QrKWNc18dAPfae4L2d901636",
-                  Accept: "*/*",
-                  "Content-Type": "application/json",
-                },
-              })
-              .then((response) => {
-                const cursos = response.data.cursos;
+            fetch(`${import.meta.env.VITE_API_URL}/api/cursos_activos`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                Accept: "*/*",
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                const cursos = data.cursos;
                 if (cursos.length > 0) {
                   setCourses(cursos); // Guardar los cursos activos
                   setHasModules(true); // Indicar que hay cursos activos
@@ -200,14 +207,16 @@ function CursoActivo() {
                 id="Card"
                 className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
               >
-                <img alt="libro" src="/Opt/SVG/book.svg" className="w-24" />
+                <img alt="libro" src="/Opt//SVG/book.svg" className="w-24" />
                 <h4 className="Montserrat  my-2 font-medium">
                   {course.nombre}
                 </h4>
                 <p>{course.descripción}</p>
-                <Button type="primary" className="bg-green-500 my-4">
-                  <Link to={`/Coordinador/Cursos/${course.id}`}>Detalles</Link>
-                </Button>
+                <Link to={`/Coordinador/Cursos/${course.id}`}>
+                  <Button type="primary" className="bg-green-500 my-4">
+                    Detalles
+                  </Button>
+                </Link>
               </div>
             ))
           ) : (
@@ -215,7 +224,7 @@ function CursoActivo() {
               id="Card"
               className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center"
             >
-              <img alt="libro" src="/Opt/SVG/sad.svg" className="w-24" />
+              <img alt="libro" src="/Opt//SVG/sad.svg" className="w-24" />
               <p className="Montserrat font-normal">Sin cursos Activos</p>
             </div>
           )}
@@ -300,7 +309,6 @@ function CursoActivo() {
             </Select>
           </Form.Item>
 
-
           <Form.Item
             label="Nivel"
             name="nivel"
@@ -319,7 +327,6 @@ function CursoActivo() {
               <Select.Option value="5">Nivel 5</Select.Option>
             </Select>
           </Form.Item>
-
 
           <Form.Item
             label="Docente"

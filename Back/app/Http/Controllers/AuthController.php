@@ -29,8 +29,8 @@ class AuthController extends Controller
             // Solo valida los campos del estudiante si el tipo_usuario es estudiante
             'carrera' => 'nullable|required_if:tipo_usuario,estudiante|string',
             'numero_control' => 'nullable|required_if:tipo_usuario,estudiante|string',
-            'historial_cursos' => 'nullable|required_if:tipo_usuario,estudiante|string',
-            'perfil' => 'nullable|required_if:tipo_usuario,estudiante|string',
+            'historial_cursos' => 'nullable',
+            'perfil' => 'nullable',
         ]);
 
         // Verificar si la validación del usuario falla
@@ -108,52 +108,93 @@ class AuthController extends Controller
         return response()->json($response, 201);
     }
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'correo_electronico' => 'required|email',
-            'contrasena' => 'required',
-            'tipo_acceso' => 'nullable|string'
-        ]);
+   public function login(Request $request)
+{
+    // Validación de campos
+    $request->validate([
+        'correo_electronico' => 'required|email',
+        'contrasena' => 'required',
+        'tipo_acceso' => 'nullable|string'
+    ]);
 
-        $user = Usuario::where('correo_electronico', $request->correo_electronico)->first();
+    // Verificar si existe el usuario
+    $user = Usuario::where('correo_electronico', $request->correo_electronico)->first();
 
-        if (!$user || !Hash::check($request->contrasena, $user->contrasena)) {
-            return response()->json(['error' => 'Credenciales incorrectas'], 401);
-        }
+    if (!$user) {
+        // Si el usuario no existe
+        return response()->json([
+            'success' => false,
+            'error' => 'Correo electrónico no registrado.'
+        ], 404);
+    }
 
-        $docente = null;
-        $coordinador = null;
-        $estudiante = null; // Inicializar variable para estudiante
+    // Verificar la contraseña
+    if (!Hash::check($request->contrasena, $user->contrasena)) {
+        return response()->json([
+            'success' => false,
+            'error' => 'Contraseña incorrecta.'
+        ], 401);
+    }
 
-        if ($request->tipo_acceso === 'accesoDocente') {
+    // Inicializar variables para los roles
+    $docente = null;
+    $coordinador = null;
+    $estudiante = null;
+
+    // Manejo de acceso según el tipo
+    switch ($request->tipo_acceso) {
+        case 'accesoDocente':
             $docente = Docente::where('usuario_id', $user->id)->first();
             if (!$docente) {
-                return response()->json(['error' => 'No se encontró el docente asociado.'], 404);
+                return response()->json([
+                    'success' => false,
+                    'error' => 'No se encontró un docente asociado a este usuario.'
+                ], 404);
             }
-        } elseif ($request->tipo_acceso === 'accesoCoordinador') {
+            break;
+
+        case 'accesoCoordinador':
             $coordinador = Coordinador::where('usuario_id', $user->id)->first();
             if (!$coordinador) {
-                return response()->json(['error' => 'No se encontró el coordinador asociado.'], 404);
+                return response()->json([
+                    'success' => false,
+                    'error' => 'No se encontró un coordinador asociado a este usuario.'
+                ], 404);
             }
-        } elseif ($request->tipo_acceso === 'accesoEstudiante') {
-            $estudiante = Estudiante::where('usuario_id', $user->id)->first(); // Busca al estudiante
+            break;
+
+        case 'accesoEstudiante':
+            $estudiante = Estudiante::where('usuario_id', $user->id)->first();
             if (!$estudiante) {
-                return response()->json(['error' => 'No se encontró el estudiante asociado.'], 404);
+                return response()->json([
+                    'success' => false,
+                    'error' => 'No se encontró un estudiante asociado a este usuario.'
+                ], 404);
             }
-        }
+            break;
 
-        $token = $user->createToken('auth_token');
-
-        return response()->json([
-            'token' => $token->plainTextToken,
-            'token_type' => 'Bearer',
-            'usuario' => $user,
-            'docente' => $docente,
-            'coordinador' => $coordinador,
-            'estudiante' => $estudiante // Incluye el estudiante en la respuesta
-        ]);
+        // Si no se especifica tipo de acceso, se continúa sin error.
+        default:
+            break;
     }
+
+    // Generar token de acceso
+    $token = $user->createToken('auth_token');
+
+    // Respuesta exitosa con los datos del usuario y roles
+    return response()->json([
+        'success' => true,
+        'token' => $token->plainTextToken,
+        'token_type' => 'Bearer',
+        'usuario' => $user,
+        'docente' => $docente,
+        'coordinador' => $coordinador,
+        'estudiante' => $estudiante // Incluye el estudiante en la respuesta
+    ]);
+
+}
+
+    
 
 
 
