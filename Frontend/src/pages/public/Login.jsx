@@ -25,7 +25,7 @@ function Login() {
           "Content-Type": "application/json", // Establecer el Content-Type a application/json
         },
         body: JSON.stringify(data), // Convertir el objeto a JSON
-        credentials: 'include', // Permite el envío de cookies
+       
       });
 
       console.log("respuesta raw",response)
