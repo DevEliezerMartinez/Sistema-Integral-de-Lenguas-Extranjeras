@@ -153,7 +153,7 @@ function LoginDocentes() {
           <img
             alt="imagen Docentes" // Cambié el texto alternativo para ser más específico
             className="h-full"
-            src="/Opt//coverDocentes.webp"
+            src="/Opt/itsmAzul.jpg"
           />
         </section>
       </main>
