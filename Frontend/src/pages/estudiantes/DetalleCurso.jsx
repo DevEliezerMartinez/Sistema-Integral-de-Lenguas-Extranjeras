@@ -1,4 +1,4 @@
-import { Button, Divider, Popconfirm, message } from "antd";
+import { Button, Divider, Popconfirm, message, Tooltip } from "antd";
 import Dragger from "antd/es/upload/Dragger";
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ function DetalleCurso() {
   const [detalles, setDetalles] = useState(""); // Detalles, si se requieren
   const [prioridad, setPrioridad] = useState(""); // Prioridad, si se requiere
   const [status, setStatus] = useState("pending"); // Estado para status (o lo que sea necesario)
+  const [isSubmitting, setIsSubmitting] = useState(false); // Estado para manejar la carga del envío
 
   // Efecto para cargar datos del curso
   useEffect(() => {
@@ -85,6 +86,8 @@ function DetalleCurso() {
       return; // Detener el envío si faltan campos
     }
 
+    setIsSubmitting(true); // Marcar el inicio del envío
+
     let userid = localStorage.getItem("usuario");
     userid = JSON.parse(userid);
     console.log("datosuser: ", userid.id);
@@ -151,6 +154,9 @@ function DetalleCurso() {
       .catch((error) => {
         console.error("Error en la solicitud:", error);
         message.error("Error en la solicitud.");
+      })
+      .finally(() => {
+        setIsSubmitting(false); // Marcar el fin del envío
       });
   };
 
@@ -181,62 +187,89 @@ function DetalleCurso() {
                 onClick={() => navigate(-1)}
                 className="Popins font-semibold text-blue-500 flex gap-2"
               >
-              <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
+                <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
                 Volver
               </button>
             </div>
-            <h3 className="Montserrat font-medium text-2xl">{curso.nombre}</h3>
-            <img alt="icon" className="w-8" src="/Opt//SVG/info.svg" />
+            <h3 className="Montserrat font-medium text-2xl capitalize">
+              {curso.nombre}
+            </h3>
+
+            <Tooltip title="Información sobre el curso seleccionado">
+              {" "}
+              <img alt="icon" className="w-8" src="/Opt//SVG/info.svg" />
+            </Tooltip>
           </div>
           <Divider />
 
           <section id="Info" className="px-4 self-start">
             <ul className="list-disc space-y-2">
-              <li>Nombre: {curso.nombre}</li>
-              <li>Descripción: {curso.descripcion}</li>
-              <li>Modalidad: {curso.modalidad}</li>
-              <li>Nivel: {curso.nivel}</li>
-              <li>Estado: {curso.estado}</li>
-              <li>Horario: {curso.horario}</li>
-              <li>Fecha Inicio: {curso.fecha_inicio}</li>
-              <li>Fecha Fin: {curso.fecha_fin}</li>
-              <li>Docente: {docente ? docente.nombre : "No asignado"}</li>
+              <li>
+                <strong className="text-black">Nombre:</strong>{" "}
+                <span>{curso.nombre}</span>
+              </li>
+              <li>
+                <strong className="text-black">Descripción:</strong>{" "}
+                <span>{curso.descripcion}</span>
+              </li>
+              <li>
+                <strong className="text-black">Modalidad:</strong>{" "}
+                <span>{curso.modalidad}</span>
+              </li>
+              <li>
+                <strong className="text-black">Nivel:</strong>{" "}
+                <span>{curso.nivel}</span>
+              </li>
+              <li>
+                <strong className="text-black">Estado:</strong>{" "}
+                <span>{curso.estado}</span>
+              </li>
+              <li>
+                <strong className="text-black">Horario:</strong>{" "}
+                <span>{curso.horario}</span>
+              </li>
+              <li>
+                <strong className="text-black">Fecha Inicio:</strong>{" "}
+                <span>{curso.fecha_inicio}</span>
+              </li>
+              <li>
+                <strong className="text-black">Fecha Fin:</strong>{" "}
+                <span>{curso.fecha_fin}</span>
+              </li>
             </ul>
           </section>
+          <Divider />
 
-          <section id="Archivos" className="p-3">
-            <h2 className="Montserrat text-center">
-              Adjunta tu comprobante de pago
-            </h2>
+          <form id="formData" className="w-full flex flex-col gap-6">
             <Dragger
-              name="pdf"
-              multiple={false}
-              onChange={handleFileChange}
-              beforeUpload={beforeUpload}
+              name="file"
               accept=".pdf"
+              beforeUpload={beforeUpload}
+              onChange={handleFileChange}
+              maxCount={1}
             >
               <p className="ant-upload-drag-icon">
                 <InboxOutlined />
               </p>
               <p className="ant-upload-text">
-                Selecciona o arrastra tu archivo aquí!
+                Haz clic o arrastra el archivo PDF a esta área para cargarlo.
               </p>
-              <p className="ant-upload-hint">Soporta únicamente el pdf</p>
             </Dragger>
-          </section>
-
-          <Popconfirm
-            title="Confirmar"
-            description="¿Estás seguro que deseas continuar?"
-            onConfirm={handleSubmit} // Llama a handleSubmit
-            onCancel={() => console.log("Cancelado")}
-            okText="Sí"
-            cancelText="No"
-          >
-            <Button type="primary" className="bg-green-500">
-              Solicitar inscripción
-            </Button>
-          </Popconfirm>
+            <Popconfirm
+              title="¿Estás seguro de que deseas inscribirte en este curso?"
+              onConfirm={handleSubmit}
+              okText="Sí"
+              cancelText="No"
+            >
+              <Button
+                type="primary"
+                disabled={isSubmitting} // Deshabilitar el botón si está en proceso de envío
+                loading={isSubmitting} // Mostrar el indicador de carga
+              >
+                Solicitar inscripción
+              </Button>
+            </Popconfirm>
+          </form>
         </div>
       </div>
     </div>

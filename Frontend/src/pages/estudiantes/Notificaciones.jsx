@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Breadcrumb, Timeline, message } from 'antd';
+import { Breadcrumb, Timeline, message, Button } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 
 function Notificaciones() {
   const [notificaciones, setNotificaciones] = useState([]);
   const [success, setSuccess] = useState(true); // Estado para manejar el éxito de la respuesta
+  const [loading, setLoading] = useState(false); // Estado de carga para deshabilitar el botón
 
   useEffect(() => {
     fetchNotificaciones();
@@ -35,7 +36,7 @@ function Notificaciones() {
       if (response.ok) {
         setSuccess(data.success); // Asignar el valor de 'success'
         setNotificaciones(data.notificaciones);
-        
+
         // Si no hay notificaciones pero el success es true
         if (data.success && data.notificaciones.length === 0) {
           message.info('No hay notificaciones disponibles.');
@@ -51,10 +52,12 @@ function Notificaciones() {
   };
 
   const handleDelete = async (id) => {
+    setLoading(true); // Activar el estado de carga
     const token = localStorage.getItem("token");
 
     if (!token) {
       message.error("Token no encontrado, por favor inicia sesión.");
+      setLoading(false); // Desactivar el estado de carga
       return;
     }
 
@@ -76,6 +79,8 @@ function Notificaciones() {
       }
     } catch (error) {
       message.error("Ocurrió un error al eliminar la notificación");
+    } finally {
+      setLoading(false); // Desactivar el estado de carga
     }
   };
 
@@ -84,10 +89,10 @@ function Notificaciones() {
       <Breadcrumb
         items={[
           {
-            title: <p className="font-medium text-black">Docente</p>,
+            title: <p className="font-medium text-black">Estudiantes</p>,
           },
           {
-            title: <a href="">Notificaciones Docente</a>,
+            title: <a href="">Notificaciones Estudiantes</a>,
           },
         ]}
       />
@@ -95,7 +100,7 @@ function Notificaciones() {
         Mis Notificaciones
       </h2>
 
-      <Timeline className='mt-8 px-8'>
+      <Timeline className='mt-8 px-8 overflow-y-scroll max-h-[60vh]'>
         {/* Mostrar mensaje si success es false */}
         {!success ? (
           <Timeline.Item>
@@ -107,7 +112,14 @@ function Notificaciones() {
               <Timeline.Item key={notificacion.id}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>{notificacion.mensaje} - {notificacion.fecha_notificacion}</span>
-                  <DeleteOutlined onClick={() => handleDelete(notificacion.id)} />
+                  <Button
+                  className='border-none'
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDelete(notificacion.id)}
+                    disabled={loading} // Deshabilitar el botón mientras se está esperando
+                  >
+                    
+                  </Button>
                 </div>
               </Timeline.Item>
             ))

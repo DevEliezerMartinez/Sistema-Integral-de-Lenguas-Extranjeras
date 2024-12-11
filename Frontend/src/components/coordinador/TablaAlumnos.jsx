@@ -132,16 +132,8 @@ const App = ({ solicitudes }) => {
       dataIndex: "Fecha_Inscripcion",
       key: "Fecha_Inscripcion",
     },
-    {
-      title: "Estado de la Solicitud",
-      dataIndex: "Estado_Solicitud",
-      key: "Estado_Solicitud",
-    },
-    {
-      title: "PDF de la Solicitud",
-      dataIndex: "PDF_Solicitud",
-      key: "PDF_Solicitud",
-    },
+  
+    
   ];
 
   const columns = defaultColumns.map((col) => ({

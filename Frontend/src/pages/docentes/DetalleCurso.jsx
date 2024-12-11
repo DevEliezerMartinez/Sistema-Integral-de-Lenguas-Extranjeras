@@ -30,8 +30,8 @@ function DetalleCurso() {
           }
         );
 
-        const cursoData = await cursoResponse.json(); // Convertir la respuesta a JSON
-        setCurso(cursoData.curso); // Acceder al objeto 'curso' directamente
+        const cursoData = await cursoResponse.json();
+        setCurso(cursoData.curso);
 
         const alumnosResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/solicitudes/${cursoId}`,
@@ -42,7 +42,7 @@ function DetalleCurso() {
           }
         );
 
-        const alumnosData = await alumnosResponse.json(); // Convertir a JSON
+        const alumnosData = await alumnosResponse.json();
 
         const calificacionesResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/calificaciones/${cursoId}`,
@@ -53,7 +53,7 @@ function DetalleCurso() {
           }
         );
 
-        const calificacionesData = await calificacionesResponse.json(); // Convertir a JSON
+        const calificacionesData = await calificacionesResponse.json();
 
         const alumnosConCalificaciones = alumnosData.map((alumno) => {
           const calificacion = calificacionesData.find(
@@ -99,6 +99,26 @@ function DetalleCurso() {
         }
       );
 
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        if (response.status === 403) {
+          notification.error({
+            message: "Calificación no editable",
+            description:
+              errorData.message || "Esta calificación ya no puede ser editada.",
+          });
+        } else {
+          notification.error({
+            message: "Error al guardar calificación",
+            description:
+              errorData.message || "Ha ocurrido un error inesperado.",
+          });
+        }
+
+        return;
+      }
+
       notification.success({
         message: "Calificación guardada",
         description: "La calificación se ha guardado exitosamente.",
@@ -110,9 +130,7 @@ function DetalleCurso() {
       );
       notification.error({
         message: "Error al guardar calificación",
-        description: error.response
-          ? error.response.data.message
-          : "Ha ocurrido un error inesperado.",
+        description: "Ha ocurrido un error inesperado. Intenta nuevamente.",
       });
     }
   };
@@ -131,14 +149,12 @@ function DetalleCurso() {
         }
       );
 
-      const data = await response.json(); // Convertir a JSON
+      const data = await response.json();
 
       notification.success({
         message: "Curso Archivado",
         description: data.mensaje,
       });
-
-      // Opcional: Puedes redirigir o actualizar el estado si es necesario
     } catch (error) {
       console.error(
         "Error al archivar el curso:",
@@ -165,12 +181,13 @@ function DetalleCurso() {
             id="headerCard"
             className="w-full flex justify-between items-center"
           >
-            <div id="Actions" className="self-start flex gap-2">
-              <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
+            <div id="Actions" className="self-start ">
+             
               <Link
-                to="/Docentes/CursosActivos"
-                className="Popins font-semibold"
+                to="/Docentes/CursosArchivados"
+                className="Popins font-semibold flex gap-2"
               >
+               <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
                 Volver
               </Link>
             </div>
@@ -183,7 +200,7 @@ function DetalleCurso() {
 
           {curso ? (
             <>
-              <h2 className="Montserrat font-bold self-start text-2xl text-center">
+              <h2 className="Montserrat font-bold self-start text-2xl text-center capitalize m-8">
                 {curso.nombre || "N/A"}
               </h2>
 
@@ -192,10 +209,11 @@ function DetalleCurso() {
                   alumnos={alumnos}
                   isLoading={isLoading}
                   onSaveGrade={onSaveGrade}
+                  cursoEstado={curso.estado} // Pasando el estado del curso
                 />
               </section>
 
-              <div className="flex Montserrat w-full justify-between items-center">
+              <div className="flex Montserrat w-full justify-between items-center ">
                 <p>
                   <span className="font-semibold">Periodo:</span>{" "}
                   {curso.fecha_inicio || "N/A"} - {curso.fecha_fin || "N/A"}
@@ -209,14 +227,20 @@ function DetalleCurso() {
                   {curso.nivel || "N/A"}
                 </p>
 
-                <Button
-                  onClick={onArchiveCourse}
-                  className="flex flex-col items-center h-auto"
-                  type="text"
-                >
-                  <img className="w-8" alt="icon" src="/Opt//SVG/archivar.svg" />
-                  <span>Marcar como terminado</span>
-                </Button>
+                {curso.estado !== "Archivado" && (
+                  <Button
+                    onClick={onArchiveCourse}
+                    className="flex flex-col items-center h-auto"
+                    type="text"
+                  >
+                    <img
+                      className="w-8"
+                      alt="icon"
+                      src="/Opt//SVG/archivar.svg"
+                    />
+                    <span>Marcar como terminado</span>
+                  </Button>
+                )}
               </div>
             </>
           ) : (

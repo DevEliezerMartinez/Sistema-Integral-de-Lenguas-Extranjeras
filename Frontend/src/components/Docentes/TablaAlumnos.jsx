@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Table, Input, Button, Empty } from "antd";
 
-const TablaAlumnos = ({ alumnos, isLoading, onSaveGrade }) => {
+const TablaAlumnos = ({ alumnos, isLoading, onSaveGrade, cursoEstado }) => {
   console.log("recibido en el componente de tabla", alumnos);
 
   const [calificaciones, setCalificaciones] = useState([]);
@@ -60,6 +60,7 @@ const TablaAlumnos = ({ alumnos, isLoading, onSaveGrade }) => {
       key: "calificacion",
       render: (text, record) => {
         const alumno = calificaciones.find(alumno => alumno.ID_Inscripcion === record.ID_Inscripcion);
+        const isDisabled = cursoEstado === "Archivado"; // Verifica si el curso está archivado
         return (
           <Input
             type="number"
@@ -67,6 +68,8 @@ const TablaAlumnos = ({ alumnos, isLoading, onSaveGrade }) => {
             max="100"
             value={alumno ? alumno.calificacion : ""}
             onChange={(e) => handleCalificacionChange(e.target.value, record)}
+            disabled={isDisabled} // Deshabilitar si el curso está archivado
+            readOnly={isDisabled} // Sólo lectura si el curso está archivado
           />
         );
       },
@@ -74,23 +77,30 @@ const TablaAlumnos = ({ alumnos, isLoading, onSaveGrade }) => {
     {
       title: "Acciones",
       key: "acciones",
-      render: (text, record) => (
-        <Button onClick={() => {
-          const payload = {
-            curso_id: record.Nombre_Curso,
-            alumno_id: record.alumno_id,
-            calificacion: calificaciones.find(alumno => alumno.ID_Inscripcion === record.ID_Inscripcion).calificacion
-          };
+      render: (text, record) => {
+        const alumno = calificaciones.find(alumno => alumno.ID_Inscripcion === record.ID_Inscripcion);
+        const isDisabled = cursoEstado === "Archivado"; // Verifica si el curso está archivado
+        return (
+          <Button
+            onClick={() => {
+              const payload = {
+                curso_id: record.Nombre_Curso,
+                alumno_id: record.alumno_id,
+                calificacion: calificaciones.find(alumno => alumno.ID_Inscripcion === record.ID_Inscripcion).calificacion
+              };
 
-          if (payload.alumno_id) {
-            onSaveGrade(payload);
-          } else {
-            console.error("El alumno_id no está definido", record);
-          }
-        }}>
-          Guardar
-        </Button>
-      ),
+              if (payload.alumno_id) {
+                onSaveGrade(payload);
+              } else {
+                console.error("El alumno_id no está definido", record);
+              }
+            }}
+            disabled={isDisabled} // Deshabilitar si el curso está archivado
+          >
+            Guardar
+          </Button>
+        );
+      },
     },
   ];
 

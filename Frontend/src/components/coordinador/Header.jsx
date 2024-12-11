@@ -67,7 +67,7 @@ function Header() {
             TecNM | Campus San Marcos
           </p>
           <span className="font-extralight text-sm xl:text-base md:hidden lg:block">
-            Centro de Lenguas Extranjeras
+            Coordinación de Lenguas Extranjeras
           </span>
         </div>
       </div>

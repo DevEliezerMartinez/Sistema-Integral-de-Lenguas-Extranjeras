@@ -73,21 +73,34 @@ function Cursos() {
         <div>
           <div
             id="Contenedor de CARDS"
-            className="flex gap-3 justify-center m-5 flex-wrap mb-42 pb-20"
+            className="flex gap-3 justify-center m-5 flex-wrap mb-42 pb-20 max-h-[70vh] overflow-scroll"
           >
             {hasModules ? (
               cursos.map((curso) => (
                 <div
                   key={curso.id}
                   id="Card"
-                  className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
+                  className=" min-w-72 border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
                 >
                   <img alt="libro" src="/Opt//SVG/book.svg" className="w-24" />
-                  <p className="Montserrat font-normal">{curso.nombre}</p>
-                  <p className="Montserrat font-light">{curso.descripción}</p>
-                  <Button type="primary" className="bg-green-500">
-                    <Link to={`/Estudiantes/Cursos/${curso.id}`}>Detalles</Link>
+                  <h3 className="Montserrat font-medium text-xl capitalize">
+                    {curso.nombre}
+                  </h3>
+                  <p className="Montserrat font-light">
+                    <span className="font-medium">Descripción:</span>{" "}
+                    {curso.descripción}
+                  </p>
+                  <p className="Montserrat font-light">
+                    <span className="font-medium">Descripción:</span>{" "}
+                    {curso.modalidad}
+                  </p>
+                 
+                    <Link to={`/Estudiantes/Cursos/${curso.id}`}>
+                    <Button type="primary" className="bg-green-500">
+                    <Link to={`/Estudiantes/Cursos/${curso.id}`}>Ver más</Link>
                   </Button>
+                    </Link>
+                
                 </div>
               ))
             ) : (

@@ -5,18 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
 
 // Función para convertir el horario numérico a texto
-const obtenerHorarioTexto = (horario) => {
-  switch (horario) {
-    case "1":
-      return "7:00 - 12:00";
-    case "2":
-      return "3:00 - 6:00";
-    case "3":
-      return "12:00 - 2:00";
-    default:
-      return "Horario no disponible";
-  }
-};
+
 
 function DetalleCurso() {
   const { cursoId } = useParams(); // Extrae cursoId de los parámetros de la URL
@@ -104,7 +93,7 @@ function DetalleCurso() {
             { label: "Modalidad", value: curso.modalidad },
             { label: "Nivel", value: curso.nivel },
             { label: "Estado", value: curso.estado },
-            { label: "Horario", value: obtenerHorarioTexto(curso.horario) },
+            { label: "Horario", value: curso.horario },
             { label: "Fecha de Inicio", value: curso.fecha_inicio },
             { label: "Fecha de Fin", value: curso.fecha_fin },
             {

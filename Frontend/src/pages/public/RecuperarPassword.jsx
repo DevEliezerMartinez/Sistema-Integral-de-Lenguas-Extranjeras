@@ -1,93 +1,95 @@
-import { Button, Divider, Form, Input, Modal, Space } from "antd";
-import Headeeer from "../../components/landing/PrincipalHeader";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
-
-const onFinish = (values) => {
-  console.log("Success:", values);
-};
-const onFinishFailed = (errorInfo) => {
-  console.log("Failed:", errorInfo);
-};
+import React from 'react';
+import { Button, Form, Input, Modal } from 'antd';
+import emailjs from 'emailjs-com'; // Importar la librería de EmailJS
+import { UserOutlined } from '@ant-design/icons';
 
 function RecuperarPassword() {
   const warning = () => {
     Modal.warning({
-      title: "Restablecer contraseña",
-      content: "Se ha enviado un enlace de restablecimiento de contraseña a tu correo electrónico",
+      title: 'Recuperación de contraseña',
+      content: 'Se ha enviado un correo con la nueva contraseña.',
     });
   };
 
+  const onFinish = async (values) => {
+    try {
+      // Realiza una solicitud al backend para validar el correo
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/recuperar-password`, {
+        correo: values.correo,
+      });
+
+      if (response.status === 200) {
+        // Envía el correo con la nueva contraseña utilizando EmailJS
+        emailjs.send(
+          'service_xxxx', // Tu Service ID de EmailJS
+          'template_xxxx', // Tu Template ID de EmailJS
+          {
+            nombre: values.correo, // Aquí puedes pasar el nombre si es necesario
+            nuevaContrasena: response.data.nuevaContrasena, // Nueva contraseña generada
+            correo: values.correo, // Correo del usuario
+          },
+          'user_xxxx' // Tu User ID de EmailJS
+        )
+        .then(
+          (result) => {
+            console.log('Correo enviado: ', result.text);
+            warning();
+          },
+          (error) => {
+            console.log('Error al enviar correo: ', error.text);
+            Modal.error({
+              title: 'Error',
+              content: 'Hubo un problema al enviar el correo. Intenta nuevamente.',
+            });
+          }
+        );
+      }
+    } catch (error) {
+      console.error('Error al enviar la solicitud:', error);
+      Modal.error({
+        title: 'Error',
+        content: 'No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.',
+      });
+    }
+  };
+
+  const onFinishFailed = (errorInfo) => {
+    console.log('Failed:', errorInfo);
+  };
+
   return (
-    <>
-      <Headeeer />
-
-      <main className="w-full flex flex-col  md:h-screen md:flex-row ">
-        <section
-          id="Left"
-          className=" w-full px-8 flex flex-col items-center md:w-1/2 "
+    <div>
+      <h2>Recuperar Contraseña</h2>
+      <Form
+        layout="vertical"
+        name="basic"
+        onFinish={onFinish}
+        onFinishFailed={onFinishFailed}
+      >
+        <Form.Item
+          label="Correo"
+          name="correo"
+          type="email"
+          rules={[
+            {
+              required: true,
+              message: 'Ingresa un correo',
+            },
+          ]}
         >
-          <img alt="Logo" className="w-32 my-8" src="/LogoTransparente.png" />
-          <h2 className="Montserrat font-bold text-3xl text-center">
-            Recuperacion de contraseña
-          </h2>
-
-          <Divider className="bg-black" />
-
-          <p className="Montserrat font-light text-2xl text-center my-4">
-            Escribe tu correo y recibiras notificaciones pronto
-          </p>
-
-          <div id="bottom" className=" w-5/6 px-4 m-0">
-            <Form
-              layout="vertical"
-              name="basic"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-            >
-              <Form.Item
-                label="Correo"
-                name="correo"
-                type="email"
-                rules={[
-                  {
-                    required: true,
-                    message: "Ingresa un correo",
-                  },
-                ]}
-              >
-                <Input
-                  prefix={<UserOutlined className="site-form-item-icon" />}
-                  placeholder="Username"
-                />
-              </Form.Item>
-
-              <Form.Item
-                wrapperCol={{
-                  offset: 8,
-                  span: 16,
-                }}
-              >
-                <Button type="primary" onClick={warning} htmlType="submit" >
-                  Enviar
-                </Button>
-              </Form.Item>
-            </Form>
-          </div>
-        </section>
-
-        <section id="right" className="hidden w-1/2 h-full md:block ">
-          <img
-            alt="imagen Alumnos"
-            className="h-full"
-            src="/Opt//CoverLogin.webp"
+          <Input
+            prefix={<UserOutlined className="site-form-item-icon" />}
+            placeholder="Correo"
           />
-        </section>
-      </main>
+        </Form.Item>
 
-      <Space wrap>
-      </Space>
-    </>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Enviar
+          </Button>
+        </Form.Item>
+      </Form>
+    </div>
   );
 }
 

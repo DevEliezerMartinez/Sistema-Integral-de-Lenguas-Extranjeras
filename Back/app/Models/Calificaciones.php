@@ -9,7 +9,7 @@ class Calificaciones extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['curso_id', 'alumno_id', 'calificacion'];
+    protected $fillable = ['curso_id', 'alumno_id', 'calificacion','editable'];
 
     public function curso()
     {

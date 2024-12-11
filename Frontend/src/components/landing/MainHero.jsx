@@ -60,7 +60,7 @@ function MainHero() {
       </main>
 
       <svg
-        className=" hidden md:block md:relative md:top-[-12rem] md:z-0"
+        className="sm:hidden md:hidden xl:block md:relative md:top-[-12rem] md:z-0"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 1440 320"
       >
@@ -70,7 +70,7 @@ function MainHero() {
 
       <section
         id="Stadistics"
-        className=" md:absolute  md:top-3/4 flex justify-center gap-8 sm:w-1/2 md:gap-32 md:pb-10"
+        className=" md:relative m-auto lg:absolute md:w-full lg:w-auto lg:p-8 md:top-3/4 flex justify-center gap-8 sm:w-1/2 md:gap-32 md:pb-10"
       >
         <div className="Card flex flex-col items-center">
           <span className="Montserrat font-extrabold text-6xl text-center">

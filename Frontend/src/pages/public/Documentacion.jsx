@@ -19,7 +19,7 @@ function Documentacion() {
           <h2 className="text-2xl font-semibold mb-4">Funciones de un CLE</h2>
 
           <ul className="list-disc list-inside text-gray-600">
-            <li>Impartir cursos de lenguas extranjeras: Inglés, francés, alemán, italiano, japonés, chino, etc.</li>
+            <li>Impartir cursos de lenguas extranjeras: Inglés, francés, alemán, italiano, japonés, chino, etc. Según su capacidad y la cantidad estudiantil.</li>
             <li>Diseñar y desarrollar materiales didácticos.</li>
             <li>Aplicar exámenes de colocación y certificación.</li>
             <li>Organizar eventos culturales y lingüísticos.</li>
@@ -31,13 +31,13 @@ function Documentacion() {
         <section className="mb-16">
           <h2 className="text-2xl font-semibold mb-4">Acreditación de los CLEs</h2>
 
-          <p className="text-gray-600">Los CLEs del TecNM están sujetos a un proceso de acreditación interna y externa para garantizar la calidad de sus servicios educativos. La acreditación interna la realiza la Comisión Nacional de Lenguas Extranjeras (CONALE) del TecNM, mientras que la acreditación externa la realizan organismos externos de prestigio, como el Centro de Evaluación del Aprendizaje del Idioma Inglés (CEFR) o el Alliance Française.</p>
+          <p className="text-gray-600">Los CLEs del TecNM están sujetos a un proceso de acreditación interna y externa para garantizar la calidad de sus servicios educativos. La acreditación interna la realiza la Coordinación Nacional de Lenguas Extranjeras del TecNM, mientras que la acreditación externa la realizan organismos externos de prestigio, como el Centro de Evaluación del Aprendizaje del Idioma Inglés .</p>
         </section>
 
         <section className="mb-16">
           <h2 className="text-2xl font-semibold mb-4">¿Quién autoriza la creación de un CLE?</h2>
 
-          <p className="text-gray-600">La creación de un CLE en un campus del TecNM es autorizada por la Dirección General del TecNM a propuesta del Director del campus correspondiente. La propuesta debe incluir un plan de trabajo que detalle los objetivos, estrategias, recursos y personal necesarios para el funcionamiento del CLE.</p>
+          <p className="text-gray-600">La creación de un CLE en un campus del TecNM es autorizada por la Dirección General del TecNM a propuesta del Director del campus correspondiente. La propuesta incluye un plan de trabajo que detalla los objetivos, estrategias, recursos y personal necesarios para el funcionamiento del CLE.</p>
         </section>
 
         <section className="mb-16">

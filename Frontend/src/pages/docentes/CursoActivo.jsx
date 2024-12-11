@@ -90,10 +90,10 @@ function CursoActivo() {
             <div
               key={curso.id}
               id="Card"
-              className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
+              className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5 min-w-80"
             >
               <img alt="libro" src="/Opt//SVG/book.svg" className="w-24" />
-              <p className="Montserrat font-normal">{curso.nombre}</p>
+              <p className="Montserrat font-normal capitalize">{curso.nombre}</p>
               <p className="Montserrat font-light">{curso.descripcion}</p>{" "}
               {/* Descripción del curso */}
               <p className="Montserrat font-light">

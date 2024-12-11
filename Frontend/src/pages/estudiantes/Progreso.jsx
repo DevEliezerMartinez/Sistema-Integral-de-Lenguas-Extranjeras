@@ -140,7 +140,8 @@ function Progreso() {
         // Si hay cursos, muestra las tarjetas
         <div
           id="Contenedor de CARDS"
-          className="flex gap-3 justify-center mt-5 flex-wrap"
+          className="flex gap-3 justify-center m-5 flex-wrap mb-42 pb-20 max-h-[60vh] overflow-scroll   "
+
         >
           {cursos.map((curso) => (
             <CursoCard curso={curso} key={curso.Curso_ID} id_estudiante={idEstudiante} />

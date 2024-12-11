@@ -21,7 +21,7 @@ const images = [
 
 function InfoCarousel() {
   return (
-    <div className="  mt-8">
+    <div className="  mt-8 lg:mt-20">
       <h2 id="acerca-del-cle" className="Poppins text-center font-bold text-3xl px-6 ">
         Centro de Lenguas Extranjeras (CLE)
       </h2>

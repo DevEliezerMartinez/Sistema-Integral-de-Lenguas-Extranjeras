@@ -8,6 +8,7 @@ import {
   notification,
   DatePicker,
   Spin,
+  Switch,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -41,6 +42,53 @@ function CursoActivo() {
   const handleChange = (value) => {
     setSelectedCarrera(value);
   };
+
+  const handleSwitchChange = (courseId, checked) => {
+    // Actualizamos el estado de `editable` localmente
+    setCourses((prevCourses) =>
+      prevCourses.map((course) =>
+        course.id === courseId ? { ...course, editable: !checked } : course
+      )
+    );
+
+    // Realizamos la petición al endpoint
+    fetch(`${import.meta.env.VITE_API_URL}/api/desactivar`, {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        curso_id: courseId, // Asegúrate de usar 'curso_id' para que coincida con la ruta del API
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) {
+          // Mostrar notificación de éxito
+          notification.success({
+            message: "Operación exitosa",
+            description: data.message,
+          });
+        } else if (data.error) {
+          // Mostrar notificación de error
+          notification.error({
+            message: "Error al desactivar",
+            description: data.error,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error en la solicitud:", error);
+        notification.error({
+          message: "Error en la solicitud",
+          description:
+            "Hubo un problema al realizar la solicitud. Intenta de nuevo.",
+        });
+      });
+  };
+
   useEffect(() => {
     // Obtener cursos activos
     fetch(`${import.meta.env.VITE_API_URL}/api/cursos_activos`, {
@@ -105,6 +153,9 @@ function CursoActivo() {
       .then((values) => {
         console.log("Form values:", values); // Imprime los valores del formulario
 
+        // Preparar el string de horarios en el formato "hora_inicio - hora_final"
+        const horarios = `${values.hora_inicio} - ${values.hora_fin}`;
+
         // Preparar los datos para enviar
         const requestData = {
           nombre_modulo: values.nombre,
@@ -112,7 +163,7 @@ function CursoActivo() {
           modalidad: values.modalidad || "", // Valor por defecto
           nivel: values.nivel || 0, // Valor por defecto
           estado: values.estado || 1, // Valor por defecto
-          horarios: values.horarios || "", // Valor por defecto
+          horarios: horarios, // Horarios en formato "hora_inicio - hora_final"
           periodo: {
             inicio: values.periodo[0].format("YYYY-MM-DD"), // Formato de fecha
             fin: values.periodo[1].format("YYYY-MM-DD"), // Formato de fecha
@@ -131,8 +182,9 @@ function CursoActivo() {
           },
           body: JSON.stringify(requestData),
         })
-          .then((response) => {
-            console.log("Curso creado:", response.data);
+          .then((response) => response.json()) // Asegúrate de convertir la respuesta en JSON
+          .then((data) => {
+            console.log("Curso creado:", data);
             setOpen(false);
             form.resetFields();
             openNotificationWithIcon("success");
@@ -212,6 +264,17 @@ function CursoActivo() {
                   {course.nombre}
                 </h4>
                 <p>{course.descripción}</p>
+
+                <div className="flex justify-between items-center w-full my-2">
+                  <span>Deshabilitar calif.</span>
+                  <Switch
+                    checked={course.editable === false} // Si editable es false, el switch estará activado
+                    onChange={(checked) =>
+                      handleSwitchChange(course.id, checked)
+                    }
+                  />
+                </div>
+
                 <Link to={`/Coordinador/Cursos/${course.id}`}>
                   <Button type="primary" className="bg-green-500 my-4">
                     Detalles
@@ -287,25 +350,53 @@ function CursoActivo() {
             ]}
           >
             <Select>
-              <Select.Option value="Escolar">Escolar</Select.Option>
-              <Select.Option value="Fines">Fines de semana</Select.Option>
+              <Select.Option value="Presencial">Presencial</Select.Option>
+              <Select.Option value="Virtual">Virtual</Select.Option>
             </Select>
           </Form.Item>
 
           <Form.Item
-            label="Horarios"
-            name="horarios"
+            label="Hora de inicio"
+            name="hora_inicio"
             rules={[
               {
                 required: true,
-                message: "Por favor selecciona los horarios.",
+                message: "Por favor selecciona la hora de inicio.",
               },
             ]}
           >
             <Select>
-              <Select.Option value="1">7:00 - 12:00</Select.Option>
-              <Select.Option value="2">3:00 - 6:00</Select.Option>
-              <Select.Option value="3">12:00 - 2:00</Select.Option>
+              <Select.Option value="7:00">7:00</Select.Option>
+              <Select.Option value="8:00">8:00</Select.Option>
+              <Select.Option value="9:00">9:00</Select.Option>
+              <Select.Option value="10:00">10:00</Select.Option>
+              <Select.Option value="11:00">11:00</Select.Option>
+              <Select.Option value="12:00">12:00</Select.Option>
+              <Select.Option value="13:00">13:00</Select.Option>
+              <Select.Option value="14:00">14:00</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            label="Hora de fin"
+            name="hora_fin"
+            rules={[
+              {
+                required: true,
+                message: "Por favor selecciona la hora de fin.",
+              },
+            ]}
+          >
+            <Select>
+              <Select.Option value="8:00">8:00</Select.Option>
+              <Select.Option value="9:00">9:00</Select.Option>
+              <Select.Option value="10:00">10:00</Select.Option>
+              <Select.Option value="11:00">11:00</Select.Option>
+              <Select.Option value="12:00">12:00</Select.Option>
+              <Select.Option value="13:00">13:00</Select.Option>
+              <Select.Option value="14:00">14:00</Select.Option>
+              <Select.Option value="15:00">15:00</Select.Option>
+              <Select.Option value="16:00">16:00</Select.Option>
             </Select>
           </Form.Item>
 

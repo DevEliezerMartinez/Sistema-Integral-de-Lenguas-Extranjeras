@@ -21,7 +21,7 @@ function Header() {
         <div className="text-center md:text-left flex flex-col items-center ">
           <p className="font-bold text-lg Poppins">TecNM | Campus San Marcos</p>
           <span className="font-extralight text-lg">
-            Centro de Lenguas Extranjeras
+            Coordinación de Lenguas Extranjeras
           </span>
         </div>
       </div>

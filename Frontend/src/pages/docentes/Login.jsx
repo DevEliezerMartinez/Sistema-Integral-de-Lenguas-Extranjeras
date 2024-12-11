@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from "react";
 import { Button, Divider, Form, Input, message } from "antd";
 import Header from "../../components/Shared/HeaderPublico"; // Renombré el import del Header
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
@@ -10,25 +10,30 @@ const onFinishFailed = (errorInfo) => {
 
 function LoginDocentes() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false); // Estado para controlar el botón de carga
 
   const onFinish = async (values) => {
+    setLoading(true); // Activar estado de carga (deshabilitar el botón)
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          correo_electronico: values.correo_electronico, // Cambiado a 'correo_electronico'
-          contrasena: values.contrasena, // Cambiado a 'contrasena'
-          tipo_acceso: "accesoDocente" // Añadido el tipo de acceso
-        }),
-      });
-  
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            correo_electronico: values.correo_electronico, // Cambiado a 'correo_electronico'
+            contrasena: values.contrasena, // Cambiado a 'contrasena'
+            tipo_acceso: "accesoDocente", // Añadido el tipo de acceso
+          }),
+        }
+      );
+
       // Verifica si la respuesta fue exitosa
       if (response.ok) {
         const data = await response.json();
-  
+
         // Verifica si la respuesta indica éxito
         if (data.success) {
           localStorage.clear();
@@ -36,19 +41,21 @@ function LoginDocentes() {
           localStorage.setItem("token", data.token);
           localStorage.setItem("usuario", JSON.stringify(data.usuario));
           localStorage.setItem("docente", JSON.stringify(data.docente));
-  
+
           // Navegar a la ruta de Cursos Activos
-          navigate('/Docentes/CursosActivos');
+          navigate("/Docentes/CursosActivos");
         } else {
           // Manejo de errores en caso de que success sea false
           message.error("Error desconocido, intenta nuevamente.");
         }
       } else {
         const errorData = await response.json();
-  
+
         // Manejo de errores para credenciales incorrectas
         if (errorData.error === "Credenciales incorrectas") {
-          message.error("Credenciales incorrectas. Por favor, verifica tu correo y contraseña.");
+          message.error(
+            "Credenciales incorrectas. Por favor, verifica tu correo y contraseña."
+          );
         } else {
           message.error("Error en el inicio de sesión. Inténtalo de nuevo.");
         }
@@ -56,9 +63,10 @@ function LoginDocentes() {
     } catch (error) {
       console.error("Error:", error);
       message.error("Hubo un problema con la solicitud de inicio de sesión.");
+    } finally {
+      setLoading(false); // Desactivar el estado de carga
     }
   };
-  
 
   return (
     <>
@@ -95,6 +103,10 @@ function LoginDocentes() {
                     required: true,
                     message: "Ingresa un correo",
                   },
+                  {
+                    type: "email",
+                    message: "Por favor ingresa un correo electrónico válido",
+                  },
                 ]}
               >
                 <Input
@@ -111,6 +123,10 @@ function LoginDocentes() {
                     required: true,
                     message: "Ingrese una contraseña!",
                   },
+                  {
+                    min: 6,
+                    message: "La contraseña debe tener al menos 6 caracteres",
+                  },
                 ]}
               >
                 <Input.Password
@@ -119,16 +135,17 @@ function LoginDocentes() {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading} // Muestra el indicador de carga
+                  disabled={loading} // Deshabilita el botón mientras se espera la respuesta
+                >
                   Ingresar
                 </Button>
               </Form.Item>
             </Form>
-            <div id="Actions" className="flex flex-col items-end mt-2">
-              <Link to="/Recuperar" className="text-right text-blue-600">
-                Olvidé mi contraseña
-              </Link>
-            </div>
+          
           </div>
         </section>
 

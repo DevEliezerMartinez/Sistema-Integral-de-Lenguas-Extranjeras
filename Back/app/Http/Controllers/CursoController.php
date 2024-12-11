@@ -32,7 +32,7 @@ class CursoController extends Controller
         // Validar los datos de la solicitud
         $validator = Validator::make($request->all(), [
             'nombre_modulo' => 'required|string',
-            'descripcion' => 'string',
+            'descripcion' => 'nullable|string',
             'modalidad' => 'required|string',
             'nivel' => 'required',
             'estado' => 'required|boolean',
@@ -51,6 +51,9 @@ class CursoController extends Controller
                 'request' => $request->all()
             ], 400);
         }
+
+        // Asignar "Sin descripción" si 'descripcion' está vacía o es null
+        $descripcion = $request->input('descripcion') ?: 'Sin descripción';
 
         try {
             // Procesar las fechas
@@ -182,7 +185,7 @@ class CursoController extends Controller
                     'fecha_fin' => $curso->fecha_fin,
                     'docente' => $curso->docente ? [
                         'id' => $curso->docente->id,
-                        'nombre' => $curso->docente->usuario->nombre,
+                        'nombre' => $curso->docente->usuario->nombre . ' ' . $curso->docente->usuario->apellidos, // Nombre completo concatenado
                     ] : null,
                 ],
             ], 200);
@@ -417,7 +420,7 @@ class CursoController extends Controller
                 return [
                     'Curso_ID' => $curso->id,
                     'Nombre_Curso' => $curso->nombre,
-                    'Descripcion_Curso' => $curso->descripcion,
+                    'Descripcion_Curso' => $curso->descripción,
                     'Fecha_Inicio' => $curso->fecha_inicio,
                     'Fecha_Fin' => $curso->fecha_fin,
                     'Horario' => $curso->horario,

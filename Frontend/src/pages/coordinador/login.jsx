@@ -2,11 +2,15 @@ import { Button, Divider, Form, Input, message } from "antd";
 import Headeeer from "../../components/Shared/HeaderPublico";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const LoginCoordinador = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false); // Estado para controlar la carga
 
   const onFinish = async (values) => {
+    setLoading(true); // Habilitar el estado de carga
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/login`,
@@ -46,7 +50,6 @@ const LoginCoordinador = () => {
 
         // Redirigir al usuario a Cursos Activos
         navigate("/Coordinador/CursosActivos");
-        console.log("ya debio redirigir")
       } else {
         // Manejar caso donde success es false
         message.error("Error desconocido, intenta nuevamente.");
@@ -54,6 +57,8 @@ const LoginCoordinador = () => {
     } catch (error) {
       // Error de red o de configuración
       message.error("Error en la conexión, intenta más tarde.");
+    } finally {
+      setLoading(false); // Deshabilitar el estado de carga una vez termine
     }
   };
 
@@ -96,6 +101,10 @@ const LoginCoordinador = () => {
                     required: true,
                     message: "Ingresa un correo",
                   },
+                  {
+                    type: "email",
+                    message: "El correo no es válido",
+                  },
                 ]}
               >
                 <Input
@@ -112,6 +121,10 @@ const LoginCoordinador = () => {
                     required: true,
                     message: "Ingrese una contraseña!",
                   },
+                  {
+                    min: 6,
+                    message: "La contraseña debe tener al menos 6 caracteres",
+                  },
                 ]}
               >
                 <Input.Password
@@ -119,26 +132,19 @@ const LoginCoordinador = () => {
                 />
               </Form.Item>
 
-              <Form.Item
-                wrapperCol={{
-                  offset: 8,
-                  span: 16,
-                }}
-              >
-                <Button type="primary" htmlType="submit">
+              <Form.Item>
+                <Button 
+                  type="primary" 
+                  htmlType="submit" 
+                  block
+                  loading={loading} // Añadir el estado de carga al botón
+                  disabled={loading} // Deshabilitar el botón mientras se recobe la respuesta
+                >
                   Ingresar
                 </Button>
               </Form.Item>
             </Form>
-            <div id="Actions" className="flex flex-col items-end mt">
-              <Link
-                to="/Recuperar"
-                className="text-right text-blue-600"
-                href="#"
-              >
-                Olvide mi contraseña
-              </Link>
-            </div>
+            
           </div>
         </section>
 

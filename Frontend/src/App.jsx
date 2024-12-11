@@ -2,6 +2,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/public/Home";
+import NoAutorizado from "./pages/public/NoAutorizado";
 import Login from "./pages/public/Login";
 import SignUp from "./pages/public/Registro";
 import RecuperarPassword from "./pages/public/RecuperarPassword";
@@ -44,6 +45,8 @@ function App() {
         <Route path="/Registro" element={<SignUp />} />
         <Route path="/Recuperar" element={<RecuperarPassword />} />
         <Route path="/Documentacion" element={<Documentacion />} />
+        <Route path="/no-autorizado" element={<NoAutorizado />} />
+
 
         {/*   Rutas Docentes */}
         <Route path="/LoginDocentes" element={<LoginDocentes />} />

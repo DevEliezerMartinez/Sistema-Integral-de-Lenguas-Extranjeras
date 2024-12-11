@@ -11,14 +11,13 @@ function Header() {
     setShowMenu(!showMenu);
   };
 
-
   const cerrarsesion = () => {
     messageApi.open({
       key,
       type: "loading",
       content: "Cerrando sesión",
     });
-  
+
     setTimeout(() => {
       messageApi.open({
         key,
@@ -27,12 +26,12 @@ function Header() {
         duration: 2,
       });
     }, 1000);
-  
+
     setTimeout(() => {
       // Eliminar el token y el usuario del localStorage
       localStorage.removeItem("token");
       localStorage.removeItem("usuario");
-      
+
       navigate("/"); // Redirigir al inicio
     }, 2000); // 2000 milisegundos = 2 segundos
   };
@@ -42,7 +41,7 @@ function Header() {
       {contextHolder}
 
       <div className="flex items-center  text-white  md:items-center justify-center  md:mb-0 py-4 gap-3  ">
-      <Link to="/">
+        <Link to="/Estudiantes/Cursos">
           <img
             alt="Logo CLE"
             src="/Opt//TecNMBig.png"
@@ -54,7 +53,7 @@ function Header() {
             TecNM | Campus San Marcos
           </p>
           <span className="font-extralight text-sm xl:text-base md:hidden lg:block">
-            Centro de Lenguas Extranjeras
+            Coordinación de Lenguas Extranjeras
           </span>
         </div>
       </div>
@@ -77,7 +76,11 @@ function Header() {
           <span className="text-sm font-thin">Cursos disp.</span>
         </Link>
         <Link to="/Estudiantes/Perfil" className="flex flex-col items-center">
-          <img className="w-6" alt="Logo profile" src="/Opt//SVG/profile-.svg" />
+          <img
+            className="w-6"
+            alt="Logo profile"
+            src="/Opt//SVG/profile-.svg"
+          />
           <span className="text-sm font-thin">Perfil</span>
         </Link>
         <Link
@@ -97,8 +100,7 @@ function Header() {
         </Button>
       </ul>
 
-      {/* Menú de hamburguesa */}
-      <div className="md:hidden">
+      <div className="md:hidden relative">
         <button className="text-white" onClick={toggleMenu}>
           <svg
             className="w-6 h-6"
@@ -116,14 +118,11 @@ function Header() {
           </svg>
         </button>
         {showMenu && (
-          <Button
-            className="absolute left-72 top-12"
-            danger
-            ghost
-            onClick={cerrarsesion}
-          >
-            Cerrar sesion
-          </Button>
+          <div className="absolute right-4 top-full pt-2 shadow-lg rounded-md w-48">
+            <Button className="w-full" danger ghost onClick={cerrarsesion}>
+              Cerrar sesion
+            </Button>
+          </div>
         )}
       </div>
     </header>

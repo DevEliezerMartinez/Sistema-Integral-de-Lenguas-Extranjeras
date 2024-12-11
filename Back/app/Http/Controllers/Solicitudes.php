@@ -86,6 +86,7 @@ class Solicitudes extends Controller
                     'Nombre_Alumno' => $solicitud->alumno->usuario->nombre ?? 'No disponible',
                     'Apellidos_Alumno' => $solicitud->alumno->usuario->apellidos ?? 'No disponible',
                     'Nombre_Curso' => $solicitud->curso->nombre ?? 'No disponible',
+                    'estado' => $solicitud->curso->estado ?? 'No disponible',
                     'Fecha_Inscripcion' => $solicitud->fecha_inscripcion ?? 'No disponible',
                     'Estado_Solicitud' => $solicitud->status ?? 'No disponible',
                     'PDF_Solicitud' => $solicitud->pdf ?? 'No disponible',

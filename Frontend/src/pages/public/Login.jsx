@@ -3,15 +3,17 @@ import Header from "../../components/Shared/HeaderPublico";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
-import React from "react";
+import React, { useState } from "react";
 
 function Login() {
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const { setToken } = useAuth();
+  const [loading, setLoading] = useState(false); // Estado para manejar el estado de carga
 
   const onFinish = async (values) => {
-    // Crear un objeto con los valores del formulario
+    setLoading(true); // Activar el estado de carga
+
     const data = {
       correo_electronico: values.correo,
       contrasena: values.password,
@@ -22,30 +24,18 @@ function Login() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json", // Establecer el Content-Type a application/json
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(data), // Convertir el objeto a JSON
-       
+        body: JSON.stringify(data),
       });
-
-      console.log("respuesta raw",response)
 
       if (response.ok) {
         const responseData = await response.json();
-
-        // Verifica si la respuesta indica éxito
         if (responseData.success) {
-          console.log("Petición POST exitosa");
-          console.log(responseData.estudiante);
-          console.log("Token:", responseData.token);
-
-          // Almacenar el token y los datos en localStorage
           localStorage.clear();
           localStorage.setItem("token", responseData.token);
           localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
           localStorage.setItem("estudiante", JSON.stringify(responseData.estudiante));
-
-          // Almacenar el token en el contexto de autenticación
           setToken(responseData.token);
 
           messageApi.open({
@@ -57,7 +47,6 @@ function Login() {
             navigate("/Estudiantes/Cursos");
           }, 2000);
         } else {
-          // Manejo de errores en caso de que success sea false
           messageApi.open({
             type: "error",
             content: "Error desconocido, intenta nuevamente.",
@@ -65,8 +54,6 @@ function Login() {
         }
       } else {
         const errorData = await response.json();
-        console.log("Error:", errorData);
-
         if (response.status === 401) {
           messageApi.open({
             type: "error",
@@ -85,6 +72,8 @@ function Login() {
         type: "error",
         content: "Error en la conexión, intenta más tarde.",
       });
+    } finally {
+      setLoading(false); // Desactivar el estado de carga
     }
   };
 
@@ -121,7 +110,7 @@ function Login() {
                 name="correo"
                 rules={[
                   { required: true, message: "Ingresa un correo" },
-                  { type: 'email', message: "Ingresa un correo válido" },
+                  { type: "email", message: "Ingresa un correo válido" },
                 ]}
               >
                 <Input
@@ -144,16 +133,17 @@ function Login() {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit">
-                  Ingresar
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading} // Mostrar spinner cuando está cargando
+                  disabled={loading} // Deshabilitar botón mientras está cargando
+                >
+                  {loading ? "Cargando..." : "Ingresar"}
                 </Button>
               </Form.Item>
             </Form>
-            <div id="Actions" className="flex flex-col items-end mt">
-              <Link to="/Recuperar" className="text-right text-blue-600">
-                Olvidé mi contraseña
-              </Link>
-            </div>
+           
             <p className="mt-6 Montserrat text-center">
               ¿No tienes cuenta aún?{" "}
               <Link className="text-blue-600 font-medium" to="/Registro">

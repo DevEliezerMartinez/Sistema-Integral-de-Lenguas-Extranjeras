@@ -28,15 +28,17 @@ function CursoArchivado() {
             {
               method: "GET",
               headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
               },
             }
           );
 
-          if (response.status === 200) {
-            const dataCursos = response.data.cursos
-              ? Object.values(response.data.cursos)
-              : [];
+          if (response.ok) {
+            const data = await response.json(); // Convertir la respuesta a JSON
+
+            // Verificar si 'cursos' está presente en los datos
+            const dataCursos = data.cursos ? Object.values(data.cursos) : [];
             setCursosArchivados(dataCursos);
             setHasError(false);
           } else {
@@ -106,9 +108,13 @@ function CursoArchivado() {
                   Periodo: {curso.fecha_inicio} - {curso.fecha_fin}
                 </li>
               </ul>
-              <Button type="primary" className="bg-green-500">
-                <Link to={`/Docentes/Cursos/${curso.id}`}> Detalles</Link>
-              </Button>
+
+              <Link to={`/Docentes/Cursos/${curso.id}`}>
+                {" "}
+                <Button type="primary" className="bg-green-500">
+                  <Link to={`/Docentes/Cursos/${curso.id}`}> Detalles</Link>
+                </Button>
+              </Link>
             </div>
           ))
         )}

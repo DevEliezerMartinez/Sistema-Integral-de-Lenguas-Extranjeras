@@ -42,7 +42,7 @@ function Header() {
       {contextHolder}
 
       <div className="flex  text-white  md:items-center justify-center  md:mb-0 py-4 gap-3">
-        <Link to="/">
+        <Link to="/Docentes/CursosActivos">
           <img
             alt="Logo CLE"
             src="/Opt//TecNMBig.png"
@@ -52,7 +52,7 @@ function Header() {
         <div className="text-center md:text-left flex flex-col items-center ">
           <p className="font-bold text-lg Poppins">TecNM | Campus San Marcos</p>
           <span className="font-extralight text-lg">
-            Centro de Lenguas Extranjeras
+            Coordinación de Lenguas Extranjeras
           </span>
         </div>
       </div>
@@ -101,7 +101,7 @@ function Header() {
       </ul>
 
       {/* Menú de hamburguesa */}
-      <div className="md:hidden">
+      <div className="md:hidden relative">
         <button className="text-white" onClick={toggleMenu}>
           <svg
             className="w-6 h-6"
@@ -119,9 +119,11 @@ function Header() {
           </svg>
         </button>
         {showMenu && (
-          <Button className="absolute left-72 top-12" onClick={cerrarsesion} danger ghost>
-            Cerrar sesion
-          </Button>
+          <div className="absolute right-4 top-full pt-2 shadow-lg rounded-md w-48">
+            <Button className="w-full" danger ghost onClick={cerrarsesion}>
+              Cerrar sesion
+            </Button>
+          </div>
         )}
       </div>
     </header>

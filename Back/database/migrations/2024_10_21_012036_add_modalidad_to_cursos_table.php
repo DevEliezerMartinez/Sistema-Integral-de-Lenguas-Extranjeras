@@ -9,7 +9,7 @@ class AddModalidadToCursosTable extends Migration
     public function up()
     {
         Schema::table('cursos', function (Blueprint $table) {
-            $table->string('modalidad')->after('descripción'); // Añade la columna 'modalidad' después de 'descripción'
+            $table->string('modalidad')->nullable()->after('descripción'); // Añade la columna 'modalidad', permitiendo valores NULL
         });
     }
 
