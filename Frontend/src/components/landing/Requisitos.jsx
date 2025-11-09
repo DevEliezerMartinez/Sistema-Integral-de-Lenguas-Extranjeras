@@ -4,78 +4,130 @@ import { Collapse } from "antd";
 const items = [
   {
     key: "1",
-    label: "Inscripcion",
+    label: "Inscripción",
     children: (
-      <>
-        <p>Durante la inscripción, los aspirantes deben seguir estos pasos:</p>
-        <ol className="p-8">
-          <li className=" list-decimal">
-            Descargar la guía paso a paso desde el sitio web del CLE. Hacer clic
-            en el botón de inscripciones y seguir los pasos descritos en la
-            guía. En caso de dificultades con la inscripción, pueden comunicarse
-            al correo admisionescle@mail.uniatlantico.edu.co o enviar un mensaje
-            interno en Facebook @cleuatlantico.
+      <div className="space-y-4">
+        <p className="Montserrat text-gray-700 leading-relaxed">
+          Para formalizar tu inscripción al curso de inglés verano , deberás
+          completar el siguiente procedimiento institucional:
+        </p>
+
+        <ol className="space-y-4 pl-6">
+          <li className="list-decimal Montserrat text-gray-700">
+            <span className="font-semibold">Entrega del formato de solicitud:</span>{" "}
+            Acude al Departamento de Gestión Tecnológica y Vinculación para entregar
+            el formato oficial de solicitud del curso.  
+            <br />
+            <a
+              href="https://www.smarcos.tecnm.mx/pdf/vinculacion/ingles/formato-solicitd_ingles_2023.docx"
+              className="text-[#1B39f6A] hover:underline font-medium"
+            >
+              DESCARGAR FORMATO
+            </a>
           </li>
-          <br/>
-          <li className=" list-decimal">
-            Después de completar la inscripción, deben dirigirse a la opción de
-            matrículas para descargar su volante de pago (matrícula financiera)
-            en las fechas indicadas en el calendario académico.
+
+          <li className="list-decimal Montserrat text-gray-700">
+            <span className="font-semibold">Realiza el pago correspondiente:</span>{" "}
+            Deposita el monto del curso a la cuenta bancaria asignada:
+            <br />
+            <span className="font-semibold">BANAMEX · Cuenta 621605666</span>
+          </li>
+
+          <li className="list-decimal Montserrat text-gray-700">
+            <span className="font-semibold">Completa tu inscripción:</span>{" "}
+            Una vez realizado el pago, regresa al Departamento de Gestión Tecnológica
+            y Vinculación en la fecha correspondiente a tu curso.  
+            La atención se brinda de <span className="font-semibold">08:00 a 13:00 horas.</span>
           </li>
         </ol>
-      </>
+
+        <p className="Montserrat text-gray-700 leading-relaxed">
+          Para dudas o aclaraciones, comunícate al correo{" "}
+          <a
+            href="mailto:vin_smarcos@tecnm.mx"
+            className="text-[#1B396A] hover:underline font-medium"
+          >
+            vin_smarcos@tecnm.mx
+          </a>{" "}
+          o al número <span className="font-semibold">745 103 2304</span>.
+        </p>
+      </div>
     ),
   },
+
   {
     key: "2",
-    label: "Durante el proceso",
+    label: "Durante el Curso",
     children: (
-      <p>
-        Durante el proceso de aprendizaje, los estudiantes asisten a clases y
-        participan activamente en las actividades del curso. En el caso
-        específico de la Universidad del Atlántico, ofrecen cursos de inglés
-        para niños, adolescentes, jóvenes adultos y también clases de inglés
-        conversacional y otros idiomas. Los estudiantes deben cumplir con los
-        requisitos de asistencia y evaluación establecidos por la institución.
-      </p>
+      <div className="space-y-3">
+        <p className="Montserrat text-gray-700 leading-relaxed">
+          Durante el desarrollo del curso, deberás participar activamente en todas
+          las sesiones programadas y cumplir con los lineamientos académicos
+          establecidos por la institución.
+        </p>
+
+        <p className="Montserrat text-gray-700 leading-relaxed">
+          La asistencia, participación y entrega de actividades forman parte de la
+          evaluación continua del curso.
+        </p>
+      </div>
     ),
   },
+
   {
     key: "3",
-    label: "Para la entrega",
+    label: "Culminación y Certificación",
     children: (
-      <p>
-        ara la culminación de los cursos, los estudiantes deben: Cumplir con los
-        requisitos de asistencia y evaluación de cada nivel. Realizar los pagos
-        correspondientes según el calendario académico. En algunos casos,
-        presentar exámenes diferidos parciales o exámenes de clasificación
-        (específicamente para inglés conversacional). Los precios varían según
-        si son estudiantes nuevos o antiguos y si se requiere un examen de
-        clasificación
-      </p>
+      <div className="space-y-4">
+        <p className="Montserrat text-gray-700 leading-relaxed">
+          Para concluir y aprobar el curso, es necesario cumplir con los siguientes
+          criterios institucionales:
+        </p>
+
+        <ul className="space-y-3 pl-6">
+          <li className="Montserrat text-gray-700">
+            <span className="font-semibold">✓ Asistir</span> al porcentaje mínimo requerido.
+          </li>
+
+          <li className="Montserrat text-gray-700">
+            <span className="font-semibold">✓ Cumplir</span> con las actividades y evaluaciones
+            correspondientes al programa.
+          </li>
+
+          <li className="Montserrat text-gray-700">
+            <span className="font-semibold">✓ Presentar</span> los exámenes establecidos por la
+            coordinación del curso.
+          </li>
+        </ul>
+
+        <p className="Montserrat text-sm text-gray-600 mt-4 italic">
+          * El proceso de certificación se realiza conforme a la normativa vigente
+          del Tecnológico Nacional de México: Campus San Marcos.
+        </p>
+      </div>
     ),
   },
 ];
 
 function Requisitos() {
-  const onChange = (key) => {
-    console.log(key);
-  };
-
   return (
-    <div>
-      <div className="my-8 md:max-w-7xl md:m-auto">
-        <h2 id="requisitos" className="Poppins text-center font-bold text-3xl px-6 md:my-10">
-          Requisitos
+    <section className="py-12 md:py-16 bg-gray-50">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2
+          id="requisitos"
+          className="Poppins text-center font-bold text-3xl md:text-4xl mb-8 md:mb-12 text-gray-900"
+        >
+          <span className="text-[#1B396A]">REQUISITOS</span> Y PROCESO
         </h2>
+
         <Collapse
-          className="w-2/3 m-auto my-4"
+          className="bg-white shadow-sm"
           items={items}
-          defaultActiveKey={["1"]}
-          onChange={onChange}
+          bordered={false}
+          expandIconPosition="end"
         />
       </div>
-    </div>
+    </section>
   );
 }
 

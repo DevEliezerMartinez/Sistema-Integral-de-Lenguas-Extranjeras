@@ -1,70 +1,97 @@
 import React from "react";
-import "../../styles/Landing/main.css";
-import { Carousel } from "antd";
-import { Image } from "antd"; // Import Image component
-
-const contentStyle = {
-  height: "160px",
-  color: "#fff",
-  lineHeight: "160px",
-  textAlign: "center",
-  background: "#364d79",
-};
+import { Carousel, Image } from "antd";
 
 const images = [
   { src: "/Opt//Carousel/1.webp", alt: "Alumnos del CLE" },
   { src: "/Opt//Carousel/2.webp", alt: "Alumnos del CLE" },
   { src: "/Opt//Carousel/3.webp", alt: "Alumnos del CLE" },
   { src: "/Opt//Carousel/4.webp", alt: "Alumnos del CLE" },
-  // Add more image objects as needed
 ];
 
 function InfoCarousel() {
   return (
-    <div className="  mt-8">
-      <h2 id="acerca-del-cle" className="Poppins text-center font-bold text-3xl px-6 ">
-        Centro de Lenguas Extranjeras (CLE)
-      </h2>
+    <div className="mt-8 bg-white">
+     
 
-      <section id="Carousel" className=" p-8">
-        <Carousel arrows dotPosition="top" autoplay className=" m-auto md:w-1/2 ">
-          {images.map((image) => (
-            <div key={image.src}>
-              {/* Replace h3 with Image component */}
-              <Image
-                width="100%" // Adjust width as needed
-                src={image.src}
-                alt={image.alt}
-              />
+      {/* CLE Section with Carousel */}
+      <section className=" py-16">
+        <div className="container mx-auto px-6">
+          <h2 id="acerca-del-cle" className="text-3xl font-bold text-gray-900 mb-8">
+            Centro de Lenguas Extranjeras (CLE)
+          </h2>
+
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            {/* Carousel */}
+            <div className="md:w-1/2">
+              <Carousel arrows dotPosition="top" autoplay className="rounded-lg overflow-hidden shadow-lg">
+                {images.map((image) => (
+                  <div key={image.src}>
+                    <Image
+                      width="100%"
+                      src={image.src}
+                      alt={image.alt}
+                      preview={false}
+                    />
+                  </div>
+                ))}
+              </Carousel>
             </div>
-          ))}
-        </Carousel>
 
-        <p className="Montserrat text-center p-4 md:text-left md:px-16">
-          El CLE ofrece cursos estructurados que abarcan desde los niveles
-          básicos hasta los avanzados. Además, el CLE puede proporcionar
-          certificaciones reconocidas por el Marco Común Europeo de Referencia
-          para las lenguas (MCER). <br></br>Es un lugar donde los alumnos pueden
-          sumergirse en el aprendizaje de idiomas y expandir sus horizontes
-          culturales. 🌎🗣️📚
-        </p>
+            {/* Text Content */}
+            <div className="md:w-1/2">
+              <p className="text-gray-600 text-lg leading-relaxed">
+                El CLE ofrece cursos estructurados que abarcan desde los niveles
+                básicos hasta los avanzados. Además, el CLE puede proporcionar
+                certificaciones reconocidas por el Marco Común Europeo de Referencia
+                para las lenguas (MCER).
+                <br /><br />
+                Es un lugar donde puedes sumergirte en el aprendizaje 
+                de idiomas y expandir tus horizontes culturales. 🌎🗣️📚
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
 
+      {/* Cards Section */}
+      <section className="container mx-auto px-6 pb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Card 1 */}
+          <div className="flex flex-col items-center text-center p-6">
+            <img 
+              className="w-16 h-16 mb-4" 
+              alt="Logo escolar" 
+              src="/Opt//SVG/academic.svg"
+            />
+            <p className="text-gray-700">
+              Con el objetivo de fomentar el perfil académico
+            </p>
+          </div>
 
-      <section id="Contenedor Minicards" className="flex  justify-around  p-4">
-        <div id="DataCard" className="flex flex-col items-center  w-1/5">
-          <img className="w-12" alt="Logo escolar" src="/Opt//SVG/academic.svg"></img>
-          <p className="Montserrat font-normal text-center">Con el objetivo de fomentar el perfil academico</p>
+          {/* Card 2 */}
+          <div className="flex flex-col items-center text-center p-6">
+            <img 
+              className="w-16 h-16 mb-4" 
+              alt="Logo grupo" 
+              src="/Opt//SVG/group.svg"
+            />
+            <p className="text-gray-700">
+              Seguimiento por grupo para practicar sus habilidades
+            </p>
+          </div>
+
+          {/* Card 3 */}
+          <div className="flex flex-col items-center text-center p-6">
+            <img 
+              className="w-16 h-16 mb-4" 
+              alt="Logo maestro" 
+              src="/Opt//SVG/teacher.svg"
+            />
+            <p className="text-gray-700">
+              Con docentes preparados y con experiencia
+            </p>
+          </div>
         </div>
-        <div id="DataCard" className="flex flex-col items-center  w-1/5">
-          <img className="w-12" alt="Logo escolar" src="/Opt//SVG/group.svg"></img>
-          <p className="Montserrat font-normal text-center">Seguimiento por grupo para practicar sus habilidades</p>
-        </div>
-        <div id="DataCard" className="flex flex-col items-center  w-1/5">
-          <img className="w-12" alt="Logo escolar" src="/Opt//SVG/teacher.svg"></img>
-          <p className="Montserrat font-normal text-center">Con docentes preparados y experiencia</p>
-        </div>
-        
       </section>
     </div>
   );
