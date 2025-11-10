@@ -12,7 +12,8 @@ function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const toggleMenu = () => {
+  const toggleMenu = (e) => {
+    e.stopPropagation(); // Prevenir que el evento se propague
     setShowMenu(!showMenu);
   };
 
@@ -20,13 +21,23 @@ function Header() {
     setShowMenu(false);
   };
 
+  // Cerrar menú al presionar ESC
   useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        closeMenu();
+      }
+    };
+
     if (showMenu) {
+      document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
+
     return () => {
+      document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
   }, [showMenu]);
@@ -39,7 +50,7 @@ function Header() {
           100% { background-position: 200%; }
         }
 
-        @keyframes fadeInLeft {
+        @keyframes slideInRight {
           from {
             opacity: 0;
             transform: translateX(100%);
@@ -50,9 +61,25 @@ function Header() {
           }
         }
 
+        @keyframes slideOutRight {
+          from {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+        }
+
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
         }
 
         .premium-shine {
@@ -98,11 +125,19 @@ function Header() {
         }
 
         .mobile-menu-enter {
-          animation: fadeInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .mobile-menu-exit {
+          animation: slideOutRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
         .overlay-enter {
-          animation: fadeIn 0.3s ease-out;
+          animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .overlay-exit {
+          animation: fadeOut 0.3s ease-out forwards;
         }
 
         .cta-premium {
@@ -144,6 +179,12 @@ function Header() {
         .menu-item:hover {
           border-left-color: #1B396A;
           background: rgba(27, 57, 106, 0.05);
+        }
+
+        /* Prevenir scroll bounce en iOS */
+        .mobile-menu-content {
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
         }
       `}</style>
 
@@ -208,8 +249,9 @@ function Header() {
             {/* Mobile Menu Button */}
             <button
               onClick={toggleMenu}
-              className="lg:hidden p-2 text-[#1B396A] hover:bg-gray-100 rounded-md transition-colors duration-200"
+              className="lg:hidden p-2 text-[#1B396A] hover:bg-gray-100 rounded-md transition-colors duration-200 relative z-[60]"
               aria-label="Menú"
+              aria-expanded={showMenu}
             >
               <svg
                 className={`w-6 h-6 transition-transform duration-300 ${
@@ -246,16 +288,22 @@ function Header() {
       {/* Mobile Menu Overlay */}
       {showMenu && (
         <div
-          className="overlay-enter fixed inset-0 bg-black/40 z-40 lg:hidden"
+          className={`fixed inset-0 bg-black/40 z-40 lg:hidden ${
+            showMenu ? 'overlay-enter' : 'overlay-exit'
+          }`}
           onClick={closeMenu}
+          aria-hidden="true"
         />
       )}
 
       {/* Mobile Menu */}
-      <nav
-        className={`mobile-menu-enter fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-white z-50 lg:hidden transform transition-transform duration-400 ${
+      <div
+        className={`fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-white z-50 lg:hidden transition-transform duration-300 ease-out ${
           showMenu ? "translate-x-0" : "translate-x-full"
         }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menú de navegación"
       >
         {/* Header del menú */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -283,36 +331,38 @@ function Header() {
 
         {/* Contenido del menú */}
         <div className="flex flex-col h-[calc(100vh-89px)]">
-          <div className="flex-1 overflow-y-auto py-4">
-            <ul className="flex flex-col">
-              <li>
-                <a
-                  href="#acerca-del-cle"
-                  onClick={closeMenu}
-                  className="menu-item flex items-center px-6 py-4 text-[#1B396A] font-medium text-base"
-                >
-                  Acerca del CLE
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#requisitos"
-                  onClick={closeMenu}
-                  className="menu-item flex items-center px-6 py-4 text-[#1B396A] font-medium text-base"
-                >
-                  Requisitos
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/Documentacion"
-                  onClick={closeMenu}
-                  className="menu-item flex items-center px-6 py-4 text-[#1B396A] font-medium text-base"
-                >
-                  Documentación
-                </a>
-              </li>
-            </ul>
+          <div className="flex-1 overflow-y-auto py-4 mobile-menu-content">
+            <nav>
+              <ul className="flex flex-col">
+                <li>
+                  <a
+                    href="#acerca-del-cle"
+                    onClick={closeMenu}
+                    className="menu-item flex items-center px-6 py-4 text-[#1B396A] font-medium text-base"
+                  >
+                    Acerca del CLE
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#requisitos"
+                    onClick={closeMenu}
+                    className="menu-item flex items-center px-6 py-4 text-[#1B396A] font-medium text-base"
+                  >
+                    Requisitos
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/Documentacion"
+                    onClick={closeMenu}
+                    className="menu-item flex items-center px-6 py-4 text-[#1B396A] font-medium text-base"
+                  >
+                    Documentación
+                  </a>
+                </li>
+              </ul>
+            </nav>
           </div>
 
           {/* Footer del menú con CTA */}
@@ -326,7 +376,7 @@ function Header() {
             </a>
           </div>
         </div>
-      </nav>
+      </div>
 
       {/* Spacer */}
       <div className="h-20" />

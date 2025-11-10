@@ -1,8 +1,20 @@
-import { Breadcrumb, Button, Divider, message, Spin } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Divider,
+  message,
+  Spin,
+  Input,
+  Switch,
+} from "antd";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import {
+  AppstoreOutlined,
+  UnorderedListOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 
-// Función para obtener el texto del horario según el valor
 const obtenerHorarioTexto = (horario) => {
   switch (horario) {
     case "1":
@@ -16,54 +28,100 @@ const obtenerHorarioTexto = (horario) => {
   }
 };
 
-const CursoCard = ({ curso, id_estudiante }) => (
-  <div
-    key={curso.Curso_ID}
-    className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5"
-  >
-    <img alt="libro" src="/Opt//SVG/class.svg" className="w-24" />
+// Card para CUADRÍCULA
+const CardGrid = ({ curso, id_estudiante }) => (
+  <div className="border rounded-xl bg-white w-full md:w-90 p-5 flex flex-col items-center shadow-sm hover:shadow-md transition">
+    {/* Badge */}
+    <div className="w-full flex justify-end mb-2">
+      <span className="inline-block bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+        En progreso
+      </span>
+    </div>
+
+    <img alt="libro" src="/Opt/SVG/book.svg" className="w-32 opacity-90" />
     <Divider />
-    <p className="Montserrat font-normal">{curso.Nombre_Curso}</p>
-    <p className="Montserrat font-light">
+    <p className="font-semibold text-gray-800 text-center">
+      {curso.Nombre_Curso}
+    </p>
+    <p className="text-sm text-gray-600">
       Horario: {obtenerHorarioTexto(curso.Horario)}
     </p>
 
-    <Button type="primary" className="bg-green-500 mt-4">
-      <Link to={`/Estudiantes/CursoInfo/${curso.Curso_ID}/${id_estudiante}`}>Información</Link>
-    </Button>
+    {/* Botón como enlace */}
+    <Link to={`/Estudiantes/CursoInfo/${curso.Curso_ID}/${id_estudiante}`}>
+      <Button
+        type="primary"
+        className="bg-[#1B396A] mt-4 hover:bg-[#244b8a]"
+      >
+        Información
+      </Button>
+    </Link>
+  </div>
+);
+
+// Card para LISTA
+const CardList = ({ curso, id_estudiante }) => (
+  <div className="w-full bg-white border rounded-xl shadow-sm hover:shadow-md transition p-4">
+    {/* Badge */}
+    <div className="flex justify-end mb-3">
+      <span className="inline-block bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+        En progreso
+      </span>
+    </div>
+
+    <div className="flex items-center justify-between">
+      <div className="flex gap-4 items-center">
+        <img alt="libro" src="/Opt/SVG/book.svg" className="w-14 opacity-80" />
+        <div>
+          <p className="font-semibold text-gray-800 text-lg">
+            {curso.Nombre_Curso}
+          </p>
+          <p className="text-sm text-gray-600">
+            Horario: {obtenerHorarioTexto(curso.Horario)}
+          </p>
+        </div>
+      </div>
+
+      <Link to={`/Estudiantes/CursoInfo/${curso.Curso_ID}/${id_estudiante}`}>
+        <Button
+          type="primary"
+          className="bg-[#1B396A] hover:bg-[#244b8a]"
+        >
+          Ver más
+        </Button>
+      </Link>
+    </div>
   </div>
 );
 
 function Progreso() {
   const [cursos, setCursos] = useState([]);
+  const [cursosFiltrados, setCursosFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [idEstudiante, setIdEstudiante] = useState(null); // Estado para almacenar el ID del estudiante
+  const [idEstudiante, setIdEstudiante] = useState(null);
+  const [vista, setVista] = useState("grid"); // grid | list
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    // Intentar recuperar el objeto 'estudiante' del localStorage
     const estudianteString = localStorage.getItem("estudiante");
 
     if (estudianteString) {
       try {
         const estudiante = JSON.parse(estudianteString);
-        if (estudiante && estudiante.id) {
-          setIdEstudiante(estudiante.id); // Establecer el ID del estudiante
+        if (estudiante?.id) {
+          setIdEstudiante(estudiante.id);
         } else {
           throw new Error("El objeto estudiante no contiene un ID válido.");
         }
-      } catch (error) {
-        console.error("Error al parsear el objeto estudiante:", error);
-        setError("No se pudo recuperar la información del estudiante.");
+      } catch {
+        message.error("No se pudo recuperar la información del estudiante.");
       }
-    } else {
-      setError("No se encontró el objeto 'estudiante' en localStorage.");
     }
   }, []);
 
   useEffect(() => {
     const obtenerCursos = async () => {
-      if (!idEstudiante) return; // No proceder si no hay ID de estudiante
+      if (!idEstudiante) return;
 
       try {
         const response = await fetch(
@@ -77,73 +135,102 @@ function Progreso() {
           }
         );
 
-        if (!response.ok) {
-          throw new Error("Error en la respuesta del servidor");
-        }
-
         const data = await response.json();
 
         if (data.exito) {
-          setCursos(data.progreso); // Actualiza el estado con los cursos obtenidos
+          setCursos(data.progreso);
+          setCursosFiltrados(data.progreso);
         } else {
-          setCursos([]); // En caso de que la consulta esté vacía
-          message.warning(data.mensaje); // Muestra un mensaje si no hay cursos
+          setCursos([]);
+          message.warning(data.mensaje);
         }
-      } catch (err) {
-        setError("Hubo un problema al obtener los cursos.");
+      } catch {
+        message.error("Hubo un problema al obtener los cursos.");
       } finally {
-        setLoading(false); // Quita el estado de carga
+        setLoading(false);
       }
     };
 
     obtenerCursos();
-  }, [idEstudiante]); // Añadir idEstudiante como dependencia
+  }, [idEstudiante]);
 
-  // Muestra un mensaje si hay un error
+  // Búsqueda
   useEffect(() => {
-    if (error) {
-      message.error(error);
-    }
-  }, [error]);
+    const filtrados = cursos.filter((c) =>
+      c.Nombre_Curso.toLowerCase().includes(search.toLowerCase())
+    );
+    setCursosFiltrados(filtrados);
+  }, [search, cursos]);
 
-  // Renderizado del componente
   return (
-    <div className="md:px-8 h-[50vh]">
+    <div className="min-h-[60vh]">
       <Breadcrumb
         items={[
-          {
-            title: <p className="font-medium text-black">Estudiantes</p>,
-          },
-          {
-            title: <a href="">Mi progreso</a>,
-          },
+          { title: <p className="font-medium text-black">Estudiantes</p> },
+          { title: <span className="text-[#1B396A]">Mi progreso</span> },
         ]}
       />
 
-      <h2 className="Montserrat font-semibold text-2xl text-center md:mt-6">
+      <h2 className="font-semibold text-3xl text-center mt-6 text-[#1B396A]">
         Mi progreso
       </h2>
 
-      <p className="Montserrat">
-        Aquí encontrarás todos los cursos que has tomado
+      <p className="text-gray-600 text-center">
+        Aquí encontrarás todos los cursos que has tomado.
       </p>
 
-      {/* Spinner para mostrar mientras los cursos están cargando */}
+      {/* Barra superior */}
+      <div className="flex flex-col md:flex-row items-center justify-between mt-6 gap-4">
+        <Input
+          placeholder="Buscar curso..."
+          prefix={<SearchOutlined />}
+          className="w-full md:w-80"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <div className="flex items-center gap-3">
+          <span>Lista</span>
+          <Switch
+            checked={vista === "grid"}
+            onChange={(checked) => setVista(checked ? "grid" : "list")}
+            checkedChildren={<AppstoreOutlined />}
+            unCheckedChildren={<UnorderedListOutlined />}
+            style={{
+              backgroundColor: vista === "grid" ? "#1B396A" : "#d9d9d9",
+            }}
+          />
+          <span>Cuadrícula</span>
+        </div>
+      </div>
+
+      {/* Contenido */}
       {loading ? (
         <div className="flex justify-center items-center h-48">
           <Spin tip="Cargando cursos..." size="large" />
         </div>
-      ) : cursos.length === 0 ? (
-        // Si no hay cursos, muestra un mensaje
-        <p>No tienes cursos asociados.</p>
+      ) : cursosFiltrados.length === 0 ? (
+        <p className="text-center mt-10 text-gray-500">
+          No se encontraron cursos.
+        </p>
+      ) : vista === "grid" ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          {cursosFiltrados.map((curso) => (
+            <CardGrid
+              curso={curso}
+              key={curso.Curso_ID}
+              id_estudiante={idEstudiante}
+            />
+          ))}
+        </div>
       ) : (
-        // Si hay cursos, muestra las tarjetas
-        <div
-          id="Contenedor de CARDS"
-          className="flex gap-3 justify-center mt-5 flex-wrap"
-        >
-          {cursos.map((curso) => (
-            <CursoCard curso={curso} key={curso.Curso_ID} id_estudiante={idEstudiante} />
+        <div className="flex flex-col gap-4 mt-8">
+          {cursosFiltrados.map((curso) => (
+            <CardList
+              curso={curso}
+              key={curso.Curso_ID}
+              id_estudiante={idEstudiante}
+            />
           ))}
         </div>
       )}

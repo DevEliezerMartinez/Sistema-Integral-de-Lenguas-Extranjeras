@@ -35,7 +35,7 @@ import DetalleAlumno from "./components/coordinador/DetalleAlumno";
 
 function App() {
   return (
-    <div>
+    <>
       <Routes>
         {/*   Rutas publicas */}
         <Route path="*" element={<NotFound />} /> {/* Ruta 404 */}
@@ -97,7 +97,7 @@ function App() {
           />
         </Route>
       </Routes>
-    </div>
+    </>
   );
 }
 

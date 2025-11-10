@@ -1,4 +1,4 @@
-import { Button, Divider, Card, List, Typography, Spin, message } from "antd";
+import { Breadcrumb, Button, Divider, Card, List, Typography, Spin, message } from "antd";
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -18,24 +18,35 @@ const obtenerHorarioTexto = (horario) => {
   }
 };
 
-function DetalleCurso() {
-  const { cursoId } = useParams(); // Extrae cursoId de los parámetros de la URL
-  const navigate = useNavigate(); // Hook para navegar a la página anterior
+// Función para formatear fechas de manera legible
+const formatFecha = (fecha) => {
+  if (!fecha) return "";
+  const d = new Date(fecha);
+  return d.toLocaleDateString("es-MX", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
 
-  const [curso, setCurso] = useState(null); // Estado para los detalles del curso
-  const [docente, setDocente] = useState(null); // Estado para el docente
-  const [error, setError] = useState(null); // Estado para manejo de errores
-  const [loading, setLoading] = useState(true); // Estado para controlar la carga
+function DetalleCurso() {
+  const { cursoId } = useParams();
+  const navigate = useNavigate();
+
+  const [curso, setCurso] = useState(null);
+  const [docente, setDocente] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const estudiante = JSON.parse(localStorage.getItem("estudiante"));
-    const id_estudiante = estudiante?.id; // Extraer el id del estudiante
+    const id_estudiante = estudiante?.id;
 
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token"); // Obtener el token de localStorage
+        const token = localStorage.getItem("token");
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/infocurso_alumno/${cursoId}/${id_estudiante}`, // Actualiza la URL
+          `${import.meta.env.VITE_API_URL}/api/infocurso_alumno/${cursoId}/${id_estudiante}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -45,85 +56,78 @@ function DetalleCurso() {
           }
         );
 
-        if (!response.ok) {
-          throw new Error('Error al obtener los detalles del curso.');
-        }
+        if (!response.ok) throw new Error("Error al obtener los detalles del curso.");
 
-        const data = await response.json(); // Espera la respuesta JSON
-        if (!data.curso) {
-          throw new Error('No se encontraron detalles del curso.');
-        }
+        const data = await response.json();
+        if (!data.curso) throw new Error("No se encontraron detalles del curso.");
 
-        const { curso } = data; // Desestructura el curso de la respuesta
-        setCurso(curso);
-        setDocente(curso.docente); // Asigna el docente desde el curso
+        setCurso(data.curso);
+        setDocente(data.curso.docente);
       } catch (err) {
-        setError(err.message); // Establece el mensaje de error
-        message.error(err.message); // Muestra el mensaje de error
+        setError(err.message);
+        message.error(err.message);
       } finally {
-        setLoading(false); // Finaliza el estado de carga
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [cursoId]); // Se elimina el token de las dependencias ya que se obtiene dentro del efecto
-
-  if (loading) {
-    return <Spin tip="Cargando..." />; // Muestra un spinner mientras carga
-  }
-
-  if (error) {
-    return <Text type="danger">{error}</Text>; // Muestra mensaje de error si lo hay
-  }
-
-  if (!curso) {
-    return <Text>No se encontraron detalles del curso.</Text>; // Mensaje si no hay curso
-  }
+  }, [cursoId]);
 
   return (
-    <div className="container">
-      <Title level={2} className="text-center my-4">
-        Detalles del Curso
-      </Title>
+    <div className="container ">
+      {/* Breadcrumb siempre visible */}
+       <Breadcrumb
+             items={[
+               { title: <p className="font-medium text-black">Estudiantes</p> },
+               { title: <span className="text-[#1B396A]">Mi progreso</span> },
+               { title: <span className="text-[#1B396A]">Detalles de mi curso</span> },
+             ]}
+           />
 
-      <Card bordered={false} className="bg-slate-100 p-4">
-        <div className="header flex justify-between">
-          <Button type="link" onClick={() => navigate(-1)}>
-            Volver
-          </Button>
-          <Title level={3}>{curso.nombre}</Title>
+      {loading ? (
+        <div className="flex justify-center py-10">
+          <Spin tip="Cargando detalles del curso..." size="large" />
         </div>
+      ) : error ? (
+        <Text type="danger">{error}</Text>
+      ) : curso ? (
+        <Card bordered={false} className="bg-white shadow-md rounded-xl p-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+            <Button type="link" onClick={() => navigate(-1)}>
+              Volver
+            </Button>
+            <Title level={3} className="text-center md:text-left">{curso.nombre}</Title>
+          </div>
 
-        <Divider />
+          <Divider />
 
-        <List
-          itemLayout="horizontal"
-          dataSource={[
-            { label: "Nombre", value: curso.nombre },
-            { label: "Descripción", value: curso.descripcion }, // Verifica que el campo sea correcto
-            { label: "Modalidad", value: curso.modalidad },
-            { label: "Nivel", value: curso.nivel },
-            { label: "Estado", value: curso.estado },
-            { label: "Horario", value: obtenerHorarioTexto(curso.horario) },
-            { label: "Fecha de Inicio", value: curso.fecha_inicio },
-            { label: "Fecha de Fin", value: curso.fecha_fin },
-            {
-              label: "Docente",
-              value: docente ? docente.nombre : "No asignado",
-            },
-            {
-              label: "Calificación del Alumno",
-              value: curso.calificacion_alumno || "No disponible",
-            }, // Nueva línea para la calificación
-          ]}
-          renderItem={(item) => (
-            <List.Item>
-              <Text strong>{item.label}: </Text>
-              <Text>{item.value}</Text>
-            </List.Item>
-          )}
-        />
-      </Card>
+          <List
+            itemLayout="horizontal"
+            dataSource={[
+              { label: "Nombre", value: curso.nombre },
+              { label: "Descripción", value: curso.descripcion },
+              { label: "Modalidad", value: curso.modalidad },
+              { label: "Nivel", value: curso.nivel },
+              { label: "Estado", value: curso.estado },
+              { label: "Horario", value: obtenerHorarioTexto(curso.horario) },
+              { label: "Fecha de Inicio", value: formatFecha(curso.fecha_inicio) },
+              { label: "Fecha de Fin", value: formatFecha(curso.fecha_fin) },
+              { label: "Docente", value: docente ? docente.nombre : "No asignado" },
+              { label: "Calificación del curso", value: curso.calificacion_alumno || "No disponible" },
+            ]}
+            renderItem={(item) => (
+              <List.Item className="px-2 py-1 md:px-4 md:py-2">
+                <Text strong className="w-40 inline-block">{item.label}:</Text>
+                <Text>{item.value}</Text>
+              </List.Item>
+            )}
+            className="bg-slate-50 rounded-lg shadow-sm p-4"
+          />
+        </Card>
+      ) : (
+        <Text>No se encontraron detalles del curso.</Text>
+      )}
     </div>
   );
 }

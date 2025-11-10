@@ -1,6 +1,6 @@
-import { Breadcrumb, Timeline, Spin, Alert, message } from "antd";
+import { Breadcrumb, Timeline, Spin, Alert, message, Button } from "antd";
 import React, { useState, useEffect } from "react";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, BellOutlined } from "@ant-design/icons";
 
 function Notificaciones() {
   const [notificaciones, setNotificaciones] = useState([]);
@@ -21,18 +21,16 @@ function Notificaciones() {
           }
         );
 
-        // Asegúrate de que la respuesta sea procesada como JSON
         const data = await response.json();
 
-        // Manejo de la respuesta cuando no hay notificaciones
         if (data.success) {
           if (data.notificaciones && data.notificaciones.length > 0) {
-            setNotificaciones(data.notificaciones); // Si hay notificaciones, actualiza el estado
+            setNotificaciones(data.notificaciones);
           } else {
-            setNotificaciones([]); // Si no hay notificaciones, establece un arreglo vacío
+            setNotificaciones([]);
           }
         } else {
-          setError("Error: " + data.mensaje); // En caso de error lógico
+          setError("Error: " + data.mensaje);
         }
       } catch (err) {
         setError(
@@ -41,7 +39,7 @@ function Notificaciones() {
             : "Error al obtener notificaciones"
         );
       } finally {
-        setLoading(false); // Siempre desactivar el estado de carga
+        setLoading(false);
       }
     };
 
@@ -60,7 +58,6 @@ function Notificaciones() {
         }
       );
 
-      // Actualizar la lista de notificaciones después de eliminar
       setNotificaciones(
         notificaciones.filter((notificacion) => notificacion.id !== id)
       );
@@ -70,52 +67,142 @@ function Notificaciones() {
     }
   };
 
+  const formatearFecha = (fecha) => {
+    const fechaObj = new Date(fecha);
+    const ahora = new Date();
+    const diferenciaDias = Math.floor((ahora - fechaObj) / (1000 * 60 * 60 * 24));
+
+    // Si es hoy
+    if (diferenciaDias === 0) {
+      return `Hoy a las ${fechaObj.toLocaleTimeString('es-MX', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })}`;
+    }
+    
+    // Si fue ayer
+    if (diferenciaDias === 1) {
+      return `Ayer a las ${fechaObj.toLocaleTimeString('es-MX', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })}`;
+    }
+    
+    // Si es esta semana (menos de 7 días)
+    if (diferenciaDias < 7) {
+      return `Hace ${diferenciaDias} días`;
+    }
+    
+    // Fecha completa
+    return fechaObj.toLocaleDateString('es-MX', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   if (loading) {
-    return <Spin tip="Cargando notificaciones..." />;
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Spin size="large" tip="Cargando notificaciones..." />
+      </div>
+    );
   }
 
   if (error) {
-    return <Alert message="Error" description={error} type="error" showIcon />;
+    return (
+      <div className="px-4 py-8">
+        <Alert message="Error" description={error} type="error" showIcon />
+      </div>
+    );
   }
 
   if (notificaciones.length === 0) {
     return (
-      <Alert
-        message="Sin Notificaciones"
-        description="No se encontraron notificaciones para este usuario."
-        type="info"
-        showIcon
-      />
+      <div className="px-4 py-8">
+        <Breadcrumb
+          className="mb-6"
+          items={[
+            {
+              title: <p className="font-medium text-gray-700">Coordinador</p>,
+            },
+            {
+              title: <span className="text-gray-600">Notificaciones</span>,
+            },
+          ]}
+        />
+        <div className="max-w-2xl mx-auto mt-12">
+          <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+            <BellOutlined className="text-6xl text-gray-300 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No tienes notificaciones
+            </h3>
+            <p className="text-gray-500">
+              Cuando recibas notificaciones, aparecerán aquí.
+            </p>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="px-4">
+    <div className="px-4 py-6 max-w-4xl mx-auto">
       <Breadcrumb
+        className="mb-6"
         items={[
           {
-            title: <p className="font-medium text-black">Coordinador</p>,
+            title: <p className="font-medium text-gray-700">Coordinador</p>,
           },
           {
-            title: <a href="">Notificaciones</a>,
+            title: <span className="text-gray-600">Notificaciones</span>,
           },
         ]}
       />
-      <h2 className="Montserrat font-medium text-2xl text-center">
-        Mis Notificaciones
-      </h2>
+      
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="Montserrat font-semibold text-2xl text-gray-800 flex items-center gap-2">
+            <BellOutlined className="text-blue-500" />
+            Mis Notificaciones
+          </h2>
+          <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+            {notificaciones.length} {notificaciones.length === 1 ? 'notificación' : 'notificaciones'}
+          </span>
+        </div>
 
-      <Timeline className="mt-8 px-8">
-        {notificaciones.map((item) => (
-          <Timeline.Item key={item.id}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              {item.mensaje} - {item.fecha_notificacion}
-              <DeleteOutlined onClick={() => eliminarNotificacion(item.id)} />
-            </div>
-            w
-          </Timeline.Item>
-        ))}
-      </Timeline>
+        <Timeline className="mt-4">
+          {notificaciones.map((item) => (
+            <Timeline.Item 
+              key={item.id}
+              color="blue"
+            >
+              <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors duration-200 border border-gray-200">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <p className="text-gray-800 font-medium mb-2">
+                      {item.mensaje}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {formatearFecha(item.fecha_notificacion)}
+                    </p>
+                  </div>
+                  <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => eliminarNotificacion(item.id)}
+                    className="hover:bg-red-50"
+                    title="Eliminar notificación"
+                  />
+                </div>
+              </div>
+            </Timeline.Item>
+          ))}
+        </Timeline>
+      </div>
     </div>
   );
 }

@@ -29,7 +29,7 @@ function RecuperarPassword() {
         >
           <img alt="Logo" className="w-32 my-8" src="/LogoTransparente.png" />
           <h2 className="Montserrat font-bold text-3xl text-center">
-            Recuperacion de contraseña
+            Restablecer contraseña
           </h2>
 
           <Divider className="bg-black" />

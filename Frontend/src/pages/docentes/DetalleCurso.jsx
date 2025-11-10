@@ -1,7 +1,12 @@
-import { Button, Divider, notification } from "antd";
+import { Breadcrumb, Button, Divider, notification, Spin, Tag, Modal, Space, Badge, Tooltip } from "antd";
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import TablaAlumnos from "../../components/Docentes/TablaAlumnos";
+import { NotificationOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+
+
+
+const { confirm } = Modal;
 
 function DetalleCurso() {
   const { cursoId } = useParams();
@@ -10,51 +15,38 @@ function DetalleCurso() {
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState("");
 
+  // Obtener token del localStorage
   useEffect(() => {
     const tokenData = localStorage.getItem("token");
-    if (tokenData) {
-      setToken(tokenData);
-    }
+    if (tokenData) setToken(tokenData);
   }, []);
 
+  // Obtener detalles del curso, alumnos y calificaciones
   useEffect(() => {
     const fetchCursoDetalles = async () => {
       if (!token) return;
+
       try {
         const cursoResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/cursos/${cursoId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
+        const cursoData = await cursoResponse.json();
+        setCurso(cursoData.curso);
 
-        const cursoData = await cursoResponse.json(); // Convertir la respuesta a JSON
-        setCurso(cursoData.curso); // Acceder al objeto 'curso' directamente
+        const [alumnosResponse, calificacionesResponse] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes/${cursoId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/calificaciones/${cursoId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-        const alumnosResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/solicitudes/${cursoId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const alumnosData = await alumnosResponse.json();
+        const calificacionesData = await calificacionesResponse.json();
 
-        const alumnosData = await alumnosResponse.json(); // Convertir a JSON
-
-        const calificacionesResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/calificaciones/${cursoId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const calificacionesData = await calificacionesResponse.json(); // Convertir a JSON
-
+        // Vincular calificaciones con alumnos
         const alumnosConCalificaciones = alumnosData.map((alumno) => {
           const calificacion = calificacionesData.find(
             (c) => c.alumno_id === alumno.alumno_id
@@ -66,57 +58,49 @@ function DetalleCurso() {
         });
 
         setAlumnos(alumnosConCalificaciones);
-        setIsLoading(false);
       } catch (error) {
-        console.error(
-          "Error al obtener el curso, alumnos o calificaciones:",
-          error
-        );
+        console.error("Error al obtener curso/alumnos/calificaciones:", error);
+        notification.error({
+          message: "Error al cargar el curso",
+          description: "Ocurrió un error al obtener los detalles del curso.",
+        });
+      } finally {
         setIsLoading(false);
       }
     };
 
-    if (token) {
-      fetchCursoDetalles();
-    }
+    if (token) fetchCursoDetalles();
   }, [cursoId, token]);
 
+  // Guardar calificación
   const onSaveGrade = async (record) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/calificaciones`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            curso_id: cursoId,
-            alumno_id: record.alumno_id,
-            calificacion: Number(record.calificacion),
-          }),
-        }
-      );
+      await fetch(`${import.meta.env.VITE_API_URL}/api/calificaciones`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          curso_id: cursoId,
+          alumno_id: record.alumno_id,
+          calificacion: Number(record.calificacion),
+        }),
+      });
 
       notification.success({
         message: "Calificación guardada",
-        description: "La calificación se ha guardado exitosamente.",
+        description: "Se ha guardado exitosamente.",
       });
     } catch (error) {
-      console.error(
-        "Error al guardar calificación:",
-        error.response ? error.response.data : error
-      );
       notification.error({
         message: "Error al guardar calificación",
-        description: error.response
-          ? error.response.data.message
-          : "Ha ocurrido un error inesperado.",
+        description: "Ha ocurrido un error inesperado.",
       });
     }
   };
 
+  // Función para archivar el curso
   const onArchiveCourse = async () => {
     try {
       const response = await fetch(
@@ -127,103 +111,165 @@ function DetalleCurso() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({}),
         }
       );
 
-      const data = await response.json(); // Convertir a JSON
-
+      const data = await response.json();
       notification.success({
         message: "Curso Archivado",
         description: data.mensaje,
       });
 
-      // Opcional: Puedes redirigir o actualizar el estado si es necesario
+      // Cambiar estado local sin recargar
+      setCurso((prev) => ({ ...prev, estado: "Archivado" }));
     } catch (error) {
-      console.error(
-        "Error al archivar el curso:",
-        error.response ? error.response.data : error
-      );
       notification.error({
         message: "Error al archivar curso",
-        description: error.response
-          ? error.response.data.error
-          : "Ha ocurrido un error inesperado.",
+        description: "Ha ocurrido un error inesperado.",
       });
     }
   };
 
+  const esArchivado = curso?.estado === "Archivado";
+
+  // Función para mostrar fecha legible
+  const formatearFecha = (fecha) => {
+    if (!fecha) return "N/A";
+    const date = new Date(fecha);
+    return date.toLocaleDateString("es-MX", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   return (
-    <div>
-      <h2 className="Montserrat font-semibold text-2xl text-center md:my-6">
-        Detalles del curso {cursoId}
-      </h2>
+    <div className="px-4">
+      {/* Breadcrumb dinámico */}
+      <Breadcrumb
+        items={[
+          { title: <p className="font-medium text-black">Docente</p> },
+          {
+            title: (
+              <p>
+                {esArchivado ? "Cursos archivados" : "Cursos activos"}
+              </p>
+            ),
+          },
+          { title: <a>Detalles del curso</a> },
+        ]}
+      />
 
-      <div id="Card" className="bg-slate-100 p-2 md:mx-16 md:p-16">
-        <div id="cardContent" className="flex flex-col items-center">
-          <div
-            id="headerCard"
-            className="w-full flex justify-between items-center"
-          >
-            <div id="Actions" className="self-start flex gap-2">
-              <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
-              <Link
-                to="/Docentes/CursosActivos"
-                className="Popins font-semibold"
+      {/* Header */}
+      <div className="flex justify-between items-center my-6">
+        <Link
+          to={
+            esArchivado
+              ? "/Docentes/CursosArchivados"
+              : "/Docentes/CursosActivos"
+          }
+          className="Montserrat font-semibold flex items-center gap-2"
+        >
+          <img alt="volver" className="w-4" src="/Opt/SVG/LighArrow.svg" />
+          Volver
+        </Link>
+
+        <h2 className="Montserrat font-semibold text-2xl md:text-3xl text-center">
+          {curso ? curso.nombre : "Detalles del curso"}
+        </h2>
+
+        {esArchivado ? (
+          <div className="flex flex-row items-center justify-center gap-2">
+            {/* Etiqueta principal */}
+            <Tag color="gray" className="px-3 py-1 text-base font-medium">
+              Archivado
+            </Tag>
+
+            {/* Ícono con tooltip */}
+            <div className="flex items-end gap-2">
+
+
+              {/* Icono de ayuda con tooltip */}
+              <Tooltip
+                title="Si necesitas volver a activar este curso, solicítalo a tu coordinador"
+                placement="right"
               >
-                Volver
-              </Link>
-            </div>
-            <h3 className="Montserrat font-extralight text-2xl">
-              Detalles del curso
-            </h3>
-            <img alt="icon" className="w-8" src="/Opt//SVG/info.svg" />
-          </div>
-          <Divider />
-
-          {curso ? (
-            <>
-              <h2 className="Montserrat font-bold self-start text-2xl text-center">
-                {curso.nombre || "N/A"}
-              </h2>
-
-              <section id="Info" className="px-4 self-start w-full">
-                <TablaAlumnos
-                  alumnos={alumnos}
-                  isLoading={isLoading}
-                  onSaveGrade={onSaveGrade}
+                <QuestionCircleOutlined
+                  style={{
+                    fontSize: 18,
+                    color: "#1890ff",
+                    cursor: "pointer",
+                  }}
                 />
-              </section>
-
-              <div className="flex Montserrat w-full justify-between items-center">
-                <p>
-                  <span className="font-semibold">Periodo:</span>{" "}
-                  {curso.fecha_inicio || "N/A"} - {curso.fecha_fin || "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">Docente:</span>{" "}
-                  {curso.docente ? curso.docente.nombre : "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">Requisitos:</span>{" "}
-                  {curso.nivel || "N/A"}
-                </p>
-
-                <Button
-                  onClick={onArchiveCourse}
-                  className="flex flex-col items-center h-auto"
-                  type="text"
-                >
-                  <img className="w-8" alt="icon" src="/Opt//SVG/archivar.svg" />
-                  <span>Marcar como terminado</span>
-                </Button>
-              </div>
-            </>
-          ) : (
-            <p>Cargando detalles del curso...</p>
-          )}
-        </div>
+              </Tooltip>
+            </div>
+          </div>
+        ) : (
+          <Button
+            type="text"
+            onClick={() => {
+              Modal.confirm({
+                title: "¿Archivar curso?",
+                content:
+                  "Una vez archivado, no podrás modificar las calificaciones y el curso se moverá a la categoría de 'Cursos Archivados'.",
+                okText: "Sí, archivar",
+                cancelText: "Cancelar",
+                okType: "primary",
+                centered: true,
+                onOk: onArchiveCourse,
+              });
+            }}
+            className="flex flex-col items-center"
+          >
+            <img className="w-8" alt="archivar" src="/Opt/SVG/archivar.svg" />
+            <span className="Montserrat text-sm">Archivar curso</span>
+          </Button>
+        )}
       </div>
+
+      <Divider />
+
+      {isLoading ? (
+        <div className="flex justify-center py-16">
+          <Spin tip="Cargando detalles..." size="large" />
+        </div>
+      ) : curso ? (
+        <div className="bg-white shadow-md rounded-xl p-6 flex flex-col gap-6">
+          {/* Información general */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col gap-2">
+              <p className="Montserrat font-medium">
+                <span className="font-semibold">Periodo:</span>{" "}
+                {formatearFecha(curso.fecha_inicio)} -{" "}
+                {formatearFecha(curso.fecha_fin)}
+              </p>
+              <p className="Montserrat font-medium">
+                <span className="font-semibold">Docente:</span>{" "}
+                {curso.docente ? curso.docente.nombre : "N/A"}
+              </p>
+              <p className="Montserrat font-medium">
+                <span className="font-semibold">Requisitos:</span>{" "}
+                {curso.nivel || "N/A"}
+              </p>
+            </div>
+          </div>
+
+          {/* Tabla de alumnos */}
+          <div className="bg-slate-50 rounded-xl p-4 shadow-sm">
+            <TablaAlumnos
+              alumnos={alumnos}
+              isLoading={isLoading}
+              onSaveGrade={onSaveGrade}
+              esArchivado={esArchivado}
+            />
+
+          </div>
+        </div>
+      ) : (
+        <p className="Montserrat text-center text-gray-500">
+          No se encontraron detalles del curso.
+        </p>
+      )}
     </div>
   );
 }

@@ -124,11 +124,11 @@ function LoginDocentes() {
                 </Button>
               </Form.Item>
             </Form>
-            <div id="Actions" className="flex flex-col items-end mt-2">
+           {/*  <div id="Actions" className="flex flex-col items-end mt-2">
               <Link to="/Recuperar" className="text-right text-blue-600">
                 Olvidé mi contraseña
               </Link>
-            </div>
+            </div> */}
           </div>
         </section>
 

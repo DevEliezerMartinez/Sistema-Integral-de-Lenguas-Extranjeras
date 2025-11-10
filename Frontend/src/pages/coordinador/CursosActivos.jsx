@@ -8,16 +8,93 @@ import {
   notification,
   DatePicker,
   Spin,
+  Switch,
+  Divider,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import {
+  AppstoreOutlined,
+  BarsOutlined,
+  SearchOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import locale from "antd/locale/es_ES";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+import updateLocale from "dayjs/plugin/updateLocale";
+
+dayjs.extend(updateLocale);
+dayjs.locale("es");
+
+// Card para CUADRÍCULA
+const CardGrid = ({ course }) => (
+  <div className="border rounded-xl bg-white w-full md:w-full p-5 flex flex-col items-center shadow-sm hover:shadow-md transition">
+    <img alt="libro" src="/Opt/SVG/book.svg" className="w-20 opacity-90" />
+    <Divider />
+    <p className="font-semibold text-gray-800">{course.nombre}</p>
+
+    {course.descripción && (
+      <p className="text-sm text-gray-600 text-center mt-1">
+        {course.descripción}
+      </p>
+    )}
+
+    <Link to={`/Coordinador/Cursos/${course.id}`}>
+      <Button
+        type="primary"
+        className="bg-[#1B396A] mt-4 hover:bg-[#244b8a]"
+      >
+        Detalles
+      </Button>
+    </Link>
+  </div>
+);
+
+// Card para LISTA
+const CardList = ({ course }) => (
+  <div className="w-full bg-white border rounded-xl shadow-sm hover:shadow-md transition p-4 flex items-center justify-between">
+    <div className="flex gap-4 items-center">
+      <img alt="libro" src="/Opt/SVG/book.svg" className="w-14 opacity-80" />
+      <div>
+        <p className="font-semibold text-gray-800 text-lg">{course.nombre}</p>
+        {course.descripción && (
+          <p className="text-sm text-gray-600">{course.descripción}</p>
+        )}
+      </div>
+    </div>
+
+    <Link to={`/Coordinador/Cursos/${course.id}`}>
+      <Button
+        type="primary"
+        className="bg-[#1B396A] hover:bg-[#244b8a]"
+      >
+        Ver más
+      </Button>
+    </Link>
+  </div>
+);
 
 function CursoActivo() {
   const [hasModules, setHasModules] = useState(false);
-  const [courses, setCourses] = useState([]); // Estado para almacenar los cursos activos
-  const [teachers, setTeachers] = useState([]); // Estado para almacenar los docentes
+  const [courses, setCourses] = useState([]);
+  const [filteredCourses, setFilteredCourses] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [horarios, setHorarios] = useState([
+    { value: "1", label: "7:00 - 12:00" },
+    { value: "2", label: "3:00 - 6:00" },
+    { value: "3", label: "12:00 - 2:00" },
+  ]);
+  const [nuevoHorario, setNuevoHorario] = useState("");
+  const [modalidades, setModalidades] = useState([
+    { value: "Escolar", label: "Escolar" },
+    { value: "Fines", label: "Fines de semana" },
+  ]);
+  const [nuevaModalidad, setNuevaModalidad] = useState("");
   const { RangePicker } = DatePicker;
   const [loading, setLoading] = useState(true);
+  const [isGridView, setIsGridView] = useState(true);
+  const [searchValue, setSearchValue] = useState("");
 
   const [api, contextHolder] = notification.useNotification();
   const openNotificationWithIcon = (type) => {
@@ -36,11 +113,7 @@ function CursoActivo() {
   };
 
   const [form] = Form.useForm();
-  const [selectedCarrera, setSelectedCarrera] = useState("");
 
-  const handleChange = (value) => {
-    setSelectedCarrera(value);
-  };
   useEffect(() => {
     // Obtener cursos activos
     fetch(`${import.meta.env.VITE_API_URL}/api/cursos_activos`, {
@@ -55,23 +128,24 @@ function CursoActivo() {
         if (!response.ok) {
           throw new Error("Error en la respuesta de la API");
         }
-        return response.json(); // Convierte la respuesta a JSON
+        return response.json();
       })
       .then((data) => {
-        const cursos = data.cursos; // Asegúrate de acceder a los datos correctamente
+        const cursos = data.cursos;
 
         if (cursos && cursos.length > 0) {
-          setCourses(cursos); // Guardar los cursos activos
-          setHasModules(true); // Indicar que hay cursos activos
+          setCourses(cursos);
+          setFilteredCourses(cursos);
+          setHasModules(true);
         } else {
-          setHasModules(false); // No hay cursos activos
+          setHasModules(false);
         }
-        setLoading(false); // Datos cargados
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching cursos activos:", error);
         setHasModules(false);
-        setLoading(false); // Datos cargados (con error)
+        setLoading(false);
       });
 
     // Obtener docentes
@@ -86,42 +160,62 @@ function CursoActivo() {
         if (!response.ok) {
           throw new Error("Error en la respuesta de la API");
         }
-        return response.json(); // Convierte la respuesta a JSON
+        return response.json();
       })
       .then((data) => {
-        console.log("Datos de docentes:", data.docentes); // Ahora accedes a data.docentes
-        setTeachers(data.docentes); // Guardar los docentes
-        setLoading(false); // Datos cargados
+        setTeachers(data.docentes);
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching docentes:", error);
-        setLoading(false); // Datos cargados (con error)
+        setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    const filtered = courses.filter((course) =>
+      course.nombre.toLowerCase().includes(searchValue.toLowerCase())
+    );
+    setFilteredCourses(filtered);
+  }, [searchValue, courses]);
+
+  const agregarHorario = (e) => {
+    e.preventDefault();
+    if (nuevoHorario && nuevoHorario.trim() !== "") {
+      const nuevoValor = `custom_${Date.now()}`;
+      setHorarios([...horarios, { value: nuevoValor, label: nuevoHorario }]);
+      setNuevoHorario("");
+    }
+  };
+
+  const agregarModalidad = (e) => {
+    e.preventDefault();
+    if (nuevaModalidad && nuevaModalidad.trim() !== "") {
+      const nuevoValor = nuevaModalidad;
+      setModalidades([...modalidades, { value: nuevoValor, label: nuevaModalidad }]);
+      setNuevaModalidad("");
+    }
+  };
 
   const handleOk = () => {
     form
       .validateFields()
       .then((values) => {
-        console.log("Form values:", values); // Imprime los valores del formulario
-
-        // Preparar los datos para enviar
         const requestData = {
           nombre_modulo: values.nombre,
-          descripcion: values.descripcion || "", // Valor por defecto
-          modalidad: values.modalidad || "", // Valor por defecto
-          nivel: values.nivel || 0, // Valor por defecto
-          estado: values.estado || 1, // Valor por defecto
-          horarios: values.horarios || "", // Valor por defecto
+          descripcion: values.descripcion || "",
+          modalidad: values.modalidad || "",
+          nivel: values.nivel || 0,
+          estado: values.estado || 1,
+          horarios: values.horarios || "",
           periodo: {
-            inicio: values.periodo[0].format("YYYY-MM-DD"), // Formato de fecha
-            fin: values.periodo[1].format("YYYY-MM-DD"), // Formato de fecha
+            inicio: values.periodo[0].format("YYYY-MM-DD"),
+            fin: values.periodo[1].format("YYYY-MM-DD"),
           },
           docente: values.docente,
-          coordinador: 1, // Valor por defecto (coordinador debe ser un ID válido)
+          coordinador: 1,
         };
 
-        // Enviar los datos del formulario al servidor
         fetch(`${import.meta.env.VITE_API_URL}/api/crear_curso`, {
           method: "POST",
           headers: {
@@ -149,10 +243,11 @@ function CursoActivo() {
               .then((data) => {
                 const cursos = data.cursos;
                 if (cursos.length > 0) {
-                  setCourses(cursos); // Guardar los cursos activos
-                  setHasModules(true); // Indicar que hay cursos activos
+                  setCourses(cursos);
+                  setFilteredCourses(cursos);
+                  setHasModules(true);
                 } else {
-                  setHasModules(false); // No hay cursos activos
+                  setHasModules(false);
                 }
               })
               .catch((error) => {
@@ -170,67 +265,118 @@ function CursoActivo() {
   };
 
   return (
-    <div className="flex flex-col px-4">
+    <div className="min-h-[50vh] mb-52">
+      {/* Breadcrumb */}
       <Breadcrumb
         items={[
-          {
-            title: <p className="font-medium text-black">Coordinador</p>,
-          },
-          {
-            title: <a href="">Mis cursos activos</a>,
-          },
+          { title: <p className="font-medium text-black">Coordinador</p> },
+          { title: <span className="text-[#1B396A]">Mis cursos activos</span> },
         ]}
       />
+
       {contextHolder}
 
-      <Button
-        className="md:self-end md:mr-10 my-4 max-w-7xl"
-        type="primary"
-        onClick={showModal}
-      >
-        Registrar un nuevo curso
-      </Button>
+      <h2 className="font-semibold text-3xl text-center mt-6 text-[#1B396A]">
+        Cursos activos
+      </h2>
 
+      <p className="text-gray-600 text-center">
+        Gestiona los cursos habilitados actualmente.
+      </p>
+
+      {/* Botón de registro */}
+      <div className="flex justify-center md:justify-end mt-6">
+        <Button
+          type="primary"
+          onClick={showModal}
+          className="bg-[#1B396A] hover:bg-[#244b8a]"
+        >
+          Registrar un nuevo curso
+        </Button>
+      </div>
+
+      {/* Controles superiores */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-6">
+        {/* Buscador */}
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="Buscar curso..."
+          className="w-full md:w-80"
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          allowClear
+        />
+
+        {/* Switch de vista */}
+        <div className="flex items-center gap-3">
+          <span>Lista</span>
+
+          <Switch
+            checked={isGridView}
+            onChange={(checked) => setIsGridView(checked)}
+            checkedChildren={<AppstoreOutlined />}
+            unCheckedChildren={<BarsOutlined />}
+            style={{
+              backgroundColor: isGridView ? "#1B396A" : "#d9d9d9",
+            }}
+          />
+
+          <span>Cuadrícula</span>
+        </div>
+      </div>
+
+      {/* Contenidos */}
       {loading ? (
-        <div className="flex justify-center items-center h-40">
-          <Spin size="large" />
+        <div className="flex justify-center items-center h-48">
+          <Spin tip="Cargando cursos..." size="large" />
         </div>
       ) : (
-        <div
-          id="Contenedor de CARDS"
-          className="flex gap-3 justify-center mt-5 flex-wrap"
-        >
-          {hasModules ? (
-            courses.map((course) => (
-              <div
-                key={course.id}
-                id="Card"
-                className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center md:w-1/5 md:gap-5"
-              >
-                <img alt="libro" src="/Opt//SVG/book.svg" className="w-24" />
-                <h4 className="Montserrat  my-2 font-medium">
-                  {course.nombre}
-                </h4>
-                <p>{course.descripción}</p>
-                <Link to={`/Coordinador/Cursos/${course.id}`}>
-                  <Button type="primary" className="bg-green-500 my-4">
-                    Detalles
-                  </Button>
-                </Link>
-              </div>
-            ))
+        <div className="mt-8 pb-20">
+          {/* Vista cuadrícula */}
+          {isGridView ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {hasModules ? (
+                filteredCourses.length > 0 ? (
+                  filteredCourses.map((course) => (
+                    <CardGrid course={course} key={course.id} />
+                  ))
+                ) : (
+                  <p className="text-center col-span-full text-gray-500">
+                    No se encontraron cursos.
+                  </p>
+                )
+              ) : (
+                <div className="border rounded-xl bg-white p-6 flex flex-col items-center shadow-sm">
+                  <img src="/Opt/SVG/sad.svg" className="w-20 opacity-80" />
+                  <p className="font-medium mt-3">Sin cursos activos</p>
+                </div>
+              )}
+            </div>
           ) : (
-            <div
-              id="Card"
-              className="border rounded bg-slate-100 w-3/5 flex flex-col px-8 py-4 items-center text-center"
-            >
-              <img alt="libro" src="/Opt//SVG/sad.svg" className="w-24" />
-              <p className="Montserrat font-normal">Sin cursos Activos</p>
+            /* Vista lista */
+            <div className="flex flex-col gap-4">
+              {hasModules ? (
+                filteredCourses.length > 0 ? (
+                  filteredCourses.map((course) => (
+                    <CardList course={course} key={course.id} />
+                  ))
+                ) : (
+                  <p className="text-center text-gray-500">
+                    No se encontraron cursos.
+                  </p>
+                )
+              ) : (
+                <div className="border rounded-xl bg-white p-6 flex flex-col items-center shadow-sm">
+                  <img src="/Opt/SVG/sad.svg" className="w-20 opacity-80" />
+                  <p className="font-medium mt-3">Sin cursos activos</p>
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
 
+      {/* Modal */}
       <Modal
         open={open}
         title="Registro de información del módulo"
@@ -273,7 +419,12 @@ function CursoActivo() {
               },
             ]}
           >
-            <RangePicker />
+            <RangePicker 
+              locale={locale}
+              format="DD/MM/YYYY"
+              placeholder={["Fecha de inicio", "Fecha de fin"]}
+              style={{ width: "100%" }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -286,9 +437,39 @@ function CursoActivo() {
               },
             ]}
           >
-            <Select>
-              <Select.Option value="Escolar">Escolar</Select.Option>
-              <Select.Option value="Fines">Fines de semana</Select.Option>
+            <Select
+              placeholder="Selecciona una modalidad"
+              dropdownRender={(menu) => (
+                <>
+                  {menu}
+                  <Divider style={{ margin: "8px 0" }} />
+                  <div style={{ padding: "8px", display: "flex", gap: "8px" }}>
+                    <Input
+                      placeholder="Ej: Sabatino"
+                      value={nuevaModalidad}
+                      onChange={(e) => setNuevaModalidad(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          agregarModalidad(e);
+                        }
+                      }}
+                    />
+                    <Button
+                      type="text"
+                      icon={<PlusOutlined />}
+                      onClick={agregarModalidad}
+                    >
+                      Agregar
+                    </Button>
+                  </div>
+                </>
+              )}
+            >
+              {modalidades.map((modalidad) => (
+                <Select.Option key={modalidad.value} value={modalidad.value}>
+                  {modalidad.label}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
 
@@ -302,10 +483,39 @@ function CursoActivo() {
               },
             ]}
           >
-            <Select>
-              <Select.Option value="1">7:00 - 12:00</Select.Option>
-              <Select.Option value="2">3:00 - 6:00</Select.Option>
-              <Select.Option value="3">12:00 - 2:00</Select.Option>
+            <Select
+              placeholder="Selecciona un horario"
+              dropdownRender={(menu) => (
+                <>
+                  {menu}
+                  <Divider style={{ margin: "8px 0" }} />
+                  <div style={{ padding: "8px", display: "flex", gap: "8px" }}>
+                    <Input
+                      placeholder="Ej: 9:00 - 11:00"
+                      value={nuevoHorario}
+                      onChange={(e) => setNuevoHorario(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          agregarHorario(e);
+                        }
+                      }}
+                    />
+                    <Button
+                      type="text"
+                      icon={<PlusOutlined />}
+                      onClick={agregarHorario}
+                    >
+                      Agregar
+                    </Button>
+                  </div>
+                </>
+              )}
+            >
+              {horarios.map((horario) => (
+                <Select.Option key={horario.value} value={horario.value}>
+                  {horario.label}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
 

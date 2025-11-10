@@ -11,7 +11,6 @@ function Login() {
   const { setToken } = useAuth();
 
   const onFinish = async (values) => {
-    // Crear un objeto con los valores del formulario
     const data = {
       correo_electronico: values.correo,
       contrasena: values.password,
@@ -22,111 +21,94 @@ function Login() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json", // Establecer el Content-Type a application/json
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(data), // Convertir el objeto a JSON
-       
+        body: JSON.stringify(data),
       });
 
-      console.log("respuesta raw",response)
 
       if (response.ok) {
         const responseData = await response.json();
 
-        // Verifica si la respuesta indica éxito
         if (responseData.success) {
-          console.log("Petición POST exitosa");
-          console.log(responseData.estudiante);
-          console.log("Token:", responseData.token);
-
-          // Almacenar el token y los datos en localStorage
           localStorage.clear();
           localStorage.setItem("token", responseData.token);
           localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
           localStorage.setItem("estudiante", JSON.stringify(responseData.estudiante));
 
-          // Almacenar el token en el contexto de autenticación
           setToken(responseData.token);
 
           messageApi.open({
             type: "success",
-            content: "Inicio de sesión exitoso!",
+            content: "Inicio de sesión exitoso.",
           });
 
-          setTimeout(() => {
-            navigate("/Estudiantes/Cursos");
-          }, 2000);
+          setTimeout(() => navigate("/Estudiantes/Cursos"), 1200);
         } else {
-          // Manejo de errores en caso de que success sea false
           messageApi.open({
             type: "error",
-            content: "Error desconocido, intenta nuevamente.",
+            content: "Error inesperado. Intente nuevamente.",
           });
         }
       } else {
         const errorData = await response.json();
-        console.log("Error:", errorData);
 
         if (response.status === 401) {
           messageApi.open({
             type: "error",
-            content: "Datos inválidos!",
+            content: "Credenciales incorrectas.",
           });
         } else {
           messageApi.open({
             type: "error",
-            content: errorData.error || "Error al iniciar sesión. Intenta nuevamente.",
+            content: errorData.error || "Error al iniciar sesión.",
           });
         }
       }
     } catch (error) {
-      console.error("Error al enviar la petición POST:", error);
+      console.error("Error en la petición:", error);
+
       messageApi.open({
         type: "error",
-        content: "Error en la conexión, intenta más tarde.",
+        content: "Error de conexión. Intente más tarde.",
       });
     }
-  };
-
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
   };
 
   return (
     <>
       {contextHolder}
       <Header />
-      <main className="w-full flex flex-col md:h-screen md:flex-row">
-        <section
-          id="Left"
-          className="w-full px-8 flex flex-col items-center md:w-1/2"
-        >
-          <img alt="Logo" className="w-32 my-8" src="/LogoTransparente.png" />
-          <h2 className="Montserrat font-bold text-3xl text-center">
-            ¡Nos alegra verte de nuevo!
+
+      <main className="w-full flex flex-col md:h-screen md:flex-row bg-gray-50">
+        {/* Panel izquierdo */}
+        <section className="w-full px-8 flex flex-col items-center justify-center md:w-1/2 py-10">
+          <img alt="Logo" className="w-32 mb-8" src="/LogoTransparente.png" />
+
+          <h2 className="Montserrat font-bold text-3xl text-center text-gray-800">
+            Bienvenido de nuevo
           </h2>
-          <Divider className="bg-black" />
-          <p className="Montserrat font-light text-2xl text-center my-4">
-            Inicia sesión para continuar tu viaje educativo
+
+          <Divider className="bg-gray-400" />
+
+          <p className="Montserrat font-light text-xl text-center mb-6 text-gray-700">
+            Accede para continuar con tu proceso académico
           </p>
-          <div id="bottom" className="w-5/6 px-4 m-0">
-            <Form
-              layout="vertical"
-              name="basic"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-            >
+
+          <div className="w-full max-w-md  p-6 rounded-xl ">
+            <Form layout="vertical" name="basic" onFinish={onFinish}>
               <Form.Item
-                label="Correo"
+                label="Correo electrónico"
                 name="correo"
                 rules={[
-                  { required: true, message: "Ingresa un correo" },
-                  { type: 'email', message: "Ingresa un correo válido" },
+                  { required: true, message: "Ingrese un correo electrónico" },
+                  { type: "email", message: "Ingrese un correo válido" },
                 ]}
               >
                 <Input
-                  prefix={<UserOutlined className="site-form-item-icon" />}
-                  placeholder="Correo electrónico"
+                  prefix={<UserOutlined />}
+                  placeholder="Correo institucional"
+                  size="large"
                 />
               </Form.Item>
 
@@ -134,40 +116,53 @@ function Login() {
                 label="Contraseña"
                 name="password"
                 rules={[
-                  { required: true, message: "Ingrese una contraseña" },
-                  { min: 6, message: "La contraseña debe tener al menos 6 caracteres" },
+                  { required: true, message: "Ingrese su contraseña" },
+                  { min: 6, message: "Debe tener al menos 6 caracteres" },
                 ]}
               >
                 <Input.Password
-                  prefix={<LockOutlined className="site-form-item-icon" />}
+                  prefix={<LockOutlined />}
+                  placeholder="Contraseña"
+                  size="large"
                 />
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  size="large"
+                  className="w-full rounded-lg font-semibold"
+                >
                   Ingresar
                 </Button>
               </Form.Item>
             </Form>
-            <div id="Actions" className="flex flex-col items-end mt">
-              <Link to="/Recuperar" className="text-right text-blue-600">
-                Olvidé mi contraseña
+
+          {/*   <div className="flex justify-end">
+              <Link to="/Recuperar" className="text-blue-600 text-sm">
+                ¿Olvidó su contraseña?
               </Link>
             </div>
-            <p className="mt-6 Montserrat text-center">
-              ¿No tienes cuenta aún?{" "}
+ */}
+            <p className="Montserrat text-center mt-6 text-gray-700">
+              ¿Aún no tiene cuenta?{" "}
               <Link className="text-blue-600 font-medium" to="/Registro">
-                ¡Regístrate!
+                Registrarse
               </Link>
             </p>
           </div>
         </section>
-        <section id="right" className="hidden w-1/2 h-full md:block">
+
+        {/* Panel derecho */}
+        <section className="hidden md:block w-1/2 h-full relative">
           <img
-            alt="imagen Alumnos"
-            className="h-full"
-            src="/Opt//CoverLogin.webp"
+            alt="Alumnos"
+            className="h-full w-full object-cover"
+            src="/Opt/Login.jpg"
           />
+
+          <div className="absolute inset-0 bg-black/20"></div>
         </section>
       </main>
     </>
