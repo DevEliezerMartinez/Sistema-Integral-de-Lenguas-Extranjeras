@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # Backend Laravel
+  backend:
+    build:
+      context: ./Back
+      dockerfile: Dockerfile
+    container_name: laravel_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Back:/var/www/html
+      - ./Back/database:/var/www/html/database
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/database/database.sqlite
+    networks:
+      - app-network
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: react_app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    command: npm run dev -- --host
+
+networks:
+  app-network:
+    driver: bridge

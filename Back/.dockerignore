@@ -1,0 +1,15 @@
+vendor
+node_modules
+.env
+.git
+.gitignore
+.editorconfig
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+*.log
+.DS_Store
+Thumbs.db
+public/storage
