@@ -215,7 +215,7 @@ function DetalleCurso() {
 
       {isLoading ? (
         <div className="flex justify-center py-16">
-          <Spin tip="Cargando detalles..." size="large" />
+          <Spin size="large" />
         </div>
       ) : curso ? (
         <div className="bg-white shadow-md rounded-xl p-6 flex flex-col gap-6">

@@ -68,7 +68,7 @@ function Notificaciones() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <Spin size="large" tip="Cargando notificaciones..." />
+        <Spin size="large" />
       </div>
     );
   }

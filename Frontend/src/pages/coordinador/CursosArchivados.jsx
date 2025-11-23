@@ -179,7 +179,7 @@ function CursosArchivados() {
       {/* Contenidos */}
       {loading ? (
         <div className="flex justify-center items-center h-48">
-          <Spin tip="Cargando cursos archivados..." size="large" />
+          <Spin size="large" />
         </div>
       ) : error ? (
         <p className="text-center text-red-600 font-medium mt-8">{error}</p>

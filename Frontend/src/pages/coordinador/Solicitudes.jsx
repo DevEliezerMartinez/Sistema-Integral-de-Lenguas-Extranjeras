@@ -74,7 +74,7 @@ function Solicitudes() {
         acc[courseName] = {
           curso: courseName,
           docente:
-            `${solicitud.Nombre_Docente || ""} ${
+            `${solicitud.Docente_Curso || ""} ${
               solicitud.Apellidos_Docente || ""
             }`.trim() || "Docente no asignado",
           nivel: solicitud.Nivel_Curso || "N/A",
@@ -323,7 +323,7 @@ function Solicitudes() {
 
       {loading ? (
         <div className="flex justify-center items-center h-48">
-          <Spin tip="Cargando solicitudes..." size="large" />
+          <Spin size="large" />
         </div>
       ) : cursosAgrupados.length === 0 ? (
         <div className="flex flex-col items-center justify-center mt-12">

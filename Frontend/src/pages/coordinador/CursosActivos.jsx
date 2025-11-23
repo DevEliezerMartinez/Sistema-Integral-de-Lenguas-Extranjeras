@@ -291,7 +291,7 @@ function CursoActivo() {
       {/* Contenidos */}
       {loading ? (
         <div className="flex justify-center items-center h-48">
-          <Spin tip="Cargando cursos..." size="large" />
+          <Spin size="large" />
         </div>
       ) : (
         <div className="mt-8 pb-20">

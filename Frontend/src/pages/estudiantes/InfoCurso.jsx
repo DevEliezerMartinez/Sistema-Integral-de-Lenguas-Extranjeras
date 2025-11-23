@@ -92,7 +92,7 @@ function DetalleCurso() {
 
       {loading ? (
         <div className="flex justify-center py-10">
-          <Spin tip="Cargando detalles del curso..." size="large" />
+          <Spin size="large" />
         </div>
       ) : error ? (
         <Text type="danger">{error}</Text>

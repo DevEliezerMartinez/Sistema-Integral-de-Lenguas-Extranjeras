@@ -161,7 +161,7 @@ function Cursos() {
       {/* Contenidos */}
       {isLoading ? (
         <div className="flex justify-center items-center h-48">
-          <Spin tip="Cargando cursos..." size="large" />
+          <Spin size="large" />
         </div>
       ) : error ? (
         <p className="text-center text-red-600 font-medium">{error}</p>

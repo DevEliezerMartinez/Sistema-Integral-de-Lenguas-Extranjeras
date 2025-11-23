@@ -194,7 +194,7 @@ function Progreso() {
       {/* Contenido */}
       {loading ? (
         <div className="flex justify-center items-center h-48">
-          <Spin tip="Cargando cursos..." size="large" />
+          <Spin size="large" />
         </div>
       ) : cursosFiltrados.length === 0 ? (
         <p className="text-center mt-10 text-gray-500">

@@ -161,22 +161,41 @@ class Solicitudes extends Controller
         }
 
         // Obtener el usuario asociado al estudiante
-        $usuario = $estudiante->usuario; // Asumiendo que tienes una relación en el modelo Estudiante
+        $usuario = $estudiante->usuario;
+
+        // Obtener el curso asociado a la solicitud
+        $curso = $solicitud->curso;
 
         // Actualizar el estado de la solicitud a "Aceptada"
         $solicitud->status = 'Aceptada';
-        $solicitud->save(); // Guardar la solicitud
+        $solicitud->save();
 
-        // Obtener el curso asociado a la solicitud
-        $curso = $solicitud->curso; // Asegúrate de que tengas una relación en el modelo Solicitud
+        // Actualizar el historial de cursos del estudiante
+        $historial = json_decode($estudiante->historial_cursos, true) ?? [];
+
+        // Agregar el nuevo curso al historial
+        $historial[] = [
+            'curso_id' => $curso->id,
+            'nombre' => $curso->nombre,
+            'nivel' => $curso->nivel,
+            'modalidad' => $curso->modalidad,
+            'fecha_inicio' => $curso->fecha_inicio,
+            'fecha_fin' => $curso->fecha_fin,
+            'fecha_inscripcion' => $solicitud->fecha_inscripcion,
+            'docente' => $curso->docente ? $curso->docente->usuario->nombre : 'No disponible',
+        ];
+
+        // Guardar el historial actualizado
+        $estudiante->historial_cursos = json_encode($historial);
+        $estudiante->save();
 
         // Generar la notificación
         if ($usuario) {
             Notificacion::create([
-                'usuario_id' => $usuario->id, // ID del usuario asociado al estudiante
-                'mensaje' => "Tu solicitud para el curso '{$curso->nombre}' ha sido aprobada exitosamente.", // Incluye el nombre del curso
-                'fecha_notificacion' => now(), // Fecha actual
-                'estado' => 'No leída', // Establecer el estado de la notificación
+                'usuario_id' => $usuario->id,
+                'mensaje' => "Tu solicitud para el curso '{$curso->nombre}' ha sido aprobada exitosamente.",
+                'fecha_notificacion' => now(),
+                'estado' => 'No leída',
             ]);
         }
 
