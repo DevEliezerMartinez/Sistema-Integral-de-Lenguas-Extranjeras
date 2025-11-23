@@ -136,9 +136,12 @@ function Notificaciones() {
           </span>
         </div>
 
-        <Timeline className="mt-4">
-          {notificaciones.map((item) => (
-            <Timeline.Item key={item.id} color="blue">
+        <Timeline
+          className="mt-4"
+          items={notificaciones.map((item) => ({
+            key: item.id,
+            color: "blue",
+            children: (
               <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors duration-200 border border-gray-200">
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1">
@@ -149,6 +152,7 @@ function Notificaciones() {
                       {formatearFecha(item.fecha_notificacion)}
                     </p>
                   </div>
+
                   <Button
                     type="text"
                     danger
@@ -159,9 +163,9 @@ function Notificaciones() {
                   />
                 </div>
               </div>
-            </Timeline.Item>
-          ))}
-        </Timeline>
+            ),
+          }))}
+        />
       </div>
     </div>
   );

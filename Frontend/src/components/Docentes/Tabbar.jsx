@@ -17,7 +17,9 @@ function Tabbar() {
   ];
 
   const isActive = (path) => location.pathname === path;
-  const isCursosActive = isActive("/Docentes/CursosActivos") || isActive("/Docentes/CursosArchivados");
+  const isCursosActive =
+    isActive("/Docentes/CursosActivos") ||
+    isActive("/Docentes/CursosArchivados");
 
   return (
     <>
@@ -31,21 +33,17 @@ function Tabbar() {
 
         {/* Contenido del tabbar */}
         <div className="relative flex justify-around items-center px-2 py-3 safe-area-bottom">
-          
           {/* Tab Cursos con Dropdown */}
-          <Dropdown
-            menu={{ items }}
-            trigger={["click"]}
-            placement="topCenter"
-          >
+          <Dropdown menu={{ items }} trigger={["click"]} placement="top">
             <button
               className={`
                 relative flex flex-col items-center justify-center gap-1.5
                 min-w-[70px] py-2.5 px-3 rounded-2xl
                 transition-all duration-300 ease-out
-                ${isCursosActive 
-                  ? 'bg-white/15 scale-105 shadow-lg shadow-black/20' 
-                  : 'scale-100 active:scale-95'
+                ${
+                  isCursosActive
+                    ? "bg-white/15 scale-105 shadow-lg shadow-black/20"
+                    : "scale-100 active:scale-95"
                 }
               `}
               onClick={(e) => e.preventDefault()}
@@ -58,13 +56,14 @@ function Tabbar() {
                     src="/Opt/SVG/classroom.svg"
                     className={`
                       w-full h-full transition-all duration-300
-                      ${isCursosActive 
-                        ? 'brightness-110 scale-110' 
-                        : 'brightness-90 opacity-80'
+                      ${
+                        isCursosActive
+                          ? "brightness-110 scale-110"
+                          : "brightness-90 opacity-80"
                       }
                     `}
                   />
-                  
+
                   {/* Punto indicador activo */}
                   {isCursosActive && (
                     <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 animate-pulse" />
@@ -75,9 +74,10 @@ function Tabbar() {
                 <img
                   className={`
                     w-3 h-3 rotate-180 transition-all duration-300
-                    ${isCursosActive 
-                      ? 'brightness-110 opacity-100' 
-                      : 'brightness-90 opacity-70'
+                    ${
+                      isCursosActive
+                        ? "brightness-110 opacity-100"
+                        : "brightness-90 opacity-70"
                     }
                   `}
                   alt="dropdown"
@@ -86,14 +86,13 @@ function Tabbar() {
               </div>
 
               {/* Texto */}
-              <span className={`
+              <span
+                className={`
                 text-[10px] font-medium tracking-wide
                 transition-all duration-300
-                ${isCursosActive 
-                  ? 'text-white font-semibold' 
-                  : 'text-white/70'
-                }
-              `}>
+                ${isCursosActive ? "text-white font-semibold" : "text-white/70"}
+              `}
+              >
                 Cursos
               </span>
 
@@ -111,9 +110,10 @@ function Tabbar() {
               relative flex flex-col items-center justify-center gap-1.5
               min-w-[70px] py-2.5 px-3 rounded-2xl
               transition-all duration-300 ease-out
-              ${isActive("/Docentes/Perfil")
-                ? 'bg-white/15 scale-105 shadow-lg shadow-black/20' 
-                : 'scale-100 active:scale-95'
+              ${
+                isActive("/Docentes/Perfil")
+                  ? "bg-white/15 scale-105 shadow-lg shadow-black/20"
+                  : "scale-100 active:scale-95"
               }
             `}
           >
@@ -124,13 +124,14 @@ function Tabbar() {
                 src="/Opt/SVG/profile-.svg"
                 className={`
                   w-full h-full transition-all duration-300
-                  ${isActive("/Docentes/Perfil")
-                    ? 'brightness-110 scale-110' 
-                    : 'brightness-90 opacity-80'
+                  ${
+                    isActive("/Docentes/Perfil")
+                      ? "brightness-110 scale-110"
+                      : "brightness-90 opacity-80"
                   }
                 `}
               />
-              
+
               {/* Punto indicador activo */}
               {isActive("/Docentes/Perfil") && (
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 animate-pulse" />
@@ -138,14 +139,17 @@ function Tabbar() {
             </div>
 
             {/* Texto */}
-            <span className={`
+            <span
+              className={`
               text-[10px] font-medium tracking-wide
               transition-all duration-300
-              ${isActive("/Docentes/Perfil")
-                ? 'text-white font-semibold' 
-                : 'text-white/70'
+              ${
+                isActive("/Docentes/Perfil")
+                  ? "text-white font-semibold"
+                  : "text-white/70"
               }
-            `}>
+            `}
+            >
               Perfil
             </span>
 
@@ -162,9 +166,10 @@ function Tabbar() {
               relative flex flex-col items-center justify-center gap-1.5
               min-w-[70px] py-2.5 px-3 rounded-2xl
               transition-all duration-300 ease-out
-              ${isActive("/Docentes/Notificaciones")
-                ? 'bg-white/15 scale-105 shadow-lg shadow-black/20' 
-                : 'scale-100 active:scale-95'
+              ${
+                isActive("/Docentes/Notificaciones")
+                  ? "bg-white/15 scale-105 shadow-lg shadow-black/20"
+                  : "scale-100 active:scale-95"
               }
             `}
           >
@@ -175,13 +180,14 @@ function Tabbar() {
                 src="/Opt/SVG/notification.svg"
                 className={`
                   w-full h-full transition-all duration-300
-                  ${isActive("/Docentes/Notificaciones")
-                    ? 'brightness-110 scale-110' 
-                    : 'brightness-90 opacity-80'
+                  ${
+                    isActive("/Docentes/Notificaciones")
+                      ? "brightness-110 scale-110"
+                      : "brightness-90 opacity-80"
                   }
                 `}
               />
-              
+
               {/* Punto indicador activo */}
               {isActive("/Docentes/Notificaciones") && (
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 animate-pulse" />
@@ -189,14 +195,17 @@ function Tabbar() {
             </div>
 
             {/* Texto */}
-            <span className={`
+            <span
+              className={`
               text-[10px] font-medium tracking-wide
               transition-all duration-300
-              ${isActive("/Docentes/Notificaciones")
-                ? 'text-white font-semibold' 
-                : 'text-white/70'
+              ${
+                isActive("/Docentes/Notificaciones")
+                  ? "text-white font-semibold"
+                  : "text-white/70"
               }
-            `}>
+            `}
+            >
               Alertas
             </span>
 

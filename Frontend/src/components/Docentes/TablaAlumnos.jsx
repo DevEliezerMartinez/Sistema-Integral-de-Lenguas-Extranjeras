@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Table, Input, Button, Empty } from "antd";
 
 const TablaAlumnos = ({ alumnos, isLoading, onSaveGrade, esArchivado }) => {
-  console.log("🔍 Valor recibido de esArchivado:", esArchivado);
-  console.log("📋 Alumnos recibidos en la tabla:", alumnos);
-
   const [calificaciones, setCalificaciones] = useState([]);
 
   // Inicializa las calificaciones con los alumnos recibidos
