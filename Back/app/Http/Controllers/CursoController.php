@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class CursoController extends Controller
 {
@@ -119,10 +120,13 @@ class CursoController extends Controller
     public function showInfobyStudent($curso_id, $alumno_id)
     {
         // Buscar el curso por su ID y cargar la relación con las calificaciones del estudiante
-        $curso = Curso::with(['docente.usuario', 'calificaciones' => function ($query) use ($alumno_id) {
-            // Filtrar las calificaciones por el alumno específico
-            $query->where('alumno_id', $alumno_id);
-        }])->find($curso_id);
+        $curso = Curso::with([
+            'docente.usuario',
+            'calificaciones' => function ($query) use ($alumno_id) {
+                // Filtrar las calificaciones por el alumno específico
+                $query->where('alumno_id', $alumno_id);
+            }
+        ])->find($curso_id);
 
         // Verificar si el curso existe
         if (!$curso) {
@@ -223,6 +227,40 @@ class CursoController extends Controller
         }
     }
 
+    public function UnArchiveCourse($id)
+    {
+        // Buscar el curso por su ID y cargar la relación del docente
+        $curso = Curso::with('docente.usuario')->find($id);
+
+        // Verificar si el curso existe
+        if ($curso) {
+            // Cambiar el estado del curso a "Disponible"
+            $curso->estado = 'Disponible';
+
+            // Guardar los cambios en la base de datos
+            $curso->save();
+
+            // Crear la notificación para el usuario con ID 1
+            $notificacion = new Notificacion();
+            $notificacion->usuario_id = 1; // ID del usuario que recibirá la notificación
+            $notificacion->mensaje = "El curso '{$curso->nombre}' ha sido desarchivado y está disponible nuevamente.";
+            $notificacion->fecha_notificacion = now(); // Fecha y hora actuales
+            $notificacion->estado = "visible"; // Estado de la notificación
+            $notificacion->save();
+
+            // Respuesta exitosa
+            return response()->json([
+                'mensaje' => 'El curso ha sido desarchivado exitosamente y está disponible.',
+                'success' => true
+            ], 200);
+        } else {
+            return response()->json([
+                'error' => 'Curso no encontrado',
+                'success' => false
+            ], 404);
+        }
+    }
+
 
 
 
@@ -270,70 +308,73 @@ class CursoController extends Controller
     public function getCursosConEstudiantes()
     {
         try {
-            // Obtener todos los cursos con la relación de docentes
-            $cursos = Curso::with('docente.usuario')->get();
+            // Obtener todos los cursos con su docente (si existe)
+            $cursos = Curso::with(['docente.usuario'])->get();
 
-            // Verificar si se encontraron cursos
+            // Si no hay cursos
             if ($cursos->isEmpty()) {
                 return response()->json([
-                    'success' => true,  // No hubo error, pero no se encontraron cursos
+                    'success' => true,
                     'mensaje' => 'No se encontraron cursos.',
-                    'cursos' => []  // Devuelve un array vacío en lugar de null
+                    'cursos' => []
                 ], 200);
             }
 
-            // Mapear la respuesta con los datos correctos
             $cursosConEstudiantes = $cursos->map(function ($curso) {
-                // Obtener las solicitudes aceptadas para cada curso
+
+                // Solicitudes aceptadas del curso
                 $solicitudes = Solicitud::where('curso_id', $curso->id)
                     ->where('status', 'Aceptada')
                     ->with('alumno.usuario')
                     ->get();
 
-                // Mapear las solicitudes para obtener los datos de los estudiantes
+                // Listado de estudiantes
                 $estudiantes = $solicitudes->map(function ($solicitud) {
+
                     return [
-                        'ID_Inscripcion' => $solicitud->alumno->id ?? 'No disponible',  // ID del estudiante
+                        'ID_Inscripcion' => $solicitud->alumno->id ?? null,
                         'Nombre_Alumno' => $solicitud->alumno->usuario->nombre ?? 'No disponible',
                         'Apellidos_Alumno' => $solicitud->alumno->usuario->apellidos ?? 'No disponible',
-                        'Fecha_Inscripcion' => $solicitud->fecha_inscripcion ?? 'No disponible',
+                        'Fecha_Inscripcion' => $solicitud->fecha_inscripcion ?? null,
                         'Estado_Solicitud' => $solicitud->status ?? 'No disponible',
-                        'PDF_Solicitud' => $solicitud->pdf ?? 'No disponible'
+                        'PDF_Solicitud' => $solicitud->pdf ?: null, // null si esta vacío
                     ];
                 });
 
-                // Retornar los datos del curso con su docente y estudiantes
                 return [
                     'Curso' => [
                         'ID' => $curso->id,
-                        'Nombre' => $curso->nombre,
-                        'Descripcion' => $curso->descripcion,
-                        'Fecha_Inicio' => $curso->fecha_inicio,
-                        'Fecha_Fin' => $curso->fecha_fin,
-                        'Horario' => $curso->horario,
+                        'Nombre' => $curso->nombre ?? 'Sin nombre',
+                        'Descripcion' => $curso->descripcion ?? 'Sin descripción',
+                        'Fecha_Inicio' => $curso->fecha_inicio ?? null,
+                        'Fecha_Fin' => $curso->fecha_fin ?? null,
+                        'Horario' => $curso->horario ?? 'No disponible',
+
                         'Docente' => $curso->docente ? [
                             'ID' => $curso->docente->id,
                             'Nombre' => $curso->docente->usuario->nombre ?? 'No disponible',
                             'Apellidos' => $curso->docente->usuario->apellidos ?? 'No disponible',
-                        ] : 'No disponible',
+                        ] : null,
                     ],
+
                     'Estudiantes' => $estudiantes
                 ];
             });
 
             return response()->json([
-                'success' => true,  // Operación exitosa
+                'success' => true,
                 'cursos' => $cursosConEstudiantes
             ], 200);
+
         } catch (\Exception $e) {
-            // Manejar cualquier error inesperado
             return response()->json([
-                'success' => false,  // Operación fallida
-                'mensaje' => 'Ocurrió un error al intentar obtener los cursos con estudiantes.',
+                'success' => false,
+                'mensaje' => 'Ocurrió un error al obtener los cursos con estudiantes.',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
+
 
 
 
@@ -448,15 +489,16 @@ class CursoController extends Controller
     // Método para obtener todos los cursos activos
     public function active()
     {
-        // Obtener todos los cursos cuyo estado sea "Disponible" o "En curso"
         $cursosActivos = Curso::whereIn('estado', ['Disponible', 'En curso'])->get();
 
-        // Verificar si hay cursos activos
         if ($cursosActivos->isEmpty()) {
-            return response()->json(['message' => 'No hay cursos activos en este momento'], 404);
+            // Retornar 200 con array vacío, no 404
+            return response()->json([
+                'message' => 'No hay cursos activos en este momento',
+                'cursos' => []
+            ], 200);
         }
 
-        // Responder con una respuesta JSON
         return response()->json(['cursos' => $cursosActivos], 200);
     }
 }

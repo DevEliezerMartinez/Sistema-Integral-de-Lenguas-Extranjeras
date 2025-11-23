@@ -1,46 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { Breadcrumb, Divider } from "antd";
+import { Breadcrumb, Divider, message } from "antd";
 import { Link, useParams } from "react-router-dom";
+import client from "../../axios";
 
 function DetalleAlumno() {
-  const { AlumnoId } = useParams(); // Usa el nombre del parámetro de la URL
-  const [alumno, setAlumno] = useState(null); // Estado para almacenar los detalles del alumno
-  const [loading, setLoading] = useState(true); // Estado para manejar el loading
-  const [error, setError] = useState(null); // Estado para manejar errores
+  const { AlumnoId } = useParams();
+  const [alumno, setAlumno] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log("ID desde useParams:", AlumnoId); // Verifica que el id se está capturando
+    console.log("ID desde useParams:", AlumnoId);
+
     const fetchAlumno = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const response = await client.get(`/api/estudiante/${AlumnoId}`);
+        console.log("Respuesta API:", response.data);
 
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/estudiante/${AlumnoId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "*/*",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        // Verifica si la respuesta es exitosa
-        if (!response.ok) {
-          throw new Error('Error en la respuesta de la API');
-        }
-
-        const data = await response.json(); // Obtén los datos de la respuesta
-        console.log("Respuesta de la API:", data); // Verifica la respuesta de la API
-        setAlumno(data.estudiante); // Ajusta esta línea si la estructura de datos es diferente
-        setLoading(false);
+        setAlumno(response.data.estudiante);
       } catch (err) {
-        console.log(
-          "Error en la petición:",
-          err.response ? err.response.data : err.message
-        ); // Verifica el error
         setError("Error al cargar los datos del estudiante.");
+        message.error("Error al cargar los datos del estudiante.");
+      } finally {
         setLoading(false);
       }
     };
@@ -50,13 +31,8 @@ function DetalleAlumno() {
     }
   }, [AlumnoId]);
 
-  if (loading) {
-    return <p>Cargando...</p>; // Muestra un mensaje mientras los datos están cargando
-  }
-
-  if (error) {
-    return <p>{error}</p>; // Muestra el error si ocurrió alguno
-  }
+  if (loading) return <p>Cargando...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div className="px-4">
@@ -66,65 +42,55 @@ function DetalleAlumno() {
             title: <p className="font-medium text-black">Coordinador</p>,
           },
           {
-            title: <a href="">Detalle Alumno</a>,
+            title: "Detalle Alumno",
           },
         ]}
       />
-      <div id="Card" className="bg-slate-100 p-2 md:mx-16 md:p-16 ">
-        <div id="cardContent" className="flex flex-col items-center">
-          <div
-            id="headerCard"
-            className="w-full flex justify-between items-center"
-          >
-            <div id="Actions" className="self-start flex gap-2">
-              <img alt="icon" className="w-4" src="/Opt//SVG/LighArrow.svg" />
+
+      <div className="bg-slate-100 p-2 md:mx-16 md:p-16">
+        <div className="flex flex-col items-center">
+          <div className="w-full flex justify-between items-center">
+            <div className="flex gap-2">
+              <img alt="icon" className="w-4" src="/Opt/SVG/LighArrow.svg" />
               <Link to="/Coordinador/Alumnos" className="Popins font-semibold">
                 Volver
               </Link>
             </div>
+
             <h3 className="Montserrat font-extralight text-2xl">
               Detalles del Alumno
             </h3>
-            <img alt="icon" className="w-8" src="/Opt//SVG/info.svg" />
+
+            <img alt="info" className="w-8" src="/Opt/SVG/info.svg" />
           </div>
+
           <Divider />
-          {/* Información del alumno */}
-          <h2 className="Montserrat font-bold self-start text-2xl text-center">
+
+          <h2 className="Montserrat font-bold self-start text-2xl">
             {alumno.nombre} {alumno.apellidos}
           </h2>
-          <section id="Archivos" className="p-3"></section>
-          <div className="flex flex-col w-full gap-2">
-            <p className="Montserrat">
-              <span className="font-semibold">Carrera:</span> {alumno.carrera}
-            </p>
-            <p className="Montserrat">
-              <span className="font-semibold">Género:</span> {alumno.genero}
-            </p>
-            <p className="Montserrat">
-              <span className="font-semibold">Teléfono:</span> {alumno.telefono}
-            </p>
-            <p className="Montserrat">
-              <span className="font-semibold">CURP:</span> {alumno.curp}
-            </p>
-            <p className="Montserrat">
-              <span className="font-semibold">Domicilio:</span>{" "}
-              {alumno.domicilio}
-            </p>
-            <p className="Montserrat">
-              <span className="font-semibold">Correo:</span>{" "}
-              {alumno.correo_electronico}
-            </p>
-            <p className="Montserrat">
-              <span className="font-semibold">Historial de Cursos:</span>{" "}
-              {alumno.historial_cursos}
-            </p>
-            <p className="Montserrat">
-              <span className="font-semibold">Perfil:</span> {alumno.perfil}
-            </p>
+
+          <div className="flex flex-col w-full gap-2 mt-4">
+            <Info label="Carrera" value={alumno.carrera} />
+            <Info label="Género" value={alumno.genero} />
+            <Info label="Teléfono" value={alumno.telefono} />
+            <Info label="CURP" value={alumno.curp} />
+            <Info label="Domicilio" value={alumno.domicilio} />
+            <Info label="Correo" value={alumno.correo_electronico} />
+            <Info label="Historial de Cursos" value={alumno.historial_cursos} />
+            <Info label="Perfil" value={alumno.perfil} />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function Info({ label, value }) {
+  return (
+    <p className="Montserrat">
+      <span className="font-semibold">{label}:</span> {value}
+    </p>
   );
 }
 

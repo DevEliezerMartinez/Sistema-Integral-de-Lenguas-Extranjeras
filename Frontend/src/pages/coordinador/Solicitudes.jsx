@@ -15,14 +15,15 @@ import {
 } from "antd";
 import {
   SearchOutlined,
+  UserOutlined,
+  FileTextOutlined,
+  DownloadOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  FileTextOutlined,
-  CalendarOutlined,
-  UserOutlined,
   BookOutlined,
-  DownloadOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
+import client from "../../axios.js";
 
 const { Panel } = Collapse;
 
@@ -38,22 +39,9 @@ function Solicitudes() {
 
   const fetchSolicitudes = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/solicitudes`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            Accept: "*/*",
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await client.get("/api/solicitudes");
+      const data = response.data;
 
-      if (!response.ok) {
-        throw new Error("Error al obtener solicitudes");
-      }
-
-      const data = await response.json();
       if (data.success && data.solicitudes) {
         setSolicitudes(data.solicitudes);
         setFilteredSolicitudes(data.solicitudes);
@@ -66,8 +54,6 @@ function Solicitudes() {
     }
   };
 
-  // --- CORRECCIÓN 1: Función formatDate definida ---
-  // El código de formato de fecha estaba fuera de una función.
   const formatDate = (dateString) => {
     if (!dateString) return "Fecha no especificada";
     const date = new Date(dateString);
@@ -78,21 +64,15 @@ function Solicitudes() {
     });
   };
 
-  // --- CORRECCIÓN 2: Función groupByCourse definida ---
-  // Esta función era necesaria para agrupar las solicitudes por curso
-  // para el componente Collapse.
   const groupByCourse = (solicitudes) => {
     if (!solicitudes) return [];
 
     const groups = solicitudes.reduce((acc, solicitud) => {
-      // Usamos Nombre_Curso como la clave para agrupar
       const courseName = solicitud.Nombre_Curso || "Curso Desconocido";
 
       if (!acc[courseName]) {
-        // Si es la primera vez que vemos este curso, creamos el grupo
         acc[courseName] = {
           curso: courseName,
-          // Asumimos que estos datos vienen en cada objeto de solicitud
           docente:
             `${solicitud.Nombre_Docente || ""} ${
               solicitud.Apellidos_Docente || ""
@@ -101,16 +81,14 @@ function Solicitudes() {
           modalidad: solicitud.Modalidad_Curso || "N/A",
           fechaInicio: solicitud.Fecha_Inicio_Curso,
           fechaFin: solicitud.Fecha_Fin_Curso,
-          estudiantes: [], // Array para guardar los estudiantes de este curso
+          estudiantes: [],
         };
       }
 
-      // Añadimos la solicitud (estudiante) al grupo correspondiente
       acc[courseName].estudiantes.push(solicitud);
       return acc;
-    }, {}); // El acumulador inicial es un objeto vacío
+    }, {});
 
-    // Convertimos el objeto de grupos (clave: valor) en un array de valores
     return Object.values(groups);
   };
 
@@ -124,36 +102,21 @@ function Solicitudes() {
       onOk: async () => {
         setProcessingId(idInscripcion);
 
-        fetch(
-          `${
-            import.meta.env.VITE_API_URL
-          }/api/solicitudes/${idInscripcion}/aceptar`,
-          {
-            method: "POST",
-            body: JSON.stringify({}),
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              Accept: "*/*",
-              "Content-Type": "application/json",
-            },
-          }
-        )
-          .then(() => {
-            message.success(
-              "Solicitud aprobada correctamente. El estudiante será notificado."
-            );
-            fetchSolicitudes();
-          })
-          .catch((err) => {
-            console.error("Error al aprobar solicitud:", err);
-            const errorMsg =
-              err.response?.data?.message ||
-              "No se pudo procesar la aprobación. Inténtalo de nuevo más tarde.";
-            message.error(errorMsg);
-          })
-          .finally(() => {
-            setProcessingId(null);
-          });
+        try {
+          await client.post(`/api/solicitudes/${idInscripcion}/aceptar`);
+          message.success(
+            "Solicitud aprobada correctamente. El estudiante será notificado."
+          );
+          fetchSolicitudes();
+        } catch (err) {
+          console.error("Error al aprobar solicitud:", err);
+          const errorMsg =
+            err.response?.data?.message ||
+            "No se pudo procesar la aprobación. Inténtalo de nuevo más tarde.";
+          message.error(errorMsg);
+        } finally {
+          setProcessingId(null);
+        }
       },
     });
   };
@@ -190,27 +153,12 @@ function Solicitudes() {
 
         setProcessingId(idInscripcion);
         try {
-          const response = await fetch(
-            `${
-              import.meta.env.VITE_API_URL
-            }/api/solicitudes/${idInscripcion}/rechazar`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ motivo: motivoRechazo }),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error("Error al rechazar solicitud");
-          }
+          await client.post(`/api/solicitudes/${idInscripcion}/rechazar`, {
+            motivo: motivoRechazo,
+          });
 
           message.success("Solicitud rechazada correctamente");
-          fetchSolicitudes(); // Recargar datos
+          fetchSolicitudes();
         } catch (error) {
           console.error("Error al rechazar solicitud:", error);
           message.error("Error al rechazar la solicitud");
@@ -223,10 +171,9 @@ function Solicitudes() {
 
   const handleVerPDF = (pdfUrl) => {
     if (!pdfUrl) {
-        message.error("No se encontró el archivo PDF.");
-        return;
+      message.error("No se encontró el archivo PDF.");
+      return;
     }
-    // Extraer solo el nombre del archivo (alumno_2_curso_1_20251109.pdf)
     const fileName = pdfUrl.split("/").pop();
     const fullUrl = `${import.meta.env.VITE_API_URL}/storage/pdfs/${fileName}`;
     window.open(fullUrl, "_blank");
@@ -234,18 +181,17 @@ function Solicitudes() {
 
   const handleDescargarPDF = (pdfUrl, nombreAlumno, nombreCurso) => {
     if (!pdfUrl) {
-        message.error("No se encontró el archivo PDF.");
-        return;
+      message.error("No se encontró el archivo PDF.");
+      return;
     }
-    // Extraer solo el nombre del archivo
     const fileName = pdfUrl.split("/").pop();
     const fullUrl = `${import.meta.env.VITE_API_URL}/storage/pdfs/${fileName}`;
 
-    // Crear un nombre descriptivo para la descarga
-    const downloadName =
-      `solicitud_${nombreAlumno}_${nombreCurso}.pdf`.replace(/\s+/g, "_");
+    const downloadName = `solicitud_${nombreAlumno}_${nombreCurso}.pdf`.replace(
+      /\s+/g,
+      "_"
+    );
 
-    // Crear link temporal para descargar
     const link = document.createElement("a");
     link.href = fullUrl;
     link.download = downloadName;
@@ -344,7 +290,6 @@ function Solicitudes() {
     },
   ];
 
-  // Ahora estas funciones existen y esta línea funcionará
   const cursosAgrupados = groupByCourse(filteredSolicitudes);
   const totalPendientes = solicitudes.filter(
     (s) => s.Estado_Solicitud === "Pendiente"
@@ -352,7 +297,6 @@ function Solicitudes() {
 
   return (
     <div className="min-h-[50vh] mb-52">
-      {/* Breadcrumb */}
       <Breadcrumb
         items={[
           { title: <p className="font-medium text-black">Coordinador</p> },
@@ -377,7 +321,6 @@ function Solicitudes() {
         Gestiona las solicitudes de inscripción de los estudiantes.
       </p>
 
-      {/* Contenido */}
       {loading ? (
         <div className="flex justify-center items-center h-48">
           <Spin tip="Cargando solicitudes..." size="large" />

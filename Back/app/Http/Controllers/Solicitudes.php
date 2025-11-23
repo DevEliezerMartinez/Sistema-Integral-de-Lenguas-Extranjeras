@@ -75,7 +75,7 @@ class Solicitudes extends Controller
                 ->get();
 
             if ($solicitudes->isEmpty()) {
-                return response()->json(['error' => 'No se encontraron solicitudes aceptadas para este curso'], 404);
+                return response()->json([]); // lista vacía
             }
 
             // Mapear la respuesta con los datos correctos
@@ -105,25 +105,25 @@ class Solicitudes extends Controller
     {
         // Buscar la solicitud por ID
         $solicitud = Solicitud::find($solicitud_id);
-    
+
         // Verificar si la solicitud existe
         if (!$solicitud) {
             return response()->json(['error' => 'Solicitud no encontrada'], 404);
         }
-    
+
         // Actualizar el estado de la solicitud a "Rechazada"
         $solicitud->status = 'Rechazada';
-    
+
         // Guardar el motivo de rechazo (opcional)
         if ($request->has('motivo')) {
             $solicitud->notas = $request->input('motivo');
         }
-    
+
         $solicitud->save();
-    
+
         // Obtener el estudiante asociado a la solicitud
         $estudiante = $solicitud->alumno;
-    
+
         // Enviar notificación al estudiante con el motivo de rechazo
         if ($estudiante) {
             // Notificar al estudiante
@@ -134,7 +134,7 @@ class Solicitudes extends Controller
                 'estado' => 'No leída', // Establecer el estado de la notificación
             ]);
         }
-    
+
         // Responder con éxito
         return response()->json([
             'mensaje' => 'La solicitud ha sido rechazada exitosamente.',
@@ -192,102 +192,112 @@ class Solicitudes extends Controller
 
 
 
-   public function create(Request $request)
-{
-    // Validación de los campos (aumentado a 5MB para comprobantes de pago)
-    try {
-        $validated = $request->validate([
-            'curso_id' => 'required|exists:cursos,id',
-            'alumno_id' => 'required|exists:estudiantes,id',
-            'fecha_inscripcion' => 'required|date',
-            'file' => 'required|file|mimes:pdf|max:5120', // 5MB para comprobantes
-        ], [
-            'file.max' => 'El archivo PDF no debe superar los 5MB.',
-            'file.mimes' => 'El archivo debe ser un PDF válido.',
-            'file.uploaded' => 'Error al cargar el archivo. Verifica el tamaño y la conexión.',
-            'file.required' => 'Debes adjuntar el comprobante de pago en PDF.',
-        ]);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'message' => 'Errores de validación.',
-            'errors' => $e->validator->errors(),
-            'success' => false,
-        ], 422);
-    }
-
-    // Verificar si ya existe una solicitud pendiente o aceptada para el mismo curso y alumno
-    $existingSolicitud = Solicitud::where('curso_id', $validated['curso_id'])
-        ->where('alumno_id', $validated['alumno_id'])
-        ->whereIn('status', ['Pendiente', 'Aceptada'])
-        ->first();
-
-    if ($existingSolicitud) {
-        return response()->json([
-            'message' => 'Ya existe una solicitud Pendiente o Aceptada para este curso.',
-            'success' => false,
-        ], 409);
-    }
-
-    // Verificar que el archivo existe (redundante pero seguro)
-    if (!$request->hasFile('file')) {
-        return response()->json([
-            'message' => 'No se recibió ningún archivo.',
-            'success' => false
-        ], 400);
-    }
-
-    $file = $request->file('file');
-
-    // Verificar que el archivo se cargó correctamente
-    if (!$file->isValid()) {
-        return response()->json([
-            'message' => 'El archivo no se cargó correctamente. Intenta nuevamente.',
-            'success' => false,
-        ], 400);
-    }
-
-    // Crear un nombre de archivo único
-    $fileName = 'alumno_' . $validated['alumno_id'] . 
-                '_curso_' . $validated['curso_id'] . 
-                '_' . date('Ymd', strtotime($validated['fecha_inscripcion'])) . 
-                '.pdf';
-
-    try {
-        // Guardar el archivo con el nuevo nombre en la carpeta 'pdfs'
-        $filePath = $file->storeAs('pdfs', $fileName, 'public');
-
-        if (!$filePath) {
-            throw new \Exception('No se pudo guardar el archivo en el servidor.');
+    public function create(Request $request)
+    {
+        if ($request->hasFile('file') && $request->file('file')->getError() === UPLOAD_ERR_INI_SIZE) {
+            return response()->json([
+                'message' => 'El archivo es demasiado grande.',
+                'error' => 'El tamaño máximo permitido es 5MB. Tu archivo excede el límite del servidor.',
+                'success' => false,
+            ], 413); // 413 Payload Too Large
         }
 
-        // Crear la solicitud con la ruta del archivo
-        $solicitud = Solicitud::create([
-            'curso_id' => $validated['curso_id'],
-            'alumno_id' => $validated['alumno_id'],
-            'status' => 'Pendiente',
-            'fecha_inscripcion' => $validated['fecha_inscripcion'],
-            'pdf' => $filePath,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Solicitud creada exitosamente.',
-            'solicitud' => $solicitud
-        ], 201);
-
-    } catch (\Exception $e) {
-        // Si algo falla, eliminar el archivo si se guardó
-        if (isset($filePath) && Storage::disk('public')->exists($filePath)) {
-            Storage::disk('public')->delete($filePath);
+        // Si no hay archivo y tampoco es error de tamaño, puede ser error de red o formulario
+        if (!$request->hasFile('file')) {
+            return response()->json([
+                'message' => 'No se recibió ningún archivo.',
+                'error' => 'Verifica que hayas seleccionado un archivo PDF válido y que tu conexión sea estable.',
+                'success' => false,
+            ], 400);
         }
 
-        return response()->json([
-            'message' => 'Ocurrió un error al crear la solicitud.',
-            'error' => $e->getMessage(),
-            'success' => false,
-        ], 500);
+        // Validación de los campos
+        try {
+            $validated = $request->validate([
+                'curso_id' => 'required|exists:cursos,id',
+                'alumno_id' => 'required|exists:estudiantes,id',
+                'fecha_inscripcion' => 'required|date',
+                'file' => 'required|file|mimes:pdf|max:5120', // 5MB
+            ], [
+                'file.max' => 'El archivo PDF no debe superar los 5MB.',
+                'file.mimes' => 'El archivo debe ser un PDF válido.',
+                'file.uploaded' => 'Error al cargar el archivo. Verifica el tamaño y la conexión.',
+                'file.required' => 'Debes adjuntar el comprobante de pago en PDF.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Errores de validación.',
+                'errors' => $e->validator->errors(),
+                'success' => false,
+            ], 422);
+        }
+
+        // Verificar si ya existe una solicitud
+        $existingSolicitud = Solicitud::where('curso_id', $validated['curso_id'])
+            ->where('alumno_id', $validated['alumno_id'])
+            ->whereIn('status', ['Pendiente', 'Aceptada'])
+            ->first();
+
+        if ($existingSolicitud) {
+            return response()->json([
+                'message' => 'Ya existe una solicitud Pendiente o Aceptada para este curso.',
+                'success' => false,
+            ], 409);
+        }
+
+        $file = $request->file('file');
+
+        // Verificar que el archivo se cargó correctamente
+        if (!$file->isValid()) {
+            return response()->json([
+                'message' => 'El archivo no se cargó correctamente.',
+                'error' => 'Código de error: ' . $file->getError(),
+                'success' => false,
+            ], 400);
+        }
+
+        // Crear un nombre de archivo único
+        $fileName = 'alumno_' . $validated['alumno_id'] .
+            '_curso_' . $validated['curso_id'] .
+            '_' . date('Ymd', strtotime($validated['fecha_inscripcion'])) .
+            '.pdf';
+
+        try {
+            // Guardar el archivo
+            $filePath = $file->storeAs('pdfs', $fileName, 'public');
+
+            if (!$filePath) {
+                throw new \Exception('No se pudo guardar el archivo en el servidor.');
+            }
+
+            // Crear la solicitud
+            $solicitud = Solicitud::create([
+                'curso_id' => $validated['curso_id'],
+                'alumno_id' => $validated['alumno_id'],
+                'status' => 'Pendiente',
+                'fecha_inscripcion' => $validated['fecha_inscripcion'],
+                'pdf' => $filePath,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Solicitud creada exitosamente.',
+                'solicitud' => $solicitud
+            ], 201);
+
+        } catch (\Exception $e) {
+            // Limpiar archivo si hubo error
+            if (isset($filePath) && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+
+            return response()->json([
+                'message' => 'Ocurrió un error al crear la solicitud.',
+                'error' => $e->getMessage(),
+                'success' => false,
+            ], 500);
+        }
     }
-}
 }

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { Breadcrumb, Timeline, message, Pagination } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from "react";
+import { Breadcrumb, Timeline, message, Pagination } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
+import client from "../../axios";
 
 function Notificaciones() {
   const [notificaciones, setNotificaciones] = useState([]);
@@ -27,74 +28,57 @@ function Notificaciones() {
 
   const fetchNotificaciones = async () => {
     const usuario = JSON.parse(localStorage.getItem("usuario"));
-    const token = localStorage.getItem("token");
-    if (!usuario || !token) {
-      message.error("No se encontró el usuario o el token.");
+    if (!usuario) {
+      message.error("No se encontró el usuario.");
       return;
     }
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/notificaciones/${usuario.id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setSuccess(data.success);
-        setNotificaciones(data.notificaciones || []);
-      } else {
-        setSuccess(false);
-        message.error(data.message || "Error al cargar las notificaciones");
-      }
+      const response = await client.get(
+        `/api/users/notificaciones/${usuario.id}`
+      );
+      const data = response.data;
+
+      setSuccess(true);
+      setNotificaciones(data.notificaciones || []);
     } catch (error) {
       setSuccess(false);
-      message.error("Ocurrió un error al cargar las notificaciones.");
+      message.error(
+        error.response?.data?.message ||
+          "Ocurrió un error al cargar las notificaciones."
+      );
     }
   };
 
   const handleDelete = async (id) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      message.error("Token no encontrado, por favor inicia sesión.");
-      return;
-    }
-
     const hide = message.loading("Eliminando notificación...", 0);
     setLoadingDeleteId(id);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/notificaciones/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await client.delete(`/api/users/notificaciones/${id}`);
 
       hide();
       setLoadingDeleteId(null);
 
-      if (response.ok) {
-        message.success("Notificación eliminada correctamente");
-        const nuevas = notificaciones.filter(n => n.id !== id);
-        setNotificaciones(nuevas);
-        const totalPages = Math.ceil(nuevas.length / pageSize);
-        if (page > totalPages && totalPages > 0) setPage(totalPages);
-      } else {
-        const errorData = await response.json();
-        message.error(errorData.message || "Error al eliminar la notificación");
-      }
+      message.success("Notificación eliminada correctamente");
+      const nuevas = notificaciones.filter((n) => n.id !== id);
+      setNotificaciones(nuevas);
+      const totalPages = Math.ceil(nuevas.length / pageSize);
+      if (page > totalPages && totalPages > 0) setPage(totalPages);
     } catch (error) {
       hide();
       setLoadingDeleteId(null);
-      message.error("Ocurrió un error al eliminar la notificación");
+      message.error(
+        error.response?.data?.message ||
+          "Ocurrió un error al eliminar la notificación"
+      );
     }
   };
 
   // Paginación
-  const paginatedData = notificaciones.slice((page - 1) * pageSize, page * pageSize);
+  const paginatedData = notificaciones.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
 
   // Construcción de items para Timeline
   const timelineItems = !success
@@ -113,16 +97,22 @@ function Notificaciones() {
         children: (
           <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl shadow-sm flex justify-between items-start hover:shadow-md transition-all">
             <div>
-              <p className="font-medium text-gray-800 leading-tight">{notificacion.mensaje}</p>
+              <p className="font-medium text-gray-800 leading-tight">
+                {notificacion.mensaje}
+              </p>
               <p className="text-xs text-gray-500 mt-1 italic">
                 {formatearFecha(notificacion.fecha_notificacion)}
               </p>
             </div>
             <DeleteOutlined
               className={`cursor-pointer text-lg ${
-                loadingDeleteId === notificacion.id ? "text-gray-400 cursor-not-allowed" : "text-red-500 hover:text-red-700"
+                loadingDeleteId === notificacion.id
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-red-500 hover:text-red-700"
               }`}
-              onClick={() => (loadingDeleteId ? null : handleDelete(notificacion.id))}
+              onClick={() =>
+                loadingDeleteId ? null : handleDelete(notificacion.id)
+              }
             />
           </div>
         ),
@@ -146,7 +136,9 @@ function Notificaciones() {
         ]}
       />
 
-      <h2 className="Montserrat font-medium text-2xl text-center mt-3">Mis Notificaciones</h2>
+      <h2 className="Montserrat font-medium text-2xl text-center mt-3">
+        Mis Notificaciones
+      </h2>
 
       <Timeline className="mt-8 px-4" items={timelineItems} />
 

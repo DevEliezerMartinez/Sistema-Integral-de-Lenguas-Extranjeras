@@ -6,13 +6,16 @@ import {
   BarsOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import client from "../../axios.js";
 
 // Card para CUADRÍCULA
 const CardGrid = ({ curso, formatDate }) => (
   <div className="border rounded-xl bg-white w-full md:w-full p-5 flex flex-col items-center shadow-sm hover:shadow-md transition">
     <img alt="libro" src="/Opt/SVG/book.svg" className="w-20 opacity-90" />
     <Divider />
-    <p className="font-semibold text-gray-800 text-lg text-center">{curso.nombre}</p>
+    <p className="font-semibold text-gray-800 text-lg text-center">
+      {curso.nombre}
+    </p>
 
     <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded mt-2">
       Curso archivado
@@ -30,9 +33,7 @@ const CardGrid = ({ curso, formatDate }) => (
             <span className="block">
               {formatDate(curso.periodo.fecha_inicio)}
             </span>
-            <span className="block">
-              {formatDate(curso.periodo.fecha_fin)}
-            </span>
+            <span className="block">{formatDate(curso.periodo.fecha_fin)}</span>
           </>
         ) : (
           "Desconocido"
@@ -41,10 +42,7 @@ const CardGrid = ({ curso, formatDate }) => (
     </div>
 
     <Link to={`/Coordinador/Cursos/${curso.id}`}>
-      <Button
-        type="primary"
-        className="bg-[#1B396A] mt-4 hover:bg-[#244b8a]"
-      >
+      <Button type="primary" className="bg-[#1B396A] mt-4 hover:bg-[#244b8a]">
         Detalles
       </Button>
     </Link>
@@ -70,17 +68,15 @@ const CardList = ({ curso, formatDate }) => (
         {curso.periodo && (
           <p className="text-sm text-gray-600">
             <span className="font-medium">Periodo:</span>{" "}
-            {formatDate(curso.periodo.fecha_inicio)} - {formatDate(curso.periodo.fecha_fin)}
+            {formatDate(curso.periodo.fecha_inicio)} -{" "}
+            {formatDate(curso.periodo.fecha_fin)}
           </p>
         )}
       </div>
     </div>
 
     <Link to={`/Coordinador/Cursos/${curso.id}`}>
-      <Button
-        type="primary"
-        className="bg-[#1B396A] hover:bg-[#244b8a]"
-      >
+      <Button type="primary" className="bg-[#1B396A] hover:bg-[#244b8a]">
         Ver más
       </Button>
     </Link>
@@ -98,23 +94,8 @@ function CursosArchivados() {
   useEffect(() => {
     const fetchCursosArchivados = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/cursosArchivados`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              Accept: "*/*",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
+        const response = await client.get("/api/cursosArchivados");
+        const data = response.data;
 
         if (data.cursos && data.cursos.length > 0) {
           setCursos(data.cursos);
@@ -125,7 +106,7 @@ function CursosArchivados() {
         }
       } catch (error) {
         console.error("Error fetching cursos archivados:", error);
-        setError(error.message);
+        setError(error.response?.data?.message || error.message);
       } finally {
         setLoading(false);
       }
@@ -210,9 +191,9 @@ function CursosArchivados() {
               {cursos.length > 0 ? (
                 filteredCursos.length > 0 ? (
                   filteredCursos.map((curso) => (
-                    <CardGrid 
-                      curso={curso} 
-                      key={curso.id} 
+                    <CardGrid
+                      curso={curso}
+                      key={curso.id}
                       formatDate={formatDate}
                     />
                   ))
@@ -237,8 +218,8 @@ function CursosArchivados() {
               {cursos.length > 0 ? (
                 filteredCursos.length > 0 ? (
                   filteredCursos.map((curso) => (
-                    <CardList 
-                      curso={curso} 
+                    <CardList
+                      curso={curso}
                       key={curso.id}
                       formatDate={formatDate}
                     />

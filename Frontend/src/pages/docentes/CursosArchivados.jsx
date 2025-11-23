@@ -1,11 +1,4 @@
-import {
-  Breadcrumb,
-  Button,
-  Input,
-  Switch,
-  Tag,
-  message,
-} from "antd";
+import { Breadcrumb, Button, Input, Switch, Tag, message } from "antd";
 import React, { useState, useEffect } from "react";
 import {
   AppstoreOutlined,
@@ -13,6 +6,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import client from "../../axios.js";
 
 function CursoArchivado() {
   const [cursos, setCursos] = useState([]);
@@ -41,23 +35,13 @@ function CursoArchivado() {
 
   useEffect(() => {
     const fetchCursosArchivados = async () => {
-      const token = localStorage.getItem("token");
-      if (!docente || !token) return;
+      if (!docente) return;
 
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/cursosArchivados/${docente.id}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        const response = await client.get(
+          `/api/cursosArchivados/${docente.id}`
         );
-
-        if (!response.ok) throw new Error("Error en la red");
-        const data = await response.json();
+        const data = response.data;
 
         const lista = Array.isArray(data.cursos)
           ? data.cursos
@@ -88,7 +72,11 @@ function CursoArchivado() {
       <Tag color="red" className="absolute top-3 right-3 font-medium">
         Archivado
       </Tag>
-      <img alt="libro" src="/Opt/SVG/book.svg" className="w-20 opacity-90 mb-3" />
+      <img
+        alt="libro"
+        src="/Opt/SVG/book.svg"
+        className="w-20 opacity-90 mb-3"
+      />
       <p className="font-semibold text-gray-800 text-center">{curso.nombre}</p>
       <p className="text-sm text-gray-600 text-center mt-1">
         Periodo: {formatearFecha(curso.fecha_inicio)} -{" "}
@@ -106,9 +94,15 @@ function CursoArchivado() {
       {/* Header con badge */}
       <div className="flex justify-between items-start mb-3">
         <div className="flex gap-4 items-start flex-1">
-          <img alt="libro" src="/Opt/SVG/book.svg" className="w-14 opacity-80 mt-1" />
+          <img
+            alt="libro"
+            src="/Opt/SVG/book.svg"
+            className="w-14 opacity-80 mt-1"
+          />
           <div className="flex-1">
-            <p className="font-semibold text-gray-800 text-lg">{curso.nombre}</p>
+            <p className="font-semibold text-gray-800 text-lg">
+              {curso.nombre}
+            </p>
             <p className="text-sm text-gray-600 mt-1">
               Periodo: {formatearFecha(curso.fecha_inicio)} -{" "}
               {formatearFecha(curso.fecha_fin)}

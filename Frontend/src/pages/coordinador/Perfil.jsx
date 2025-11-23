@@ -20,6 +20,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import TablaDocentes from "../../components/coordinador/TablaDeDocentes";
+import client from "../../axios.js";
 
 const { Option } = Select;
 
@@ -44,36 +45,23 @@ function Perfil() {
   // --- EFECTO 1: Cargar datos del Coordinador (Perfil Propio) ---
   useEffect(() => {
     const user = localStorage.getItem("usuario");
-    const token = localStorage.getItem("token");
 
-    if (user && token) {
+    if (user) {
       const userParse = JSON.parse(user);
       const userid = userParse.id;
 
       const fetchUserData = async () => {
         try {
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/infoUser/${userid}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          const data = await response.json();
-          if (response.ok) {
-            setFormValues(data.user);
-            setPreviewImg(data.user.foto || null);
-            editForm.setFieldsValue(data.user);
-          } else {
-            message.error(
-              data.message || "Error al cargar la información del usuario."
-            );
-          }
+          const response = await client.get(`/api/infoUser/${userid}`);
+          const data = response.data;
+          setFormValues(data.user);
+          setPreviewImg(data.user.foto || null);
+          editForm.setFieldsValue(data.user);
         } catch (error) {
-          message.error("Ocurrió un error al cargar la información del usuario.");
+          message.error(
+            error.response?.data?.message ||
+              "Ocurrió un error al cargar la información del usuario."
+          );
         } finally {
           setLoading(false); // Dejar de cargar solo cuando el perfil esté listo
         }
@@ -85,16 +73,8 @@ function Perfil() {
   // --- EFECTO 2: Cargar lista de Docentes ---
   const fetchDocentes = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/docentes`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setDocentes(data.docentes);
+      const response = await client.get("/api/docentes");
+      setDocentes(response.data.docentes);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -106,7 +86,7 @@ function Perfil() {
 
   // --- FUNCIONES: Gestión de Docentes (de C2) ---
   const showAddModal = () => setIsAddModalVisible(true);
-  
+
   const handleAddModalCancel = () => {
     setIsAddModalVisible(false);
     addForm.resetFields();
@@ -115,52 +95,27 @@ function Perfil() {
   const onFinishAdd = async (values) => {
     values.tipo_usuario = "docente";
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(values),
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        message.success(data.message);
-        fetchDocentes();
-        handleAddModalCancel();
-      } else {
-        const errorData = await response.json();
-        message.error("Error en el registro: " + (errorData.errors ? errorData.errors[0] : "Datos inválidos"));
-      }
+      const response = await client.post("/api/register", values);
+      message.success(response.data.message);
+      fetchDocentes();
+      handleAddModalCancel();
     } catch (error) {
-      message.error("Hubo un problema con la solicitud");
+      const errorData = error.response?.data;
+      message.error(
+        "Error en el registro: " +
+          (errorData?.errors ? errorData.errors[0] : "Datos inválidos")
+      );
       console.error("Error registrando docente:", error);
     }
   };
 
   const eliminarDocente = async (docente_id) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/docentes/${docente_id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+      await client.delete(`/api/docentes/${docente_id}`);
+      message.success("Docente eliminado con éxito");
+      setDocentes(
+        docentes.filter((docente) => docente.docente_id !== docente_id)
       );
-      if (response.ok) {
-        message.success("Docente eliminado con éxito");
-        setDocentes(
-          docentes.filter((docente) => docente.docente_id !== docente_id)
-        );
-      } else {
-        message.error("Error al eliminar el docente");
-      }
     } catch (error) {
       message.error("Hubo un problema con la solicitud de eliminación");
       console.error("Error eliminando docente:", error);
@@ -169,15 +124,15 @@ function Perfil() {
 
   // --- FUNCIONES: Edición de Perfil (de C1) ---
   const beforeUpload = (file) => {
-    const isImage = file.type.startsWith('image/');
+    const isImage = file.type.startsWith("image/");
     const isLt2M = file.size / 1024 / 1024 < 2;
 
     if (!isImage) {
-      message.error('Solo puedes subir archivos de imagen');
+      message.error("Solo puedes subir archivos de imagen");
       return Upload.LIST_IGNORE;
     }
     if (!isLt2M) {
-      message.error('La imagen debe ser menor a 2MB');
+      message.error("La imagen debe ser menor a 2MB");
       return Upload.LIST_IGNORE;
     }
 
@@ -197,10 +152,9 @@ function Perfil() {
 
   const onFinishEdit = async (values) => {
     const user = localStorage.getItem("usuario");
-    const token = localStorage.getItem("token");
 
-    if (!(user && token)) {
-      message.error("Token no encontrado, por favor inicia sesión.");
+    if (!user) {
+      message.error("Usuario no encontrado, por favor inicia sesión.");
       return;
     }
 
@@ -215,37 +169,26 @@ function Perfil() {
     formData.append("telefono", values.telefono);
     formData.append("curp", values.curp);
     formData.append("domicilio", values.domicilio);
-    
+
     if (fileImage) {
       formData.append("foto", fileImage);
     }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/updateUser/${userid}`,
-        {
-          method: "POST", // Usar POST con _method=PUT para FormData
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await client.post(`/api/updateUser/${userid}`, formData);
+      const data = response.data;
 
-      const data = await response.json();
-
-      if (response.ok) {
-        message.success("Información actualizada correctamente.");
-        setFormValues(data.user);
-        setPreviewImg(data.user.foto);
-        setFileImage(null);
-        setIsEditModalVisible(false);
-      } else {
-        message.error(data.message || "Error al actualizar la información.");
-      }
+      message.success("Información actualizada correctamente.");
+      setFormValues(data.user);
+      setPreviewImg(data.user.foto);
+      setFileImage(null);
+      setIsEditModalVisible(false);
     } catch (error) {
       console.error("Error:", error);
-      message.error("Ocurrió un error al actualizar la información.");
+      message.error(
+        error.response?.data?.message ||
+          "Ocurrió un error al actualizar la información."
+      );
     }
   };
 
@@ -270,7 +213,6 @@ function Perfil() {
         <>
           {/* Layout general (de C1) */}
           <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
             {/* Panel lateral (de C1, datos dinámicos) */}
             <div className="bg-slate-100 rounded-xl shadow-md p-6 flex flex-col items-center self-start">
               <img
@@ -294,7 +236,6 @@ function Perfil() {
 
             {/* Contenido principal (de C1, fusionado con C2) */}
             <div className="lg:col-span-2 bg-slate-100 rounded-xl shadow-md p-8">
-              
               {/* Sección 1: Información del Coordinador (de C1) */}
               <h3 className="text-2xl font-semibold text-[#1B396A] mb-6">
                 Información del Usuario
@@ -333,8 +274,8 @@ function Perfil() {
                 <h2 className="Montserrat font-medium text-2xl text-[#1B396A]">
                   Docentes registrados
                 </h2>
-                <Button 
-                  type="primary" 
+                <Button
+                  type="primary"
                   onClick={showAddModal} // Llama al modal de agregar
                   icon={<PlusOutlined />}
                   className="bg-[#1B396A] hover:opacity-90"
@@ -387,21 +328,30 @@ function Perfil() {
               <Form.Item
                 label="Nombre"
                 name="nombre"
-                rules={[{ required: true, message: 'Por favor ingresa tu nombre' }]}
+                rules={[
+                  { required: true, message: "Por favor ingresa tu nombre" },
+                ]}
               >
                 <Input prefix={<UserOutlined />} />
               </Form.Item>
               <Form.Item
                 label="Apellidos"
                 name="apellidos"
-                rules={[{ required: true, message: 'Por favor ingresa tus apellidos' }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingresa tus apellidos",
+                  },
+                ]}
               >
                 <Input prefix={<UserOutlined />} />
               </Form.Item>
               <Form.Item
                 label="Género"
                 name="genero"
-                rules={[{ required: true, message: 'Por favor selecciona tu género' }]}
+                rules={[
+                  { required: true, message: "Por favor selecciona tu género" },
+                ]}
               >
                 <Select placeholder="Selecciona tu género">
                   <Select.Option value="Masculino">Masculino</Select.Option>
@@ -412,21 +362,27 @@ function Perfil() {
               <Form.Item
                 label="Teléfono"
                 name="telefono"
-                rules={[{ required: true, message: 'Por favor ingresa tu teléfono' }]}
+                rules={[
+                  { required: true, message: "Por favor ingresa tu teléfono" },
+                ]}
               >
                 <Input prefix={<PhoneOutlined />} />
               </Form.Item>
               <Form.Item
                 label="CURP"
                 name="curp"
-                rules={[{ required: true, message: 'Por favor ingresa tu CURP' }]}
+                rules={[
+                  { required: true, message: "Por favor ingresa tu CURP" },
+                ]}
               >
                 <Input prefix={<IdcardOutlined />} />
               </Form.Item>
               <Form.Item
                 label="Domicilio"
                 name="domicilio"
-                rules={[{ required: true, message: 'Por favor ingresa tu domicilio' }]}
+                rules={[
+                  { required: true, message: "Por favor ingresa tu domicilio" },
+                ]}
               >
                 <Input prefix={<HomeOutlined />} />
               </Form.Item>
@@ -451,14 +407,21 @@ function Perfil() {
               <Form.Item
                 name="nombre"
                 label="Nombre"
-                rules={[{ required: true, message: "Por favor ingrese el nombre" }]}
+                rules={[
+                  { required: true, message: "Por favor ingrese el nombre" },
+                ]}
               >
                 <Input />
               </Form.Item>
               <Form.Item
                 name="apellidos"
                 label="Apellidos"
-                rules={[{ required: true, message: "Por favor ingrese los apellidos" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingrese los apellidos",
+                  },
+                ]}
               >
                 <Input />
               </Form.Item>
@@ -466,7 +429,10 @@ function Perfil() {
                 name="correo_electronico"
                 label="Correo Electrónico"
                 rules={[
-                  { required: true, message: "Por favor ingrese el correo electrónico" },
+                  {
+                    required: true,
+                    message: "Por favor ingrese el correo electrónico",
+                  },
                   { type: "email", message: "Ingrese un correo válido" },
                 ]}
               >
@@ -475,7 +441,12 @@ function Perfil() {
               <Form.Item
                 name="contrasena"
                 label="Contraseña"
-                rules={[{ required: true, message: "Por favor ingrese una contraseña" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingrese una contraseña",
+                  },
+                ]}
               >
                 <Input.Password />
               </Form.Item>
@@ -493,33 +464,39 @@ function Perfil() {
               <Form.Item
                 name="telefono"
                 label="Teléfono"
-                rules={[{ required: true, message: "Por favor ingrese el teléfono" }]}
+                rules={[
+                  { required: true, message: "Por favor ingrese el teléfono" },
+                ]}
               >
                 <Input />
               </Form.Item>
               <Form.Item
                 name="curp"
                 label="CURP"
-                rules={[{ required: true, message: "Por favor ingrese el CURP" }]}
+                rules={[
+                  { required: true, message: "Por favor ingrese el CURP" },
+                ]}
               >
                 <Input />
               </Form.Item>
               <Form.Item
                 name="domicilio"
                 label="Domicilio"
-                rules={[{ required: true, message: "Por favor ingrese el domicilio" }]}
+                rules={[
+                  { required: true, message: "Por favor ingrese el domicilio" },
+                ]}
               >
                 <Input />
               </Form.Item>
-              <Form.Item
-                name="tipo_usuario"
-                initialValue="docente"
-                hidden
-              >
+              <Form.Item name="tipo_usuario" initialValue="docente" hidden>
                 <Input />
               </Form.Item>
               <Form.Item>
-                <Button type="primary" htmlType="submit" className="bg-[#1B396A] hover:opacity-90">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="bg-[#1B396A] hover:opacity-90"
+                >
                   Registrar
                 </Button>
               </Form.Item>

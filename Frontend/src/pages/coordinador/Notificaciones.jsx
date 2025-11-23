@@ -1,6 +1,7 @@
 import { Breadcrumb, Timeline, Spin, Alert, message, Button } from "antd";
 import React, { useState, useEffect } from "react";
 import { DeleteOutlined, BellOutlined } from "@ant-design/icons";
+import client from "../../axios.js";
 
 function Notificaciones() {
   const [notificaciones, setNotificaciones] = useState([]);
@@ -11,17 +12,10 @@ function Notificaciones() {
   useEffect(() => {
     const fetchNotificaciones = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/users/notificaciones/${userId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
+        const response = await client.get(
+          `/api/users/notificaciones/${userId}`
         );
-
-        const data = await response.json();
+        const data = response.data;
 
         if (data.success) {
           if (data.notificaciones && data.notificaciones.length > 0) {
@@ -48,15 +42,7 @@ function Notificaciones() {
 
   const eliminarNotificacion = async (id) => {
     try {
-      await fetch(
-        `${import.meta.env.VITE_API_URL}/api/users/notificaciones/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      await client.delete(`/api/users/notificaciones/${id}`);
 
       setNotificaciones(
         notificaciones.filter((notificacion) => notificacion.id !== id)
@@ -69,37 +55,13 @@ function Notificaciones() {
 
   const formatearFecha = (fecha) => {
     const fechaObj = new Date(fecha);
-    const ahora = new Date();
-    const diferenciaDias = Math.floor((ahora - fechaObj) / (1000 * 60 * 60 * 24));
 
-    // Si es hoy
-    if (diferenciaDias === 0) {
-      return `Hoy a las ${fechaObj.toLocaleTimeString('es-MX', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      })}`;
-    }
-    
-    // Si fue ayer
-    if (diferenciaDias === 1) {
-      return `Ayer a las ${fechaObj.toLocaleTimeString('es-MX', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      })}`;
-    }
-    
-    // Si es esta semana (menos de 7 días)
-    if (diferenciaDias < 7) {
-      return `Hace ${diferenciaDias} días`;
-    }
-    
-    // Fecha completa
-    return fechaObj.toLocaleDateString('es-MX', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return fechaObj.toLocaleString("es-MX", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -161,7 +123,7 @@ function Notificaciones() {
           },
         ]}
       />
-      
+
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="Montserrat font-semibold text-2xl text-gray-800 flex items-center gap-2">
@@ -169,16 +131,14 @@ function Notificaciones() {
             Mis Notificaciones
           </h2>
           <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-            {notificaciones.length} {notificaciones.length === 1 ? 'notificación' : 'notificaciones'}
+            {notificaciones.length}{" "}
+            {notificaciones.length === 1 ? "notificación" : "notificaciones"}
           </span>
         </div>
 
         <Timeline className="mt-4">
           {notificaciones.map((item) => (
-            <Timeline.Item 
-              key={item.id}
-              color="blue"
-            >
+            <Timeline.Item key={item.id} color="blue">
               <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors duration-200 border border-gray-200">
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1">

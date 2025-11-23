@@ -6,26 +6,21 @@ import PrincipalFooter from "../../components/landing/PrincipalFooter";
 
 function Dashboard_docentes() {
   return (
-      <>
-      {/* Estilos internos */}
+    <>
       <style>{`
         .custom-scroll::-webkit-scrollbar {
           width: 6px;
         }
-
         .custom-scroll::-webkit-scrollbar-track {
           background: transparent;
         }
-
         .custom-scroll::-webkit-scrollbar-thumb {
           background: #cfd7df;
           border-radius: 20px;
         }
-
         .custom-scroll::-webkit-scrollbar-thumb:hover {
           background: #9aa5b1;
         }
-
         @media (max-width: 768px) {
           .custom-scroll::-webkit-scrollbar {
             display: none;
@@ -43,9 +38,9 @@ function Dashboard_docentes() {
             overflow-y-auto
             px-4
             mt-4
-            mb-28  /* espacio para Tabbar en móvil */
+            mb-28
             custom-scroll
-            flex 
+            flex
             flex-col
           "
         >

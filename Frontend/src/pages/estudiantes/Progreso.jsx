@@ -14,6 +14,7 @@ import {
   UnorderedListOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import client from "../../axios";
 
 const obtenerHorarioTexto = (horario) => {
   switch (horario) {
@@ -49,10 +50,7 @@ const CardGrid = ({ curso, id_estudiante }) => (
 
     {/* Botón como enlace */}
     <Link to={`/Estudiantes/CursoInfo/${curso.Curso_ID}/${id_estudiante}`}>
-      <Button
-        type="primary"
-        className="bg-[#1B396A] mt-4 hover:bg-[#244b8a]"
-      >
+      <Button type="primary" className="bg-[#1B396A] mt-4 hover:bg-[#244b8a]">
         Información
       </Button>
     </Link>
@@ -83,10 +81,7 @@ const CardList = ({ curso, id_estudiante }) => (
       </div>
 
       <Link to={`/Estudiantes/CursoInfo/${curso.Curso_ID}/${id_estudiante}`}>
-        <Button
-          type="primary"
-          className="bg-[#1B396A] hover:bg-[#244b8a]"
-        >
+        <Button type="primary" className="bg-[#1B396A] hover:bg-[#244b8a]">
           Ver más
         </Button>
       </Link>
@@ -124,18 +119,10 @@ function Progreso() {
       if (!idEstudiante) return;
 
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/progreso/estudiante/${idEstudiante}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              Accept: "*/*",
-              "Content-Type": "application/json",
-            },
-          }
+        const response = await client.get(
+          `/api/progreso/estudiante/${idEstudiante}`
         );
-
-        const data = await response.json();
+        const data = response.data;
 
         if (data.exito) {
           setCursos(data.progreso);
@@ -144,7 +131,7 @@ function Progreso() {
           setCursos([]);
           message.warning(data.mensaje);
         }
-      } catch {
+      } catch (error) {
         message.error("Hubo un problema al obtener los cursos.");
       } finally {
         setLoading(false);

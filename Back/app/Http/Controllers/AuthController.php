@@ -92,109 +92,103 @@ class AuthController extends Controller
         return response()->json($response, 201);
     }
 
-    public function test (Request $request)
+    public function test(Request $request)
     {
-       
 
-      
+
+
         $response = [
             'message' => 'Funcionando correctamente',
             'condicional' => null, // Indicará a qué condicional entró
-          
+
         ];
 
-        
+
         // Responder con una respuesta JSON
         return response()->json($response, 201);
     }
 
-   public function login(Request $request)
-{
-    // Validación de campos
-    $request->validate([
-        'correo_electronico' => 'required|email',
-        'contrasena' => 'required',
-        'tipo_acceso' => 'nullable|string'
-    ]);
+    public function login(Request $request)
+    {
+        // Validación de campos
+        $request->validate([
+            'correo_electronico' => 'required|email',
+            'contrasena' => 'required',
+            'tipo_acceso' => 'nullable|string'
+        ]);
 
-    // Verificar si existe el usuario
-    $user = Usuario::where('correo_electronico', $request->correo_electronico)->first();
+        // Verificar si existe el usuario
+        $user = Usuario::where('correo_electronico', $request->correo_electronico)->first();
 
-    if (!$user) {
-        // Si el usuario no existe
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Correo electrónico no registrado.'
+            ], 404);
+        }
+
+        // Verificar la contraseña
+        if (!Hash::check($request->contrasena, $user->contrasena)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Contraseña incorrecta.'
+            ], 401);
+        }
+
+        // Inicializar variables para los roles
+        $docente = null;
+        $coordinador = null;
+        $estudiante = null;
+
+        // Manejo de acceso según el tipo
+        switch ($request->tipo_acceso) {
+            case 'accesoDocente':
+                $docente = Docente::where('usuario_id', $user->id)->first();
+                if (!$docente) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'No se encontró un docente asociado a este usuario.'
+                    ], 404);
+                }
+                break;
+
+            case 'accesoCoordinador':
+                $coordinador = Coordinador::where('usuario_id', $user->id)->first();
+                if (!$coordinador) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'No se encontró un coordinador asociado a este usuario.'
+                    ], 404);
+                }
+                break;
+
+            case 'accesoEstudiante':
+                $estudiante = Estudiante::where('usuario_id', $user->id)->first();
+                if (!$estudiante) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'No se encontró un estudiante asociado a este usuario.'
+                    ], 404);
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        // 🔥 IMPORTANTE: Autenticar y regenerar sesión
+        Auth::guard('web')->login($user);
+        $request->session()->regenerate();
+
+        // Respuesta exitosa
         return response()->json([
-            'success' => false,
-            'error' => 'Correo electrónico no registrado.'
-        ], 404);
+            'success' => true,
+            'usuario' => $user,
+            'docente' => $docente,
+            'coordinador' => $coordinador,
+            'estudiante' => $estudiante
+        ]);
     }
-
-    // Verificar la contraseña
-    if (!Hash::check($request->contrasena, $user->contrasena)) {
-        return response()->json([
-            'success' => false,
-            'error' => 'Contraseña incorrecta.'
-        ], 401);
-    }
-
-    // Inicializar variables para los roles
-    $docente = null;
-    $coordinador = null;
-    $estudiante = null;
-
-    // Manejo de acceso según el tipo
-    switch ($request->tipo_acceso) {
-        case 'accesoDocente':
-            $docente = Docente::where('usuario_id', $user->id)->first();
-            if (!$docente) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'No se encontró un docente asociado a este usuario.'
-                ], 404);
-            }
-            break;
-
-        case 'accesoCoordinador':
-            $coordinador = Coordinador::where('usuario_id', $user->id)->first();
-            if (!$coordinador) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'No se encontró un coordinador asociado a este usuario.'
-                ], 404);
-            }
-            break;
-
-        case 'accesoEstudiante':
-            $estudiante = Estudiante::where('usuario_id', $user->id)->first();
-            if (!$estudiante) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'No se encontró un estudiante asociado a este usuario.'
-                ], 404);
-            }
-            break;
-
-        // Si no se especifica tipo de acceso, se continúa sin error.
-        default:
-            break;
-    }
-
-    // Generar token de acceso
-    $token = $user->createToken('auth_token');
-
-    // Respuesta exitosa con los datos del usuario y roles
-    return response()->json([
-        'success' => true,
-        'token' => $token->plainTextToken,
-        'token_type' => 'Bearer',
-        'usuario' => $user,
-        'docente' => $docente,
-        'coordinador' => $coordinador,
-        'estudiante' => $estudiante // Incluye el estudiante en la respuesta
-    ]);
-
-}
-
-    
 
 
 
@@ -203,7 +197,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         return response()->json(['message' => 'Sesión cerrada exitosamente']);
     }
 }

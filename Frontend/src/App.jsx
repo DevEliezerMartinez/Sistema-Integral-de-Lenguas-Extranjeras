@@ -21,83 +21,113 @@ import CursosArchivados from "./pages/docentes/CursosArchivados";
 import PerfilDocentes from "./pages/docentes/Perfil";
 import NotificacionesDocente from "./pages/docentes/Notificaciones";
 import LoginCoordinador from "./pages/coordinador/login";
-import DashboardCoordinador from './pages/coordinador/Dashboard_coordinador'
-import CursosCoordinador from './pages/coordinador/CursosActivos'
-import CursosArchivadosCoordinador from './pages/coordinador/CursosArchivados'
-import PerfilCoordinador from './pages/coordinador/Perfil'
-import NotificacionCoordinador from './pages/coordinador/Notificaciones'
-import DetalleCursoCoordinador from './pages/coordinador/DetalleCurso'
+import DashboardCoordinador from "./pages/coordinador/Dashboard_coordinador";
+import CursosCoordinador from "./pages/coordinador/CursosActivos";
+import CursosArchivadosCoordinador from "./pages/coordinador/CursosArchivados";
+import PerfilCoordinador from "./pages/coordinador/Perfil";
+import NotificacionCoordinador from "./pages/coordinador/Notificaciones";
+import DetalleCursoCoordinador from "./pages/coordinador/DetalleCurso";
 import Solicitudes from "./pages/coordinador/Solicitudes";
-import NotFound from './pages/public/Notfound'
+import NotFound from "./pages/public/Notfound";
 import ListaAlumnos from "./components/coordinador/ListaAlumnos";
 import DetalleAlumno from "./components/coordinador/DetalleAlumno";
-
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
-    <>
-      <Routes>
-        {/*   Rutas publicas */}
-        <Route path="*" element={<NotFound />} /> {/* Ruta 404 */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/Registro" element={<SignUp />} />
-        <Route path="/Recuperar" element={<RecuperarPassword />} />
-        <Route path="/Documentacion" element={<Documentacion />} />
+    <Routes>
+      {/* Rutas públicas */}
+      <Route path="*" element={<NotFound />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/Registro" element={<SignUp />} />
+      <Route path="/Recuperar" element={<RecuperarPassword />} />
+      <Route path="/Documentacion" element={<Documentacion />} />
 
-        {/*   Rutas Docentes */}
-        <Route path="/LoginDocentes" element={<LoginDocentes />} />
-        <Route path="/Docentes" element={<DashboardDocentes />}>
-          <Route path="/Docentes/CursosActivos" element={<CursosActivos />} />
-          <Route path="/Docentes/CursosArchivados" element={<CursosArchivados />} />
-          <Route path="/Docentes/Perfil" element={<PerfilDocentes />} />
-          <Route path="/Docentes/Notificaciones" element={<NotificacionesDocente />} />
-          <Route
-            path="/Docentes/Cursos/:cursoId"
-            element={< DetalleCursoDocente />}
-          />
-        </Route>
+      {/* Rutas Docentes - Protegidas */}
+      <Route path="/LoginDocentes" element={<LoginDocentes />} />
+      <Route
+        path="/Docentes"
+        element={
+          <ProtectedRoute allowedRoles={["docente"]}>
+            <DashboardDocentes />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/Docentes/CursosActivos" element={<CursosActivos />} />
+        <Route
+          path="/Docentes/CursosArchivados"
+          element={<CursosArchivados />}
+        />
+        <Route path="/Docentes/Perfil" element={<PerfilDocentes />} />
+        <Route
+          path="/Docentes/Notificaciones"
+          element={<NotificacionesDocente />}
+        />
+        <Route
+          path="/Docentes/Cursos/:cursoId"
+          element={<DetalleCursoDocente />}
+        />
+      </Route>
 
-        {/*   Rutas Alumnos */}
-        <Route path="/Estudiantes" element={<Dashboard />}>
-          <Route path="/Estudiantes/Cursos" element={<Cursos />} />
-          <Route
-            path="/Estudiantes/Cursos/:cursoId"
-            element={<DetalleCurso />}
-          />
-          <Route
-            path="/Estudiantes/CursoInfo/:cursoId/:id_estudiante"
-            element={<InfoCurso />}
-          />
-          <Route path="/Estudiantes/Progreso" element={<Progreso />} />
-          <Route path="/Estudiantes/Perfil" element={<Perfil />} />
-          <Route
-            path="/Estudiantes/Notificaciones"
-            element={<Notificaciones />}
-          />
-        </Route>
+      {/* Rutas Estudiantes - Protegidas */}
+      <Route
+        path="/Estudiantes"
+        element={
+          <ProtectedRoute allowedRoles={["estudiante"]}>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/Estudiantes/Cursos" element={<Cursos />} />
+        <Route path="/Estudiantes/Cursos/:cursoId" element={<DetalleCurso />} />
+        <Route
+          path="/Estudiantes/CursoInfo/:cursoId/:id_estudiante"
+          element={<InfoCurso />}
+        />
+        <Route path="/Estudiantes/Progreso" element={<Progreso />} />
+        <Route path="/Estudiantes/Perfil" element={<Perfil />} />
+        <Route
+          path="/Estudiantes/Notificaciones"
+          element={<Notificaciones />}
+        />
+      </Route>
 
-
-        {/*   Rutas Coordinador */}
-        <Route path="/LoginCoordinador" element={<LoginCoordinador />} />
-        <Route path="/Coordinador" element={<DashboardCoordinador />}>
-          <Route path="/Coordinador/CursosActivos" element={<CursosCoordinador />} />
-          <Route path="/Coordinador/CursosArchivados" element={<CursosArchivadosCoordinador />} />
-          <Route path="/Coordinador/Perfil" element={<PerfilCoordinador />} />
-          <Route path="/Coordinador/Notificaciones" element={<NotificacionCoordinador />} />
-          <Route path="/Coordinador/Solicitudes" element={<Solicitudes />} />
-          <Route path="/Coordinador/Alumnos" element={<ListaAlumnos />} />
-          <Route
-            path="/Coordinador/Cursos/:cursoId"
-            element={<DetalleCursoCoordinador/>}
-          />
-          <Route
-            path="/Coordinador/Alumnos/:AlumnoId"
-            element={<DetalleAlumno/>}
-          />
-        </Route>
-      </Routes>
-    </>
+      {/* Rutas Coordinador - Protegidas */}
+      <Route path="/LoginCoordinador" element={<LoginCoordinador />} />
+      <Route
+        path="/Coordinador"
+        element={
+          <ProtectedRoute allowedRoles={["coordinador"]}>
+            <DashboardCoordinador />
+          </ProtectedRoute>
+        }
+      >
+        <Route
+          path="/Coordinador/CursosActivos"
+          element={<CursosCoordinador />}
+        />
+        <Route
+          path="/Coordinador/CursosArchivados"
+          element={<CursosArchivadosCoordinador />}
+        />
+        <Route path="/Coordinador/Perfil" element={<PerfilCoordinador />} />
+        <Route
+          path="/Coordinador/Notificaciones"
+          element={<NotificacionCoordinador />}
+        />
+        <Route path="/Coordinador/Solicitudes" element={<Solicitudes />} />
+        <Route path="/Coordinador/Alumnos" element={<ListaAlumnos />} />
+        <Route
+          path="/Coordinador/Cursos/:cursoId"
+          element={<DetalleCursoCoordinador />}
+        />
+        <Route
+          path="/Coordinador/Alumnos/:AlumnoId"
+          element={<DetalleAlumno />}
+        />
+      </Route>
+    </Routes>
   );
 }
 

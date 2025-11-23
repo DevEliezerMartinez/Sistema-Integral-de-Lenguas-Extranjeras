@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Breadcrumb, Button, Spin, Input, Switch, Divider, message } from "antd";
-import { Link } from "react-router-dom";
+import {
+  Breadcrumb,
+  Button,
+  Spin,
+  Input,
+  Switch,
+  Divider,
+  message,
+} from "antd";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AppstoreOutlined,
   BarsOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import client from "../../axios";
 
 /* --- Cards homologadas con Progreso.jsx --- */
 
@@ -22,15 +31,11 @@ const CardGrid = ({ curso }) => (
       </p>
     )}
 
-   <Link to={`/Estudiantes/Cursos/${curso.id}`}>
-  <Button
-    type="primary"
-    className="bg-[#1B396A] mt-4 hover:bg-[#244b8a]"
-  >
-    Información
-  </Button>
-</Link>
-
+    <Link to={`/Estudiantes/Cursos/${curso.id}`}>
+      <Button type="primary" className="bg-[#1B396A] mt-4 hover:bg-[#244b8a]">
+        Información
+      </Button>
+    </Link>
   </div>
 );
 
@@ -48,18 +53,15 @@ const CardList = ({ curso }) => (
     </div>
 
     <Link to={`/Estudiantes/Cursos/${curso.id}`}>
-  <Button
-    type="primary"
-    className="bg-[#1B396A] hover:bg-[#244b8a]"
-  >
-    Ver más
-  </Button>
-</Link>
-
+      <Button type="primary" className="bg-[#1B396A] hover:bg-[#244b8a]">
+        Ver más
+      </Button>
+    </Link>
   </div>
 );
 
 function Cursos() {
+  const navigate = useNavigate();
   const [hasModules, setHasModules] = useState(false);
   const [cursos, setCursos] = useState([]);
   const [filteredCursos, setFilteredCursos] = useState([]);
@@ -70,23 +72,10 @@ function Cursos() {
 
   useEffect(() => {
     const fetchCursos = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        setError("No autorizado. Inicie sesión nuevamente.");
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/cursos_activos`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        const data = await response.json();
+        // Usar axios con autenticación por cookies (sin token)
+        const response = await client.get("/api/cursos_activos");
+        const data = response.data;
 
         if (data.cursos?.length > 0) {
           setHasModules(true);
@@ -97,14 +86,22 @@ function Cursos() {
         }
       } catch (err) {
         console.error("Error en la solicitud:", err);
-        setError("Error al obtener los datos.");
+
+        // Manejar error 401 (no autenticado)
+        if (err.response?.status === 401) {
+          message.error("Sesión expirada. Inicie sesión nuevamente.");
+          localStorage.clear();
+          navigate("/login");
+        } else {
+          setError("Error al obtener los datos.");
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchCursos();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const filtered = cursos.filter((curso) =>
@@ -115,7 +112,6 @@ function Cursos() {
 
   return (
     <div className="min-h-[50vh] mb-52">
-
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -134,7 +130,6 @@ function Cursos() {
 
       {/* Controles superiores */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-6">
-
         {/* Buscador */}
         <Input
           prefix={<SearchOutlined />}
@@ -172,7 +167,6 @@ function Cursos() {
         <p className="text-center text-red-600 font-medium">{error}</p>
       ) : (
         <div className="mt-8 pb-20">
-
           {/* Vista cuadrícula */}
           {isGridView ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -188,7 +182,11 @@ function Cursos() {
                 )
               ) : (
                 <div className="border rounded-xl bg-white p-6 flex flex-col items-center shadow-sm">
-                  <img src="/Opt/SVG/sad.svg" className="w-20 opacity-80" />
+                  <img
+                    alt="sin cursos"
+                    src="/Opt/SVG/sad.svg"
+                    className="w-20 opacity-80"
+                  />
                   <p className="font-medium mt-3">Sin módulos disponibles</p>
                 </div>
               )}
@@ -208,7 +206,11 @@ function Cursos() {
                 )
               ) : (
                 <div className="border rounded-xl bg-white p-6 flex flex-col items-center shadow-sm">
-                  <img src="/Opt/SVG/sad.svg" className="w-20 opacity-80" />
+                  <img
+                    alt="sin cursos"
+                    src="/Opt/SVG/sad.svg"
+                    className="w-20 opacity-80"
+                  />
                   <p className="font-medium mt-3">Sin módulos disponibles</p>
                 </div>
               )}

@@ -1,13 +1,17 @@
 import { Breadcrumb, Button, Input, Switch, Skeleton } from "antd";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { AppstoreOutlined, UnorderedListOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  AppstoreOutlined,
+  UnorderedListOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import client from "../../axios.js";
 
 function CursoActivo() {
   const [cursos, setCursos] = useState([]);
   const [usuario, setUsuario] = useState(null);
   const [docente, setDocente] = useState(null);
-  const [token, setToken] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   const [vista, setVista] = useState("grid");
@@ -23,36 +27,24 @@ function CursoActivo() {
     });
   };
 
-  // Cargar datos del usuario y token
+  // Cargar datos del usuario
   useEffect(() => {
     const usuarioData = localStorage.getItem("usuario");
     const docenteData = localStorage.getItem("docente");
-    const tokenData = localStorage.getItem("token");
 
     if (usuarioData) setUsuario(JSON.parse(usuarioData));
     if (docenteData) setDocente(JSON.parse(docenteData));
-    if (tokenData) setToken(tokenData);
   }, []);
 
   // Obtener cursos
   useEffect(() => {
     const fetchCursos = async () => {
-      if (!docente || !token) return;
+      if (!docente) return;
 
       try {
         setIsLoading(true);
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/cursosAsignados/${docente.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) throw new Error("Error en la red");
-        const data = await response.json();
+        const response = await client.get(`/api/cursosAsignados/${docente.id}`);
+        const data = response.data;
         const lista = Object.values(data.cursos || {});
         setCursos(lista);
       } catch (error) {
@@ -63,7 +55,7 @@ function CursoActivo() {
     };
 
     fetchCursos();
-  }, [docente, token]);
+  }, [docente]);
 
   const cursosFiltrados = cursos.filter((curso) =>
     curso.nombre?.toLowerCase().includes(busqueda.toLowerCase())
@@ -72,9 +64,15 @@ function CursoActivo() {
   // Tarjeta en modo grid
   const CardGrid = ({ curso }) => (
     <div className="border rounded-xl bg-white w-full p-5 flex flex-col items-center shadow-sm hover:shadow-md transition">
-      <img alt="libro" src="/Opt/SVG/book.svg" className="w-20 opacity-90 mb-3" />
+      <img
+        alt="libro"
+        src="/Opt/SVG/book.svg"
+        className="w-20 opacity-90 mb-3"
+      />
       <p className="font-semibold text-gray-800 text-center">{curso.nombre}</p>
-      <p className="text-sm text-gray-600 text-center mt-1">{curso.descripcion}</p>
+      <p className="text-sm text-gray-600 text-center mt-1">
+        {curso.descripcion}
+      </p>
       <p className="text-sm text-gray-600 text-center mt-1">
         Modalidad: {curso.modalidad}
       </p>
@@ -149,7 +147,9 @@ function CursoActivo() {
             onChange={(checked) => setVista(checked ? "grid" : "list")}
             checkedChildren={<AppstoreOutlined />}
             unCheckedChildren={<UnorderedListOutlined />}
-            style={{ backgroundColor: vista === "grid" ? "#1B396A" : "#d9d9d9" }}
+            style={{
+              backgroundColor: vista === "grid" ? "#1B396A" : "#d9d9d9",
+            }}
             disabled={isLoading}
           />
           <span className="Montserrat">Cuadrícula</span>
@@ -185,10 +185,17 @@ function CursoActivo() {
         ) : (
           <div className="flex flex-col justify-center items-center text-center min-h-[50vh] w-full">
             <div className="border rounded bg-slate-100 px-8 py-6 w-full md:w-2/4">
-              <img alt="triste" src="/Opt/SVG/sad.svg" className="w-24 mx-auto" />
-              <p className="Montserrat font-medium mt-3">Sin cursos disponibles</p>
+              <img
+                alt="triste"
+                src="/Opt/SVG/sad.svg"
+                className="w-24 mx-auto"
+              />
+              <p className="Montserrat font-medium mt-3">
+                Sin cursos disponibles
+              </p>
               <span className="text-sm block mt-1">
-                Si consideras que existe un error, contacta al coordinador del CLE.
+                Si consideras que existe un error, contacta al coordinador del
+                CLE.
               </span>
             </div>
           </div>

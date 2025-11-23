@@ -1,8 +1,10 @@
-import React from 'react';
+import React from "react";
 import { Button, Divider, Form, Input, message } from "antd";
 import Header from "../../components/Shared/HeaderPublico"; // Renombré el import del Header
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../AuthContext";
+import client from "../../axios.js";
 
 const onFinishFailed = (errorInfo) => {
   console.log("Failed:", errorInfo);
@@ -11,57 +13,67 @@ const onFinishFailed = (errorInfo) => {
 function LoginDocentes() {
   const navigate = useNavigate();
 
+  const { login } = useAuth();
+  const [messageApi, contextHolder] = message.useMessage();
+  const [loading, setLoading] = React.useState(false);
+
   const onFinish = async (values) => {
+    const data = {
+      correo_electronico: values.correo_electronico,
+      contrasena: values.contrasena,
+      tipo_acceso: "accesoDocente",
+    };
+
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          correo_electronico: values.correo_electronico, // Cambiado a 'correo_electronico'
-          contrasena: values.contrasena, // Cambiado a 'contrasena'
-          tipo_acceso: "accesoDocente" // Añadido el tipo de acceso
-        }),
-      });
-  
-      // Verifica si la respuesta fue exitosa
-      if (response.ok) {
-        const data = await response.json();
-  
-        // Verifica si la respuesta indica éxito
-        if (data.success) {
-          localStorage.clear();
-          // Guardar el token y los datos del usuario en localStorage
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("usuario", JSON.stringify(data.usuario));
-          localStorage.setItem("docente", JSON.stringify(data.docente));
-  
-          // Navegar a la ruta de Cursos Activos
-          navigate('/Docentes/CursosActivos');
-        } else {
-          // Manejo de errores en caso de que success sea false
-          message.error("Error desconocido, intenta nuevamente.");
-        }
-      } else {
-        const errorData = await response.json();
-  
-        // Manejo de errores para credenciales incorrectas
-        if (errorData.error === "Credenciales incorrectas") {
-          message.error("Credenciales incorrectas. Por favor, verifica tu correo y contraseña.");
-        } else {
-          message.error("Error en el inicio de sesión. Inténtalo de nuevo.");
-        }
+      setLoading(true);
+
+      // Obtener CSRF cookie
+      await client.get("/sanctum/csrf-cookie");
+
+      // Hacer login
+      const response = await client.post("/api/login", data);
+      const responseData = response.data;
+
+      if (responseData.success) {
+        // Limpiar y guardar datos del usuario
+        localStorage.clear();
+        localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
+        localStorage.setItem("docente", JSON.stringify(responseData.docente));
+
+        // Actualizar el contexto de autenticación
+        login(responseData.usuario);
+
+        messageApi.open({
+          type: "success",
+          content: "Inicio de sesión exitoso.",
+        });
+
+        setTimeout(() => navigate("/Docentes/CursosActivos"), 1200);
       }
     } catch (error) {
-      console.error("Error:", error);
-      message.error("Hubo un problema con la solicitud de inicio de sesión.");
+      console.error("Error en login:", error);
+
+      if (error.response) {
+        const errorMessage =
+          error.response.data.error || "Error al iniciar sesión.";
+        messageApi.open({
+          type: "error",
+          content: errorMessage,
+        });
+      } else {
+        messageApi.open({
+          type: "error",
+          content: "Error de conexión. Intente más tarde.",
+        });
+      }
+    } finally {
+      setLoading(false);
     }
   };
-  
 
   return (
     <>
+      {contextHolder}
       <Header />
 
       <main className="w-full flex flex-col md:h-screen md:flex-row">
@@ -119,12 +131,12 @@ function LoginDocentes() {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" loading={loading}>
                   Ingresar
                 </Button>
               </Form.Item>
             </Form>
-           {/*  <div id="Actions" className="flex flex-col items-end mt-2">
+            {/*  <div id="Actions" className="flex flex-col items-end mt-2">
               <Link to="/Recuperar" className="text-right text-blue-600">
                 Olvidé mi contraseña
               </Link>

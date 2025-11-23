@@ -17,6 +17,7 @@ import {
   IdcardOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
+import client from "../../axios";
 
 const fallbackImage =
   "https://images.pexels.com/photos/4009599/pexels-photo-4009599.jpeg?auto=compress&cs=tinysrgb&w=600";
@@ -31,38 +32,24 @@ const Perfil = () => {
 
   useEffect(() => {
     const user = localStorage.getItem("usuario");
-    const token = localStorage.getItem("token");
 
-    if (user && token) {
+    if (user) {
       const userParse = JSON.parse(user);
       const userid = userParse.id;
 
       const fetchUserData = async () => {
         try {
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/infoUser/${userid}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          const response = await client.get(`/api/infoUser/${userid}`);
+          const data = response.data;
 
-          const data = await response.json();
-
-          if (response.ok) {
-            setFormValues(data.user);
-            setPreviewImg(data.user.foto || null);
-            form.setFieldsValue(data.user);
-          } else {
-            message.error(
-              data.message || "Error al cargar la información del usuario."
-            );
-          }
+          setFormValues(data.user);
+          setPreviewImg(data.user.foto || null);
+          form.setFieldsValue(data.user);
         } catch (error) {
-          message.error("Ocurrió un error al cargar la información del usuario.");
+          message.error(
+            error.response?.data?.message ||
+              "Error al cargar la información del usuario."
+          );
         } finally {
           setLoading(false);
         }
@@ -73,15 +60,15 @@ const Perfil = () => {
   }, [form]);
 
   const beforeUpload = (file) => {
-    const isImage = file.type.startsWith('image/');
+    const isImage = file.type.startsWith("image/");
     const isLt2M = file.size / 1024 / 1024 < 2;
 
     if (!isImage) {
-      message.error('Solo puedes subir archivos de imagen');
+      message.error("Solo puedes subir archivos de imagen");
       return Upload.LIST_IGNORE;
     }
     if (!isLt2M) {
-      message.error('La imagen debe ser menor a 2MB');
+      message.error("La imagen debe ser menor a 2MB");
       return Upload.LIST_IGNORE;
     }
 
@@ -91,7 +78,7 @@ const Perfil = () => {
   };
 
   const showModal = () => setIsModalVisible(true);
-  
+
   const handleCancel = () => {
     setIsModalVisible(false);
     form.setFieldsValue(formValues);
@@ -101,10 +88,9 @@ const Perfil = () => {
 
   const onFinish = async (values) => {
     const user = localStorage.getItem("usuario");
-    const token = localStorage.getItem("token");
 
-    if (!(user && token)) {
-      message.error("Token no encontrado, por favor inicia sesión.");
+    if (!user) {
+      message.error("Usuario no encontrado, por favor inicia sesión.");
       return;
     }
 
@@ -112,10 +98,10 @@ const Perfil = () => {
     const userid = userParse.id;
 
     const formData = new FormData();
-    
+
     // Agregar _method para Laravel
     formData.append("_method", "PUT");
-    
+
     // Agregar todos los campos del formulario
     formData.append("nombre", values.nombre);
     formData.append("apellidos", values.apellidos);
@@ -123,39 +109,26 @@ const Perfil = () => {
     formData.append("telefono", values.telefono);
     formData.append("curp", values.curp);
     formData.append("domicilio", values.domicilio);
-    
+
     // Agregar la foto solo si fue seleccionada
     if (fileImage) {
       formData.append("foto", fileImage);
     }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/updateUser/${userid}`,
-        {
-          method: "POST", // Usar POST con _method=PUT
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            // NO incluir Content-Type, el navegador lo establece automáticamente con boundary
-          },
-          body: formData,
-        }
-      );
+      const response = await client.post(`/api/updateUser/${userid}`, formData);
+      const data = response.data;
 
-      const data = await response.json();
-
-      if (response.ok) {
-        message.success("Información actualizada correctamente.");
-        setFormValues(data.user);
-        setPreviewImg(data.user.foto);
-        setFileImage(null);
-        setIsModalVisible(false);
-      } else {
-        message.error(data.message || "Error al actualizar la información.");
-      }
+      message.success("Información actualizada correctamente.");
+      setFormValues(data.user);
+      setPreviewImg(data.user.foto);
+      setFileImage(null);
+      setIsModalVisible(false);
     } catch (error) {
       console.error("Error:", error);
-      message.error("Ocurrió un error al actualizar la información.");
+      message.error(
+        error.response?.data?.message || "Error al actualizar la información."
+      );
     }
   };
 
@@ -276,7 +249,9 @@ const Perfil = () => {
               <Form.Item
                 label="Nombre"
                 name="nombre"
-                rules={[{ required: true, message: 'Por favor ingresa tu nombre' }]}
+                rules={[
+                  { required: true, message: "Por favor ingresa tu nombre" },
+                ]}
               >
                 <Input prefix={<UserOutlined />} />
               </Form.Item>
@@ -284,7 +259,12 @@ const Perfil = () => {
               <Form.Item
                 label="Apellidos"
                 name="apellidos"
-                rules={[{ required: true, message: 'Por favor ingresa tus apellidos' }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingresa tus apellidos",
+                  },
+                ]}
               >
                 <Input prefix={<UserOutlined />} />
               </Form.Item>
@@ -292,7 +272,9 @@ const Perfil = () => {
               <Form.Item
                 label="Género"
                 name="genero"
-                rules={[{ required: true, message: 'Por favor selecciona tu género' }]}
+                rules={[
+                  { required: true, message: "Por favor selecciona tu género" },
+                ]}
               >
                 <Select placeholder="Selecciona tu género">
                   <Select.Option value="Masculino">Masculino</Select.Option>
@@ -304,7 +286,9 @@ const Perfil = () => {
               <Form.Item
                 label="Teléfono"
                 name="telefono"
-                rules={[{ required: true, message: 'Por favor ingresa tu teléfono' }]}
+                rules={[
+                  { required: true, message: "Por favor ingresa tu teléfono" },
+                ]}
               >
                 <Input prefix={<PhoneOutlined />} />
               </Form.Item>
@@ -312,7 +296,9 @@ const Perfil = () => {
               <Form.Item
                 label="CURP"
                 name="curp"
-                rules={[{ required: true, message: 'Por favor ingresa tu CURP' }]}
+                rules={[
+                  { required: true, message: "Por favor ingresa tu CURP" },
+                ]}
               >
                 <Input prefix={<IdcardOutlined />} />
               </Form.Item>
@@ -320,7 +306,9 @@ const Perfil = () => {
               <Form.Item
                 label="Domicilio"
                 name="domicilio"
-                rules={[{ required: true, message: 'Por favor ingresa tu domicilio' }]}
+                rules={[
+                  { required: true, message: "Por favor ingresa tu domicilio" },
+                ]}
               >
                 <Input prefix={<HomeOutlined />} />
               </Form.Item>

@@ -1,10 +1,23 @@
-import { Breadcrumb, Button, Divider, notification, Spin, Tag, Modal, Space, Badge, Tooltip } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Divider,
+  notification,
+  Spin,
+  Tag,
+  Modal,
+  Space,
+  Badge,
+  Tooltip,
+} from "antd";
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import TablaAlumnos from "../../components/Docentes/TablaAlumnos";
-import { NotificationOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-
-
+import {
+  NotificationOutlined,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
+import client from "../../axios.js";
 
 const { confirm } = Modal;
 
@@ -15,7 +28,7 @@ function DetalleCurso() {
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState("");
 
-  // Obtener token del localStorage
+  // Obtener token del localStorage (aunque ya no se usa para auth, puede ser util para otras cosas o se puede quitar si no se usa)
   useEffect(() => {
     const tokenData = localStorage.getItem("token");
     if (tokenData) setToken(tokenData);
@@ -24,27 +37,18 @@ function DetalleCurso() {
   // Obtener detalles del curso, alumnos y calificaciones
   useEffect(() => {
     const fetchCursoDetalles = async () => {
-      if (!token) return;
-
       try {
-        const cursoResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/cursos/${cursoId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const cursoData = await cursoResponse.json();
+        const cursoResponse = await client.get(`/api/cursos/${cursoId}`);
+        const cursoData = cursoResponse.data;
         setCurso(cursoData.curso);
 
         const [alumnosResponse, calificacionesResponse] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes/${cursoId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/calificaciones/${cursoId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+          client.get(`/api/solicitudes/${cursoId}`),
+          client.get(`/api/calificaciones/${cursoId}`),
         ]);
 
-        const alumnosData = await alumnosResponse.json();
-        const calificacionesData = await calificacionesResponse.json();
+        const alumnosData = alumnosResponse.data;
+        const calificacionesData = calificacionesResponse.data;
 
         // Vincular calificaciones con alumnos
         const alumnosConCalificaciones = alumnosData.map((alumno) => {
@@ -69,23 +73,16 @@ function DetalleCurso() {
       }
     };
 
-    if (token) fetchCursoDetalles();
-  }, [cursoId, token]);
+    fetchCursoDetalles();
+  }, [cursoId]);
 
   // Guardar calificación
   const onSaveGrade = async (record) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/calificaciones`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          curso_id: cursoId,
-          alumno_id: record.alumno_id,
-          calificacion: Number(record.calificacion),
-        }),
+      await client.post("/api/calificaciones", {
+        curso_id: cursoId,
+        alumno_id: record.alumno_id,
+        calificacion: Number(record.calificacion),
       });
 
       notification.success({
@@ -103,18 +100,9 @@ function DetalleCurso() {
   // Función para archivar el curso
   const onArchiveCourse = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/archivarCurso/${cursoId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await client.post(`/api/archivarCurso/${cursoId}`);
+      const data = response.data;
 
-      const data = await response.json();
       notification.success({
         message: "Curso Archivado",
         description: data.mensaje,
@@ -151,9 +139,7 @@ function DetalleCurso() {
           { title: <p className="font-medium text-black">Docente</p> },
           {
             title: (
-              <p>
-                {esArchivado ? "Cursos archivados" : "Cursos activos"}
-              </p>
+              <p>{esArchivado ? "Cursos archivados" : "Cursos activos"}</p>
             ),
           },
           { title: <a>Detalles del curso</a> },
@@ -187,8 +173,6 @@ function DetalleCurso() {
 
             {/* Ícono con tooltip */}
             <div className="flex items-end gap-2">
-
-
               {/* Icono de ayuda con tooltip */}
               <Tooltip
                 title="Si necesitas volver a activar este curso, solicítalo a tu coordinador"
@@ -262,7 +246,6 @@ function DetalleCurso() {
               onSaveGrade={onSaveGrade}
               esArchivado={esArchivado}
             />
-
           </div>
         </div>
       ) : (

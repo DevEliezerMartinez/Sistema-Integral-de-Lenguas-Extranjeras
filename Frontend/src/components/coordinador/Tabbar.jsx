@@ -69,19 +69,16 @@ function Tabbar() {
 
             if (tab.isDropdown) {
               return (
-                <Dropdown
-                  key={index}
-                  menu={{ items }}
-                  trigger={["click"]}
-                >
+                <Dropdown key={index} menu={{ items }} trigger={["click"]}>
                   <div
                     className={`
                       relative flex flex-col items-center justify-center gap-1.5
                       min-w-[70px] py-2.5 px-3 rounded-2xl cursor-pointer
                       transition-all duration-300 ease-out
-                      ${active 
-                        ? 'bg-white/15 scale-105 shadow-lg shadow-black/20' 
-                        : 'scale-100 active:scale-95'
+                      ${
+                        active
+                          ? "bg-white/15 scale-105 shadow-lg shadow-black/20"
+                          : "scale-100 active:scale-95"
                       }
                     `}
                     onClick={(e) => e.preventDefault()}
@@ -93,13 +90,14 @@ function Tabbar() {
                         src={tab.icon}
                         className={`
                           w-full h-full transition-all duration-300
-                          ${active 
-                            ? 'brightness-110 scale-110' 
-                            : 'brightness-90 opacity-80'
+                          ${
+                            active
+                              ? "brightness-110 scale-110"
+                              : "brightness-90 opacity-80"
                           }
                         `}
                       />
-                      
+
                       {/* Punto indicador activo */}
                       {active && (
                         <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 animate-pulse" />
@@ -108,14 +106,13 @@ function Tabbar() {
 
                     {/* Texto del tab con flecha */}
                     <div className="flex items-center gap-1">
-                      <span className={`
+                      <span
+                        className={`
                         text-[10px] font-medium tracking-wide
                         transition-all duration-300
-                        ${active 
-                          ? 'text-white font-semibold' 
-                          : 'text-white/70'
-                        }
-                      `}>
+                        ${active ? "text-white font-semibold" : "text-white/70"}
+                      `}
+                      >
                         {tab.label}
                       </span>
                       <img
@@ -142,9 +139,10 @@ function Tabbar() {
                   relative flex flex-col items-center justify-center gap-1.5
                   min-w-[70px] py-2.5 px-3 rounded-2xl
                   transition-all duration-300 ease-out
-                  ${active 
-                    ? 'bg-white/15 scale-105 shadow-lg shadow-black/20' 
-                    : 'scale-100 active:scale-95'
+                  ${
+                    active
+                      ? "bg-white/15 scale-105 shadow-lg shadow-black/20"
+                      : "scale-100 active:scale-95"
                   }
                 `}
               >
@@ -155,13 +153,14 @@ function Tabbar() {
                     src={tab.icon}
                     className={`
                       w-full h-full transition-all duration-300
-                      ${active 
-                        ? 'brightness-110 scale-110' 
-                        : 'brightness-90 opacity-80'
+                      ${
+                        active
+                          ? "brightness-110 scale-110"
+                          : "brightness-90 opacity-80"
                       }
                     `}
                   />
-                  
+
                   {/* Punto indicador activo */}
                   {active && (
                     <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 animate-pulse" />
@@ -169,14 +168,13 @@ function Tabbar() {
                 </div>
 
                 {/* Texto del tab */}
-                <span className={`
+                <span
+                  className={`
                   text-[10px] font-medium tracking-wide
                   transition-all duration-300
-                  ${active 
-                    ? 'text-white font-semibold' 
-                    : 'text-white/70'
-                  }
-                `}>
+                  ${active ? "text-white font-semibold" : "text-white/70"}
+                `}
+                >
                   {tab.label}
                 </span>
 
@@ -191,48 +189,46 @@ function Tabbar() {
       </nav>
 
       {/* Estilos personalizados */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
+      <style>{`
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
 
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateX(-50%) translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-          }
-        }
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
 
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
 
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
+  .animate-slideUp {
+    animation: slideUp 0.3s ease-out;
+  }
 
-        /* Safe area para dispositivos con notch */
-        .safe-area-bottom {
-          padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
-        }
+  .safe-area-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
 
-        /* Evitar selección de texto en taps */
-        nav {
-          -webkit-tap-highlight-color: transparent;
-          user-select: none;
-        }
-      `}</style>
+  nav {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+`}</style>
     </>
   );
 }

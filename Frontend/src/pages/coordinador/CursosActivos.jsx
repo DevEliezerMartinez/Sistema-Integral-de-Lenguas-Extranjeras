@@ -23,6 +23,7 @@ import locale from "antd/locale/es_ES";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import updateLocale from "dayjs/plugin/updateLocale";
+import client from "../../axios.js";
 
 dayjs.extend(updateLocale);
 dayjs.locale("es");
@@ -41,10 +42,7 @@ const CardGrid = ({ course }) => (
     )}
 
     <Link to={`/Coordinador/Cursos/${course.id}`}>
-      <Button
-        type="primary"
-        className="bg-[#1B396A] mt-4 hover:bg-[#244b8a]"
-      >
+      <Button type="primary" className="bg-[#1B396A] mt-4 hover:bg-[#244b8a]">
         Detalles
       </Button>
     </Link>
@@ -65,10 +63,7 @@ const CardList = ({ course }) => (
     </div>
 
     <Link to={`/Coordinador/Cursos/${course.id}`}>
-      <Button
-        type="primary"
-        className="bg-[#1B396A] hover:bg-[#244b8a]"
-      >
+      <Button type="primary" className="bg-[#1B396A] hover:bg-[#244b8a]">
         Ver más
       </Button>
     </Link>
@@ -116,22 +111,10 @@ function CursoActivo() {
 
   useEffect(() => {
     // Obtener cursos activos
-    fetch(`${import.meta.env.VITE_API_URL}/api/cursos_activos`, {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token"),
-        Accept: "*/*",
-        "Content-Type": "application/json",
-      },
-    })
+    client
+      .get("/api/cursos_activos")
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Error en la respuesta de la API");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const cursos = data.cursos;
+        const cursos = response.data.cursos;
 
         if (cursos && cursos.length > 0) {
           setCourses(cursos);
@@ -149,21 +132,10 @@ function CursoActivo() {
       });
 
     // Obtener docentes
-    fetch(`${import.meta.env.VITE_API_URL}/api/docentes`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        Accept: "*/*",
-        "Content-Type": "application/json",
-      },
-    })
+    client
+      .get("/api/docentes")
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Error en la respuesta de la API");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setTeachers(data.docentes);
+        setTeachers(response.data.docentes);
         setLoading(false);
       })
       .catch((error) => {
@@ -192,7 +164,10 @@ function CursoActivo() {
     e.preventDefault();
     if (nuevaModalidad && nuevaModalidad.trim() !== "") {
       const nuevoValor = nuevaModalidad;
-      setModalidades([...modalidades, { value: nuevoValor, label: nuevaModalidad }]);
+      setModalidades([
+        ...modalidades,
+        { value: nuevoValor, label: nuevaModalidad },
+      ]);
       setNuevaModalidad("");
     }
   };
@@ -216,15 +191,8 @@ function CursoActivo() {
           coordinador: 1,
         };
 
-        fetch(`${import.meta.env.VITE_API_URL}/api/crear_curso`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestData),
-        })
+        client
+          .post("/api/crear_curso", requestData)
           .then((response) => {
             console.log("Curso creado:", response.data);
             setOpen(false);
@@ -232,16 +200,10 @@ function CursoActivo() {
             openNotificationWithIcon("success");
 
             // Recargar la lista de cursos activos
-            fetch(`${import.meta.env.VITE_API_URL}/api/cursos_activos`, {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                Accept: "*/*",
-                "Content-Type": "application/json",
-              },
-            })
-              .then((response) => response.json())
-              .then((data) => {
-                const cursos = data.cursos;
+            client
+              .get("/api/cursos_activos")
+              .then((response) => {
+                const cursos = response.data.cursos;
                 if (cursos.length > 0) {
                   setCourses(cursos);
                   setFilteredCourses(cursos);
@@ -253,6 +215,7 @@ function CursoActivo() {
               .catch((error) => {
                 console.error("Error fetching cursos activos:", error);
                 setHasModules(false);
+                setLoading(false);
               });
           })
           .catch((error) => {
@@ -419,7 +382,7 @@ function CursoActivo() {
               },
             ]}
           >
-            <RangePicker 
+            <RangePicker
               locale={locale}
               format="DD/MM/YYYY"
               placeholder={["Fecha de inicio", "Fecha de fin"]}

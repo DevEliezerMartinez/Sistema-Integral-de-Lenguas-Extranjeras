@@ -1,59 +1,75 @@
 import { Button, Divider, Form, Input, message } from "antd";
 import Headeeer from "../../components/Shared/HeaderPublico";
+import { useAuth } from "../../AuthContext";
+import React from "react";
+import client from "../../axios.js";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 
 const LoginCoordinador = () => {
   const navigate = useNavigate();
 
+  const { login } = useAuth();
+  const [messageApi, contextHolder] = message.useMessage();
+  const [loading, setLoading] = React.useState(false);
+
   const onFinish = async (values) => {
+    const data = {
+      correo_electronico: values.correo,
+      contrasena: values.password,
+      tipo_acceso: "accesoCoordinador",
+    };
+
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            correo_electronico: values.correo,
-            contrasena: values.password,
-            tipo_acceso: "accesoCoordinador",
-          }),
-        }
-      );
+      setLoading(true);
 
-      // Verifica si la respuesta fue exitosa
-      if (!response.ok) {
-        const data = await response.json();
-        if (response.status === 401) {
-          message.error(data.error || "Credenciales incorrectas");
-        } else if (response.status === 404) {
-          message.error(data.error || "Usuario no encontrado");
-        } else {
-          message.error("Error en el servidor, intenta más tarde.");
-        }
-        return; // Salir de la función si la respuesta no es exitosa
-      }
+      // Obtener CSRF cookie
+      await client.get("/sanctum/csrf-cookie");
 
-      // Si la respuesta es exitosa, procesar los datos
-      const data = await response.json();
-      if (data.success) {
+      // Hacer login
+      const response = await client.post("/api/login", data);
+      const responseData = response.data;
+
+      if (responseData.success) {
+        // Limpiar y guardar datos del usuario
         localStorage.clear();
-        // Guardar el token y el usuario en localStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("usuario", JSON.stringify(data.usuario));
+        localStorage.setItem("usuario", JSON.stringify(responseData.usuario));
+        // Note: The original code stored 'token' which is no longer needed for cookie-based auth
+        // It also didn't store a specific 'coordinador' object, just 'usuario'.
+        // If the backend returns 'coordinador' data similar to 'estudiante', we might want to store it,
+        // but I will stick to the previous behavior of just clearing and setting what was there, minus the token.
+        // Wait, the original code DID NOT store 'coordinador' object, but the public one stored 'estudiante'.
+        // I will follow the public pattern but adapt to what the backend likely returns.
+        // The original code stored: token, usuario.
 
-        // Redirigir al usuario a Cursos Activos
-        navigate("/Coordinador/CursosActivos");
-        console.log("ya debio redirigir")
-      } else {
-        // Manejar caso donde success es false
-        message.error("Error desconocido, intenta nuevamente.");
+        // Actualizar el contexto de autenticación
+        login(responseData.usuario);
+
+        messageApi.open({
+          type: "success",
+          content: "Inicio de sesión exitoso.",
+        });
+
+        setTimeout(() => navigate("/Coordinador/CursosActivos"), 1200);
       }
     } catch (error) {
-      // Error de red o de configuración
-      message.error("Error en la conexión, intenta más tarde.");
+      console.error("Error en login:", error);
+
+      if (error.response) {
+        const errorMessage =
+          error.response.data.error || "Error al iniciar sesión.";
+        messageApi.open({
+          type: "error",
+          content: errorMessage,
+        });
+      } else {
+        messageApi.open({
+          type: "error",
+          content: "Error de conexión. Intente más tarde.",
+        });
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,6 +79,7 @@ const LoginCoordinador = () => {
 
   return (
     <>
+      {contextHolder}
       <Headeeer />
 
       <main className="w-full flex flex-col md:h-screen md:flex-row">
@@ -125,7 +142,7 @@ const LoginCoordinador = () => {
                   span: 16,
                 }}
               >
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" loading={loading}>
                   Ingresar
                 </Button>
               </Form.Item>

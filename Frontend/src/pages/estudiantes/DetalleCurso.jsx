@@ -2,8 +2,13 @@ import { Breadcrumb, Button, Divider, Popconfirm, message, Upload } from "antd";
 import Dragger from "antd/es/upload/Dragger";
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { InboxOutlined, DeleteOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  InboxOutlined,
+  DeleteOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { useAuth } from "../../AuthContext";
+import client from "../../axios";
 
 function DetalleCurso() {
   const { cursoId } = useParams();
@@ -40,18 +45,8 @@ function DetalleCurso() {
 
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/cursos/${cursoId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "*/*",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const data = await response.json();
+        const response = await client.get(`/api/cursos/${cursoId}`);
+        const data = response.data;
         const { curso } = data;
 
         setCurso(curso);
@@ -65,7 +60,7 @@ function DetalleCurso() {
     };
 
     fetchData();
-  }, [cursoId, token]);
+  }, [cursoId]);
 
   // === Gestión del archivo ===
   const beforeUpload = (file) => {
@@ -95,7 +90,7 @@ function DetalleCurso() {
   const handleFileChange = (info) => {
     // Solo procesamos si el archivo pasó las validaciones
     const { file } = info;
-    
+
     if (file.status === "error") {
       message.error("Error al cargar el archivo");
       handleRemoveFile();
@@ -165,70 +160,69 @@ function DetalleCurso() {
       formData.append("status", status);
       formData.append("file", pdfFile);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/crear_solicitud`,
-        {
-          method: "POST",
-          body: formData,
-          headers: { 
-            Authorization: `Bearer ${localStorage.getItem("token")}` 
-          },
-        }
-      );
-
-      const data = await response.json();
+      const response = await client.post("/api/crear_solicitud", formData);
+      const data = response.data;
 
       hideLoading();
 
-      if (!response.ok) {
-        // Manejar diferentes códigos de error
+      // Éxito
+      if (data.success) {
+        message.success({
+          content:
+            "¡Solicitud enviada correctamente! Espera la aprobación del administrador",
+          duration: 5,
+        });
+
+        // Limpiar el formulario SIN mostrar mensaje de "eliminado"
+        clearFileWithoutMessage();
+
+        // Opcional: redirigir después de un momento
+        setTimeout(() => {
+          navigate("/estudiantes/cursos");
+        }, 2000);
+      }
+    } catch (error) {
+      hideLoading();
+      console.error("Error en la solicitud:", error);
+
+      const response = error.response;
+      if (response) {
         if (response.status === 409) {
           message.warning({
-            content: data.message || "Ya existe una solicitud pendiente o aceptada para este curso",
+            content:
+              response.data.message ||
+              "Ya existe una solicitud pendiente o aceptada para este curso",
             duration: 5,
           });
         } else if (response.status === 422) {
           // Errores de validación
-          const errores = data.errors;
+          const errores = response.data.errors;
           if (errores) {
             const mensajesError = Object.values(errores).flat();
             mensajesError.forEach((error) => {
               message.error(error);
             });
           } else {
-            message.error(data.message || "Error de validación. Verifica los datos");
+            message.error(
+              response.data.message || "Error de validación. Verifica los datos"
+            );
           }
         } else if (response.status === 400) {
-          message.error(data.message || "Datos incorrectos. Verifica el archivo");
+          message.error(
+            response.data.message || "Datos incorrectos. Verifica el archivo"
+          );
         } else {
-          message.error(data.message || "Error al procesar la solicitud");
+          message.error(
+            response.data.message || "Error al procesar la solicitud"
+          );
         }
-        return;
-      }
-
-      // Éxito
-      if (data.success) {
-        message.success({
-          content: "¡Solicitud enviada correctamente! Espera la aprobación del administrador",
+      } else {
+        message.error({
+          content:
+            "Error de conexión. Verifica tu internet e intenta nuevamente",
           duration: 5,
         });
-        
-        // Limpiar el formulario SIN mostrar mensaje de "eliminado"
-        clearFileWithoutMessage();
-        
-        // Opcional: redirigir después de un momento
-        setTimeout(() => {
-          navigate("/estudiantes/cursos");
-        }, 2000);
       }
-
-    } catch (error) {
-      hideLoading();
-      console.error("Error en la solicitud:", error);
-      message.error({
-        content: "Error de conexión. Verifica tu internet e intenta nuevamente",
-        duration: 5,
-      });
     } finally {
       setIsSubmitting(false);
     }
@@ -236,7 +230,6 @@ function DetalleCurso() {
 
   return (
     <div className="w-full flex flex-col justify-center">
-
       {/* Breadcrumb SIEMPRE visible */}
       <Breadcrumb
         items={[
@@ -247,11 +240,9 @@ function DetalleCurso() {
       />
 
       <div className="bg-white shadow-md rounded-xl p-8 w-full max-w-6xl">
-
         {/* SI CURSO NO HA CARGADO → SKELETON */}
         {!curso ? (
           <div className="animate-pulse space-y-6">
-
             <div className="flex justify-between items-center">
               <div className="h-6 w-32 bg-gray-300 rounded"></div>
               <div className="h-6 w-48 bg-gray-300 rounded"></div>
@@ -292,19 +283,35 @@ function DetalleCurso() {
 
             {/* === LAYOUT HORIZONTAL === */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-8">
-
               {/* Información del curso */}
               <section className="p-4 rounded-xl bg-slate-50 shadow-sm">
-                <h3 className="text-lg font-semibold mb-4">Información del curso</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Información del curso
+                </h3>
 
                 <ul className="space-y-2 text-gray-700">
-                  <li><strong>Descripción:</strong> {curso.descripcion}</li>
-                  <li><strong>Modalidad:</strong> {curso.modalidad}</li>
-                  <li><strong>Nivel:</strong> {curso.nivel}</li>
-                  <li><strong>Estado:</strong> {curso.estado}</li>
-                  <li><strong>Horario:</strong> {curso.horario}</li>
-                  <li><strong>Fecha Inicio:</strong> {formatFecha(curso.fecha_inicio)}</li>
-                  <li><strong>Fecha Fin:</strong> {formatFecha(curso.fecha_fin)}</li>
+                  <li>
+                    <strong>Descripción:</strong> {curso.descripcion}
+                  </li>
+                  <li>
+                    <strong>Modalidad:</strong> {curso.modalidad}
+                  </li>
+                  <li>
+                    <strong>Nivel:</strong> {curso.nivel}
+                  </li>
+                  <li>
+                    <strong>Estado:</strong> {curso.estado}
+                  </li>
+                  <li>
+                    <strong>Horario:</strong> {curso.horario}
+                  </li>
+                  <li>
+                    <strong>Fecha Inicio:</strong>{" "}
+                    {formatFecha(curso.fecha_inicio)}
+                  </li>
+                  <li>
+                    <strong>Fecha Fin:</strong> {formatFecha(curso.fecha_fin)}
+                  </li>
                   <li>
                     <strong>Docente:</strong>
                     {docente ? " " + docente.nombre : " No asignado"}
@@ -328,9 +335,15 @@ function DetalleCurso() {
                     showUploadList={false}
                     className="hover:border-blue-400 transition-colors"
                   >
-                    <p className="ant-upload-drag-icon"><InboxOutlined /></p>
-                    <p className="ant-upload-text">Selecciona o arrastra tu archivo aquí</p>
-                    <p className="ant-upload-hint">Solo formato PDF (máx. 5MB)</p>
+                    <p className="ant-upload-drag-icon">
+                      <InboxOutlined />
+                    </p>
+                    <p className="ant-upload-text">
+                      Selecciona o arrastra tu archivo aquí
+                    </p>
+                    <p className="ant-upload-hint">
+                      Solo formato PDF (máx. 5MB)
+                    </p>
                   </Dragger>
                 ) : (
                   <div className="space-y-4">
@@ -344,11 +357,17 @@ function DetalleCurso() {
 
                     <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <svg
+                          className="w-5 h-5 text-blue-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
                           <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
                         </svg>
                         <div>
-                          <p className="text-sm font-medium text-gray-700">{pdfFile.name}</p>
+                          <p className="text-sm font-medium text-gray-700">
+                            {pdfFile.name}
+                          </p>
                           <p className="text-xs text-gray-500">
                             {(pdfFile.size / 1024).toFixed(2)} KB
                           </p>
@@ -376,7 +395,11 @@ function DetalleCurso() {
                         okButtonProps={{ danger: true }}
                         disabled={isSubmitting}
                       >
-                        <Button icon={<DeleteOutlined />} danger disabled={isSubmitting}>
+                        <Button
+                          icon={<DeleteOutlined />}
+                          danger
+                          disabled={isSubmitting}
+                        >
                           Eliminar
                         </Button>
                       </Popconfirm>
@@ -402,8 +425,10 @@ function DetalleCurso() {
                   disabled={!pdfFile || isSubmitting}
                   loading={isSubmitting}
                   style={{
-                    backgroundColor: !pdfFile || isSubmitting ? undefined : "#16a34a",
-                    borderColor: !pdfFile || isSubmitting ? undefined : "#16a34a",
+                    backgroundColor:
+                      !pdfFile || isSubmitting ? undefined : "#16a34a",
+                    borderColor:
+                      !pdfFile || isSubmitting ? undefined : "#16a34a",
                     height: "48px",
                     fontSize: "16px",
                     paddingLeft: "32px",
@@ -414,11 +439,15 @@ function DetalleCurso() {
                 </Button>
               </Popconfirm>
 
-              {!pdfFile && (
+              {!pdfFile ? (
                 <p className="text-sm text-gray-500 mt-2">
                   * Debes cargar un comprobante de pago para continuar
                 </p>
-              )}
+              ) : isSubmitting ? (
+                <p className="text-sm text-blue-600 mt-2">
+                  * Procesando tu solicitud, por favor espera...
+                </p>
+              ) : null}
             </div>
           </>
         )}

@@ -18,6 +18,7 @@ import {
   UploadOutlined,
   MailOutlined,
 } from "@ant-design/icons";
+import client from "../../axios.js";
 
 const fallbackImage =
   "https://images.pexels.com/photos/4009599/pexels-photo-4009599.jpeg?auto=compress&cs=tinysrgb&w=600";
@@ -32,35 +33,23 @@ const PerfilDocente = () => {
   // 🔹 Cargar datos del usuario
   useEffect(() => {
     const user = localStorage.getItem("usuario");
-    const token = localStorage.getItem("token");
 
-    if (!user || !token) return setLoading(false);
+    if (!user) return setLoading(false);
 
     const userParse = JSON.parse(user);
     const userid = userParse.id;
 
     const fetchUserData = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/infoUser/${userid}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const response = await client.get(`/api/infoUser/${userid}`);
+        const data = response.data;
+
+        setFormValues(data.user);
+        setPreviewImg(data.user.foto || null);
+      } catch (error) {
+        message.error(
+          error.response?.data?.message || "Error al cargar la información."
         );
-
-        const data = await response.json();
-
-        if (response.ok) {
-          setFormValues(data.user);
-          setPreviewImg(data.user.foto || null);
-        } else {
-          message.error(data.message || "Error al cargar la información.");
-        }
-      } catch {
-        message.error("Ocurrió un error al cargar la información.");
       } finally {
         setLoading(false);
       }
@@ -79,10 +68,9 @@ const PerfilDocente = () => {
   // 🔹 Actualizar perfil
   const onFinish = async (values) => {
     const user = localStorage.getItem("usuario");
-    const token = localStorage.getItem("token");
 
-    if (!(user && token)) {
-      message.error("Token no encontrado, por favor inicia sesión.");
+    if (!user) {
+      message.error("Usuario no encontrado, por favor inicia sesión.");
       return;
     }
 
@@ -90,31 +78,22 @@ const PerfilDocente = () => {
     const userid = userParse.id;
 
     const formData = new FormData();
+    formData.append("_method", "PUT"); // Laravel method spoofing for PUT requests with FormData
     for (let key in values) formData.append(key, values[key]);
     if (fileImage) formData.append("foto", fileImage);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/updateUser/${userid}`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
+      const response = await client.post(`/api/updateUser/${userid}`, formData);
+      const data = response.data;
+
+      message.success("Información actualizada correctamente.");
+      setFormValues(data.user);
+      setPreviewImg(data.user.foto);
+      localStorage.setItem("usuario", JSON.stringify(data.user));
+    } catch (error) {
+      message.error(
+        error.response?.data?.message || "Error al actualizar la información."
       );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        message.success("Información actualizada correctamente.");
-        setFormValues(data.user);
-        setPreviewImg(data.user.foto);
-        localStorage.setItem("usuario", JSON.stringify(data.user));
-      } else {
-        message.error(data.message || "Error al actualizar la información.");
-      }
-    } catch {
-      message.error("Ocurrió un error al actualizar la información.");
     }
 
     setIsModalVisible(false);
@@ -199,7 +178,9 @@ const PerfilDocente = () => {
 
       {/* 🔹 Modal: editar perfil */}
       <Modal
-        title={<p className="text-xl font-semibold text-[#1B396A]">Editar Perfil</p>}
+        title={
+          <p className="text-xl font-semibold text-[#1B396A]">Editar Perfil</p>
+        }
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
@@ -218,7 +199,11 @@ const PerfilDocente = () => {
               alt="Preview"
               className="w-28 h-28 rounded-full object-cover shadow-md mb-3"
             />
-            <Upload beforeUpload={beforeUpload} showUploadList={false} accept="image/*">
+            <Upload
+              beforeUpload={beforeUpload}
+              showUploadList={false}
+              accept="image/*"
+            >
               <Button icon={<UploadOutlined />}>Cambiar imagen</Button>
             </Upload>
           </div>
@@ -227,7 +212,11 @@ const PerfilDocente = () => {
             <Input prefix={<UserOutlined />} />
           </Form.Item>
 
-          <Form.Item label="Apellidos" name="apellidos" rules={[{ required: true }]}>
+          <Form.Item
+            label="Apellidos"
+            name="apellidos"
+            rules={[{ required: true }]}
+          >
             <Input prefix={<UserOutlined />} />
           </Form.Item>
 
@@ -239,7 +228,11 @@ const PerfilDocente = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item label="Teléfono" name="telefono" rules={[{ required: true }]}>
+          <Form.Item
+            label="Teléfono"
+            name="telefono"
+            rules={[{ required: true }]}
+          >
             <Input prefix={<PhoneOutlined />} />
           </Form.Item>
 
@@ -247,7 +240,11 @@ const PerfilDocente = () => {
             <Input prefix={<IdcardOutlined />} />
           </Form.Item>
 
-          <Form.Item label="Domicilio" name="domicilio" rules={[{ required: true }]}>
+          <Form.Item
+            label="Domicilio"
+            name="domicilio"
+            rules={[{ required: true }]}
+          >
             <Input prefix={<HomeOutlined />} />
           </Form.Item>
 

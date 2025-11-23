@@ -1,6 +1,16 @@
-import { Breadcrumb, Button, Divider, Card, List, Typography, Spin, message } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Divider,
+  Card,
+  List,
+  Typography,
+  Spin,
+  message,
+} from "antd";
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import client from "../../axios";
 
 const { Title, Text } = Typography;
 
@@ -44,28 +54,21 @@ function DetalleCurso() {
 
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/infocurso_alumno/${cursoId}/${id_estudiante}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "*/*",
-              "Content-Type": "application/json",
-            },
-          }
+        const response = await client.get(
+          `/api/infocurso_alumno/${cursoId}/${id_estudiante}`
         );
+        const data = response.data;
 
-        if (!response.ok) throw new Error("Error al obtener los detalles del curso.");
-
-        const data = await response.json();
-        if (!data.curso) throw new Error("No se encontraron detalles del curso.");
+        if (!data.curso)
+          throw new Error("No se encontraron detalles del curso.");
 
         setCurso(data.curso);
         setDocente(data.curso.docente);
       } catch (err) {
-        setError(err.message);
-        message.error(err.message);
+        setError(err.message || "Error al obtener los detalles del curso.");
+        message.error(
+          err.message || "Error al obtener los detalles del curso."
+        );
       } finally {
         setLoading(false);
       }
@@ -77,13 +80,15 @@ function DetalleCurso() {
   return (
     <div className="container ">
       {/* Breadcrumb siempre visible */}
-       <Breadcrumb
-             items={[
-               { title: <p className="font-medium text-black">Estudiantes</p> },
-               { title: <span className="text-[#1B396A]">Mi progreso</span> },
-               { title: <span className="text-[#1B396A]">Detalles de mi curso</span> },
-             ]}
-           />
+      <Breadcrumb
+        items={[
+          { title: <p className="font-medium text-black">Estudiantes</p> },
+          { title: <span className="text-[#1B396A]">Mi progreso</span> },
+          {
+            title: <span className="text-[#1B396A]">Detalles de mi curso</span>,
+          },
+        ]}
+      />
 
       {loading ? (
         <div className="flex justify-center py-10">
@@ -97,7 +102,9 @@ function DetalleCurso() {
             <Button type="link" onClick={() => navigate(-1)}>
               Volver
             </Button>
-            <Title level={3} className="text-center md:text-left">{curso.nombre}</Title>
+            <Title level={3} className="text-center md:text-left">
+              {curso.nombre}
+            </Title>
           </div>
 
           <Divider />
@@ -111,14 +118,25 @@ function DetalleCurso() {
               { label: "Nivel", value: curso.nivel },
               { label: "Estado", value: curso.estado },
               { label: "Horario", value: obtenerHorarioTexto(curso.horario) },
-              { label: "Fecha de Inicio", value: formatFecha(curso.fecha_inicio) },
+              {
+                label: "Fecha de Inicio",
+                value: formatFecha(curso.fecha_inicio),
+              },
               { label: "Fecha de Fin", value: formatFecha(curso.fecha_fin) },
-              { label: "Docente", value: docente ? docente.nombre : "No asignado" },
-              { label: "Calificación del curso", value: curso.calificacion_alumno || "No disponible" },
+              {
+                label: "Docente",
+                value: docente ? docente.nombre : "No asignado",
+              },
+              {
+                label: "Calificación del curso",
+                value: curso.calificacion_alumno || "No disponible",
+              },
             ]}
             renderItem={(item) => (
               <List.Item className="px-2 py-1 md:px-4 md:py-2">
-                <Text strong className="w-40 inline-block">{item.label}:</Text>
+                <Text strong className="w-40 inline-block">
+                  {item.label}:
+                </Text>
                 <Text>{item.value}</Text>
               </List.Item>
             )}

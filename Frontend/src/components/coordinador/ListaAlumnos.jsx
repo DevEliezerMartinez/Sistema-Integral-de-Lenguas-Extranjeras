@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, Breadcrumb, Collapse, Input, Table, Tag } from "antd";
+import client from "../../axios.js";
 
 const { Panel } = Collapse;
 const { Search } = Input;
@@ -30,24 +31,11 @@ const ListaAlumno = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    // Hacer la solicitud al endpoint
-    fetch(`${import.meta.env.VITE_API_URL}/api/cursos_con_estudiantes`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "*/*",
-        "Content-Type": "application/json",
-      },
-    })
+    // Hacer la solicitud al endpoint usando axios client
+    client
+      .get("/api/cursos_con_estudiantes")
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Error en la respuesta de la red");
-        }
-        return response.json();
-      })
-      .then((data) => {
+        const data = response.data;
         const cursos = data.cursos;
 
         // Verificar si el array de cursos está vacío
@@ -115,6 +103,9 @@ const ListaAlumno = () => {
                     dataSource={cursosData[curso]}
                     pagination={false}
                     rowKey="key"
+                    locale={{
+                      emptyText: "Este curso aún no tiene alumnos registrados.",
+                    }}
                   />
                 </Panel>
               ))}
