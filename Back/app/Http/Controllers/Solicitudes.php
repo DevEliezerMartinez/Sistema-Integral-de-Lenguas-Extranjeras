@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Solicitud;
 use App\Models\Notificacion;
 use App\Models\Curso;
+use Storage;
 
 class Solicitudes extends Controller
 {

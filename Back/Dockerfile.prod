@@ -1,0 +1,64 @@
+FROM php:8.2-fpm
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    sqlite3 \
+    libsqlite3-dev
+
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy project files
+COPY . .
+
+# Install Laravel dependencies (Production)
+RUN composer install --no-interaction --optimize-autoloader --no-dev
+
+# Create database directory and file
+RUN mkdir -p database && touch database/database.sqlite
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache database
+
+# Generate key and cache config
+# Note: In a real production env, APP_KEY should be set via env vars, not generated here.
+# But for this setup, we'll ensure it exists.
+RUN cp .env.example .env
+
+# Set production environment variables
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+ENV APP_URL=http://localhost
+ENV SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1
+# ENV SESSION_DOMAIN=localhost  <-- Commented out to let browser handle it
+ENV SESSION_SECURE_COOKIE=false
+ENV SESSION_DRIVER=cookie
+
+RUN php artisan key:generate
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
+
+# Link storage
+RUN php artisan storage:link
+
+# Expose port 9000 and start php-fpm server
+EXPOSE 9000
+CMD ["php-fpm"]
