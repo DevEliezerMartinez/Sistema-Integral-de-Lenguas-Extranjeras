@@ -46,7 +46,7 @@ RUN cp .env.example .env
 ENV APP_ENV=production
 ENV APP_DEBUG=false
 ENV APP_URL=http://localhost
-ENV SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1
+# SANCTUM_STATEFUL_DOMAINS is set in docker-compose.prod.yml for flexibility
 # ENV SESSION_DOMAIN=localhost  <-- Commented out to let browser handle it
 ENV SESSION_SECURE_COOKIE=false
 ENV SESSION_DRIVER=cookie
