@@ -9,8 +9,8 @@ services:
     restart: always
     environment:
       # Change this IP to match your network IP or production domain
-      - FRONTEND_URL=http://192.168.0.162
-      - SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,192.168.0.162
+      - FRONTEND_URL=http://192.168.6.218
+      - SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,192.168.6.218
       - SESSION_SECURE_COOKIE=false
       - SESSION_SAME_SITE=lax
       - SESSION_HTTP_ONLY=true
@@ -25,6 +25,8 @@ services:
     build:
       context: ./Frontend
       dockerfile: Dockerfile.prod
+      args:
+        - VITE_API_URL=http://192.168.6.218
     container_name: react_prod
     restart: always
     ports:
