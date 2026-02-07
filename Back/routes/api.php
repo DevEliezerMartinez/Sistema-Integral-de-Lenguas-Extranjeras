@@ -12,8 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Rutas públicas (no requieren autenticación)
-Route::post('/login', [AuthController::class, 'login']); // Iniciar sesión
-Route::post('/register', [AuthController::class, 'registrar']); // Registro de usuario
+Route::post('/login', [AuthController::class, 'login'])->middleware('web'); // Iniciar sesión
+Route::post('/register', [AuthController::class, 'registrar'])->middleware('web'); // Registro de usuario
 Route::get('/test', [AuthController::class, 'test']); // Registro de usuario
 
 // Rutas protegidas por autenticación
@@ -26,7 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::delete('/users/notificaciones/{id}', [notificacions::class, 'destroy']); // Eliminar notificación por ID
 
   // Cerrar sesión
-  Route::post('/logout', [AuthController::class, 'logout']); // Cerrar sesión del usuario
+  Route::post('/logout', [AuthController::class, 'logout'])->middleware('web'); // Cerrar sesión del usuario
 
   // Gestión de cursos
   Route::get('/cursos', [CursoController::class, 'index']); // Obtener lista de cursos disponibles
