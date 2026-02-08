@@ -1,74 +1,232 @@
 # Sistema de Gestión de Lenguas Extranjeras
 
-Este proyecto implementa un Sistema de Información para la Gestión de Lenguas Extranjeras destinado a la Coordinación de Lenguas Extranjeras del Tecnológico Nacional de México Campus San Marcos.
+Sistema de Información para la Gestión de Lenguas Extranjeras del Tecnológico Nacional de México Campus San Marcos. Plataforma web completa para administración académica y seguimiento de estudiantes.
 
-## Descripción
+## 🚀 Instalación Rápida
 
-El sistema está diseñado para optimizar procesos administrativos y académicos, mejorando la eficiencia operativa y ofreciendo un seguimiento detallado del progreso académico. El proyecto abarca desde la investigación y análisis de requerimientos hasta la implementación y despliegue de la plataforma.
+### Requisitos Previos
 
-## Características Principales
+- **Docker Desktop** (versión 20.10+) - [Descargar aquí](https://www.docker.com/products/docker-desktop)
+- **Git**
 
-### Gestión de Usuarios
+### Comandos de Instalación
 
-- Registro y administración de cuentas de usuario.
-- Autenticación segura mediante cookies HTTP-only (Laravel Sanctum) y protección CSRF.
-- Control de acceso basado en roles y permisos.
-- Perfiles de usuario con información académica y administrativa.
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/DevEliezerMartinez/Sistema-Integral-de-Lenguas-Extranjeras.git
+cd Sistema-Integral-de-Lenguas-Extranjeras
 
-### Gestión Académica
+# 2. Configurar line endings (SOLO EN WINDOWS)
+# PowerShell:
+$content = Get-Content docker/backend/entrypoint.sh -Raw; $content = $content -replace "`r`n", "`n"; [System.IO.File]::WriteAllText("$PWD\docker\backend\entrypoint.sh", $content, [System.Text.UTF8Encoding]::new($false))
 
-- Administración completa de cursos de lenguas extranjeras.
-- Registro y seguimiento detallado de estudiantes.
-- Creación y gestión de grupos y horarios.
-- Registro de calificaciones y evaluaciones.
+# Git Bash / Linux / macOS:
+dos2unix docker/backend/entrypoint.sh
 
-### Gestión Administrativa
+# 3. Construir e iniciar
+docker-compose build --no-cache
+docker-compose up -d
 
-- Gestión de procesos de inscripción.
-- Administración digital de documentación y expedientes.
-- Control de trámites internos y reportes.
+# 4. Verificar que todo esté corriendo
+docker ps
+```
 
-### Sistema de Notificaciones
+**Accede a:** `http://localhost`
 
-- Emisión de alertas administrativas.
-- Recordatorios de eventos clave y fechas importantes.
+---
 
-## Arquitectura y Tecnologías
+## 🌐 Configuración para Red Local
 
-El sistema opera como una **Single Page Application (SPA)** con arquitectura desacoplada.
+Para acceder desde otros dispositivos en tu red (celular, otras PCs):
 
-- **Backend (API RESTful):**
-  - **Framework:** Laravel 11 (PHP 8.2)
-  - **Base de Datos:** SQLite (Local) / Compatible con MySQL/PostgreSQL (Producción)
-  - **Seguridad:** Laravel Sanctum (Auth), Bcrypt (Password Hashing)
-  - **Servidor:** Nginx + PHP-FPM
+### 1. Obtener tu IP local
 
-- **Frontend:**
-  - **Biblioteca:** React 18
-  - **Build Tool:** Vite
-  - **Estilos:** TailwindCSS
-  - **Routing:** React Router
-  - **Cliente HTTP:** Axios
+```bash
+# Windows
+ipconfig
+# Busca "Dirección IPv4" (ej: 192.168.1.50)
 
-- **Infraestructura:**
-  - **Containerización:** Docker & Docker Compose
-  - **Proxy Inverso:** Nginx
+# Linux/Mac
+hostname -I
+```
 
-## Requisitos Previos
+### 2. Configurar la IP en docker-compose.yml
 
-Antes de comenzar, asegúrate de tener instalado:
+Abre `docker-compose.yml` y reemplaza `localhost` por tu IP en estas líneas:
 
-- **Docker Desktop** (versión 20.10 o superior)
-  - Windows: [Descargar Docker Desktop](https://www.docker.com/products/docker-desktop)
-  - Asegúrate de que Docker Desktop esté corriendo
-- **Git** (para clonar el repositorio)
+```yaml
+backend:
+  environment:
+    - APP_URL=http://TU_IP_AQUI # Cambia esto
+    - FRONTEND_URL=http://TU_IP_AQUI # Cambia esto
+    - SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,TU_IP_AQUI # Añade tu IP
 
-## Estructura del Proyecto
+frontend:
+  environment:
+    - VITE_API_URL=http://TU_IP_AQUI # Cambia esto
+```
+
+### 3. Aplicar cambios
+
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+**Accede desde cualquier dispositivo en tu red:** `http://TU_IP`
+
+---
+
+## 📋 Comandos Esenciales
+
+### Gestión de Contenedores
+
+```bash
+# Ver estado de contenedores
+docker ps
+
+# Ver logs en tiempo real
+docker logs -f lenguas_backend
+docker logs -f lenguas_frontend
+docker logs -f lenguas_nginx
+
+# Reiniciar servicios
+docker-compose restart
+
+# Detener servicios
+docker-compose down
+
+# Reiniciar un servicio específico
+docker-compose restart backend
+```
+
+### Acceso a Contenedores
+
+```bash
+# Acceder al shell del backend
+docker exec -it lenguas_backend sh
+
+# Acceder al shell del frontend
+docker exec -it lenguas_frontend sh
+```
+
+---
+
+## 🧹 Limpieza y Eliminación
+
+### Limpieza Completa (Eliminar TODO)
+
+```bash
+# Opción 1: Eliminar contenedores, imágenes Y base de datos
+docker-compose down --rmi local -v
+
+# Opción 2: Eliminar contenedores e imágenes (mantiene BD)
+docker-compose down --rmi local
+
+# Opción 3: Solo detener contenedores
+docker-compose down
+```
+
+### Limpieza Manual
+
+```bash
+# Ver todas las imágenes
+docker images
+
+# Eliminar imagen específica
+docker rmi <IMAGE_ID>
+
+# Limpiar imágenes sin usar
+docker image prune
+
+# Limpiar todo el sistema Docker
+docker system prune -a
+```
+
+### Reinstalación Limpia
+
+```bash
+# 1. Eliminar todo
+docker-compose down --rmi local -v
+
+# 2. Reconstruir desde cero
+docker-compose build --no-cache
+
+# 3. Iniciar de nuevo
+docker-compose up -d
+```
+
+---
+
+## 🛠️ Solución de Problemas
+
+### Error: "exec /usr/local/bin/entrypoint.sh: no such file or directory"
+
+**Causa:** Line endings incorrectos en Windows.
+
+**Solución:**
+
+```bash
+# Convertir line endings
+$content = Get-Content docker/backend/entrypoint.sh -Raw; $content = $content -replace "`r`n", "`n"; [System.IO.File]::WriteAllText("$PWD\docker\backend\entrypoint.sh", $content, [System.Text.UTF8Encoding]::new($false))
+
+# Reconstruir
+docker-compose build --no-cache backend
+docker-compose up -d
+```
+
+### Error: "host not found in upstream backend:9000"
+
+**Solución:**
+
+```bash
+docker logs lenguas_backend
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+### Puerto 80 ocupado
+
+**Opción 1:** Detén el servicio que usa el puerto 80 (IIS, Apache, etc.)
+
+**Opción 2:** Cambia el puerto en `docker-compose.yml`:
+
+```yaml
+nginx:
+  ports:
+    - "8080:80" # Accede con http://localhost:8080
+```
+
+### Contenedores reiniciándose continuamente
+
+```bash
+# Ver qué está fallando
+docker ps -a
+docker logs lenguas_backend
+docker logs lenguas_frontend
+
+# Reiniciar limpio
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+---
+
+## 📁 Estructura del Proyecto
 
 ```
 .
-├── Back/                   # Backend Laravel
-├── Frontend/              # Frontend React
+├── Back/                      # Backend Laravel 11
+│   ├── app/
+│   ├── database/
+│   │   └── database.sqlite    # Base de datos SQLite
+│   └── ...
+├── Frontend/                  # Frontend React 18
+│   ├── src/
+│   └── ...
 ├── docker/
 │   ├── backend/
 │   │   ├── Dockerfile
@@ -77,230 +235,91 @@ Antes de comenzar, asegúrate de tener instalado:
 │   │   └── Dockerfile
 │   └── nginx/
 │       └── nginx.conf
-└── docker-compose.yml     # Configuración de Docker Compose
+└── docker-compose.yml         # Configuración principal
 ```
-
-## Pasos de Instalación
-
-### 1. Clonar el Repositorio
-
-```bash
-git clone <https://github.com/DevEliezerMartinez/Sistema-Integral-de-Lenguas-Extranjeras.git>
-cd Sistema-Integral-de-Lenguas-Extranjeras
-```
-
-### 2. Configurar Line Endings (IMPORTANTE en Windows)
-
-El archivo `entrypoint.sh` debe tener line endings de Unix (LF) en lugar de Windows (CRLF). Si estás en Windows, ejecuta:
-
-**PowerShell:**
-
-```powershell
-$content = Get-Content docker/backend/entrypoint.sh -Raw
-$content = $content -replace "`r`n", "`n"
-[System.IO.File]::WriteAllText("$PWD\docker\backend\entrypoint.sh", $content, [System.Text.UTF8Encoding]::new($false))
-```
-
-**Git Bash / Linux / macOS:**
-
-```bash
-dos2unix docker/backend/entrypoint.sh
-```
-
-O configura Git para manejar line endings automáticamente:
-
-```bash
-git config core.autocrlf false
-```
-
-### 3. Construir las Imágenes Docker
-
-```bash
-docker-compose build --no-cache
-```
-
-Este proceso puede tardar varios minutos la primera vez.
-
-### 4. Iniciar los Contenedores
-
-```bash
-docker-compose up -d
-```
-
-Este comando iniciará tres contenedores:
-
-- **lenguas_backend**: Backend Laravel con PHP-FPM
-- **lenguas_frontend**: Frontend React
-- **lenguas_nginx**: Servidor web Nginx (puerto 80)
-
-### 5. Verificar el Estado
-
-Verifica que todos los contenedores estén corriendo:
-
-```bash
-docker ps
-```
-
-Deberías ver los tres contenedores con estado "Up".
-
-### 6. Acceder a la Aplicación
-
-Abre tu navegador y visita:
-
-```
-http://localhost
-```
-
-## Comandos Útiles
-
-### Ver logs de un contenedor
-
-```bash
-docker logs lenguas_backend
-docker logs lenguas_frontend
-docker logs lenguas_nginx
-```
-
-### Ver logs en tiempo real
-
-```bash
-docker logs -f lenguas_backend
-```
-
-### Detener los contenedores
-
-```bash
-docker-compose down
-```
-
-### Reiniciar los contenedores
-
-```bash
-docker-compose restart
-```
-
-### Reconstruir y reiniciar un servicio específico
-
-```bash
-docker-compose build backend
-docker-compose up -d backend
-```
-
-### Acceder al shell de un contenedor
-
-```bash
-docker exec -it lenguas_backend sh
-```
-
-## Solución de Problemas
-
-### Error: "exec /usr/local/bin/entrypoint.sh: no such file or directory"
-
-**Causa**: El archivo `entrypoint.sh` tiene line endings de Windows (CRLF).
-
-**Solución**: Ejecuta el comando del Paso 2 para convertir los line endings a formato Unix (LF), luego reconstruye:
-
-```bash
-docker-compose build --no-cache backend
-docker-compose up -d backend
-```
-
-### Error: "host not found in upstream backend:9000"
-
-**Causa**: El contenedor backend no está corriendo correctamente.
-
-**Solución**:
-
-1. Verifica el estado: `docker ps -a`
-2. Revisa los logs: `docker logs lenguas_backend`
-3. Si es necesario, reconstruye: `docker-compose build --no-cache backend && docker-compose up -d`
-
-### Error: "Unable to connect to the remote server" al acceder a localhost
-
-**Causa**: Los contenedores no están corriendo o están reiniciándose continuamente.
-
-**Solución**:
-
-1. Verifica el estado: `docker ps -a`
-2. Si los contenedores están "Restarting", revisa los logs de cada uno
-3. Detén todo: `docker-compose down`
-4. Reconstruye: `docker-compose build --no-cache`
-5. Inicia de nuevo: `docker-compose up -d`
-
-### Puerto 80 ya está en uso
-
-**Causa**: Otro servicio está usando el puerto 80.
-
-**Solución**:
-Opción 1 - Detener el otro servicio (IIS, Apache, etc.)
-
-Opción 2 - Cambiar el puerto en `docker-compose.yml`:
-
-```yaml
-nginx:
-  ports:
-    - "8080:80" # Cambia 80 por 8080
-```
-
-Luego accede a `http://localhost:8080`
-
-### Verificar que Docker Desktop está corriendo
-
-En Windows, asegúrate de que Docker Desktop esté abierto y corriendo. Puedes verificarlo ejecutando:
-
-```bash
-docker --version
-docker ps
-```
-
-## Configuración para Acceso en Red Local (Opcional)
-
-Si solo vas a usar la aplicación en la misma máquina donde la instalaste, no necesitas hacer nada (`localhost` funcionará bien).
-
-Si deseas acceder a la aplicación desde **otros dispositivos en tu red local** (por ejemplo, desde tu celular u otra PC), debes configurar tu dirección IP:
-
-1.  Obtén tu dirección IP local:
-    - Windows: Ejecuta `ipconfig` en la terminal.
-    - Linux/Mac: Ejecuta `hostname -I` o `ifconfig`.
-2.  Abre el archivo `docker-compose.yml`.
-3.  Reemplaza todas las ocurrencias de `localhost` por tu dirección IP (ej. `192.168.1.50`) en:
-    - `APP_URL`
-    - `FRONTEND_URL`
-    - `SANCTUM_STATEFUL_DOMAINS` (añade tu IP a la lista: `localhost,127.0.0.1,TU_IP`)
-    - `VITE_API_URL`
-4.  Reconstruye los contenedores para aplicar los cambios:
-    ```bash
-    docker-compose down
-    docker-compose build --no-cache
-    docker-compose up -d
-    ```
-
-## Detalles Técnicos Adicionales
-
-### Base de Datos
-
-El proyecto usa SQLite como base de datos, que se crea automáticamente en: `Back/database/database.sqlite`. Las migraciones se ejecutan automáticamente al iniciar el contenedor backend.
-
-### Variables de Entorno
-
-Las variables de entorno están configuradas en `docker-compose.yml`. Los valores importantes son:
-
-- **APP_URL**: `http://localhost`
-- **FRONTEND_URL**: `http://localhost`
-- **DB_CONNECTION**: `sqlite`
-
-### Notas
-
-- La primera vez que se inicia el proyecto, el backend ejecutará migraciones y configuración inicial.
-- Los archivos de storage de Laravel están montados como volúmenes para persistencia.
-- El proyecto está configurado para reiniciarse automáticamente (`restart: unless-stopped`).
 
 ---
 
-## Créditos y Licencia
+## 🔧 Arquitectura y Tecnologías
+
+### Backend (API RESTful)
+
+- **Framework:** Laravel 11 (PHP 8.2)
+- **Base de Datos:** SQLite (desarrollo) / MySQL/PostgreSQL (producción)
+- **Autenticación:** Laravel Sanctum (cookies HTTP-only)
+- **Seguridad:** CSRF protection, Bcrypt
+- **Servidor:** Nginx + PHP-FPM
+
+### Frontend (SPA)
+
+- **Biblioteca:** React 18
+- **Build Tool:** Vite
+- **Estilos:** TailwindCSS
+- **Routing:** React Router
+- **Cliente HTTP:** Axios
+
+### Infraestructura
+
+- **Containerización:** Docker & Docker Compose
+- **Proxy Inverso:** Nginx
+- **Puertos:** 80 (HTTP)
+
+---
+
+## ✨ Características Principales
+
+### Gestión de Usuarios
+
+- Registro y autenticación segura
+- Control de acceso basado en roles
+- Perfiles de usuario personalizados
+
+### Gestión Académica
+
+- Administración de cursos de lenguas
+- Seguimiento detallado de estudiantes
+- Gestión de grupos y horarios
+- Registro de calificaciones
+
+### Gestión Administrativa
+
+- Procesos de inscripción
+- Documentación digital
+- Control de trámites y reportes
+
+### Sistema de Notificaciones
+
+- Alertas administrativas
+- Recordatorios automáticos
+
+---
+
+## 📝 Notas Técnicas
+
+- **Base de Datos:** Se crea automáticamente en `Back/database/database.sqlite`
+- **Migraciones:** Se ejecutan automáticamente al iniciar el backend
+- **Persistencia:** Los archivos de storage están montados como volúmenes
+- **Reinicio Automático:** Los contenedores se reinician automáticamente si fallan
+- **Variables de Entorno:** Configuradas en `docker-compose.yml`
+
+---
+
+## 👨‍💻 Créditos
 
 **Autor:** Eliezer Solano Martinez  
 **Institución:** Tecnológico Nacional de México, Campus San Marcos  
-**Repositorio:** [GitHub](https://github.com/DevEliezerMartinez/Sistema-Integral-de-Lenguas-Extranjeras)
+**Repositorio:** [GitHub](https://github.com/DevEliezerMartinez/Sistema-Integral-de-Lenguas-Extranjeras)  
+**Licencia:** MIT
 
-Este proyecto se distribuye bajo la licencia **MIT**, permitiendo su uso y modificación con fines académicos y administrativos.
+---
+
+## 📞 Soporte
+
+Si encuentras problemas:
+
+1. Revisa la sección de **Solución de Problemas**
+2. Verifica los logs: `docker logs lenguas_backend`
+3. Asegúrate de que Docker Desktop esté corriendo
+4. Intenta una reinstalación limpia
+
+Para reportar issues: [GitHub Issues](https://github.com/DevEliezerMartinez/Sistema-Integral-de-Lenguas-Extranjeras/issues)
