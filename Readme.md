@@ -39,7 +39,15 @@ docker ps
 
 Para acceder desde otros dispositivos en tu red (celular, otras PCs):
 
-### 1. Obtener tu IP local
+### 1. Crear configuración local
+
+Copia el archivo de ejemplo:
+
+```bash
+cp .env.example .env
+```
+
+### 2. Obtener tu IP local
 
 ```bash
 # Windows
@@ -50,28 +58,21 @@ ipconfig
 hostname -I
 ```
 
-### 2. Configurar la IP en docker-compose.yml
+### 3. Configurar la IP en .env
 
-Abre `docker-compose.yml` y reemplaza `localhost` por tu IP en estas líneas:
+Abre el archivo `.env` que acabas de crear y establece tu IP:
 
-```yaml
-backend:
-  environment:
-    - APP_URL=http://TU_IP_AQUI # Cambia esto
-    - FRONTEND_URL=http://TU_IP_AQUI # Cambia esto
-    - SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,TU_IP_AQUI # Añade tu IP
-
-frontend:
-  environment:
-    - VITE_API_URL=http://TU_IP_AQUI # Cambia esto
+```ini
+HOST_IP=192.168.1.50  <-- Tu IP aquí
 ```
 
-### 3. Aplicar cambios
+### 4. Aplicar cambios
+
+Es **CRÍTICO** usar `--build` para que la configuración se aplique al frontend:
 
 ```bash
 docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 **Accede desde cualquier dispositivo en tu red:** `http://TU_IP`
