@@ -1,0 +1,29 @@
+# Archivos de entorno y configuración local
+.env
+.env.backup
+.env.production
+.env.local
+
+# Directorios de dependencias (por si acaso se instalaran en raíz)
+node_modules/
+vendor/
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Logs y bases de datos locales
+*.log
+*.sqlite
+*.sqlite-journal
+
+# Editor de código / IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
