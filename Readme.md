@@ -33,7 +33,7 @@ cd Sistema-Integral-de-Lenguas-Extranjeras
 bash build.sh
 ```
 
-El script te preguntará qué IP usar y levantará todos los servicios automáticamente. Al finalizar mostrará la URL de acceso.
+El script detecta automáticamente tus adaptadores de red físicos (Ethernet / Wi-Fi), filtra adaptadores virtuales (VPN, VMware, WSL, Docker, etc.) y muestra un menú numerado para que elijas la IP correcta. Al finalizar mostrará la URL de acceso.
 
 > **Nota:** Si es la primera vez que accedes a la app o tuviste instalaciones previas, abre el navegador en **modo incógnito** para evitar conflictos con cookies de sesiones anteriores.
 
@@ -41,18 +41,41 @@ El script te preguntará qué IP usar y levantará todos los servicios automáti
 
 ## 🌐 Acceso desde Red Local
 
-Para acceder desde otros dispositivos en tu red (celular, otras PCs), selecciona tu IP local cuando el script te lo pida. Puedes consultarla con:
+El script `build.ps1` lista automáticamente los adaptadores físicos encontrados con su IP, por lo que **normalmente no necesitas consultar tu IP manualmente**. Si aun así lo necesitas:
+
+```powershell
+# Windows — muestra todas las IPs de red
+Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notmatch '^127\.' } | Select-Object InterfaceAlias, IPAddress
+```
 
 ```bash
-# Windows
-ipconfig
-# Busca "Dirección IPv4" (ej: 192.168.1.50)
-
 # Linux / macOS
 hostname -I
 ```
 
-Luego accede desde cualquier dispositivo en tu red con: `http://TU_IP`
+Elige la IP del adaptador que conecta tu PC a la red (Ethernet o Wi-Fi). Luego accede desde cualquier dispositivo en la misma red con:
+
+```
+http://<TU_IP>
+```
+
+> Nginx está configurado con `server_name _;` para aceptar peticiones con cualquier `Host` header (IP, nombre de host, etc.), por lo que **no se requiere ninguna configuración adicional** para acceder desde la red.
+
+> [!WARNING]
+> **La IP cambia si cambias de red.**
+> La IP que eliges durante el despliegue queda fija en la configuración de Docker. Si la PC cambia de adaptador de red (por ejemplo, conectas un cable Ethernet estando en Wi-Fi, o al contrario), el sistema operativo asigna una IP diferente y **la app dejará de ser accesible desde otros dispositivos**.
+>
+> **¿Qué hacer en ese caso?**
+> 1. Comprueba tu nueva IP:
+>    ```powershell
+>    Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notmatch '^127\.' } | Select-Object InterfaceAlias, IPAddress
+>    ```
+> 2. Vuelve a ejecutar el script de despliegue para actualizar la configuración:
+>    ```powershell
+>    .\build.ps1
+>    ```
+> 3. El script detectará los adaptadores disponibles, elige el que corresponda a tu conexión activa (Ethernet o Wi-Fi).
+> 4. Comparte la nueva IP con los demás dispositivos de la red.
 
 ---
 
@@ -109,11 +132,30 @@ Las causas más comunes son:
 
 ### Error 502 Bad Gateway
 
-El backend aún está inicializando (migraciones, seeders). Espera unos segundos y recarga. Si persiste:
+Nginx espera hasta **120 segundos** tanto a PHP-FPM como al frontend antes de reportar 502, por lo que debería desaparecer solo una vez que el backend termine de ejecutar migraciones y seeders. Si persiste tras ese tiempo:
 
 ```bash
+# Ver en qué paso falla el backend
 docker compose logs -f backend
+
+# Ver qué reporta Nginx
+docker compose logs -f nginx
 ```
+
+Causas comunes:
+- El contenedor `lenguas_backend` está en `Restarting` — revisa los logs del backend.
+- El contenedor `lenguas_frontend` tardó más de 120s en arrancar — ejecuta `docker compose restart nginx` tras verificar que el frontend esté `Up`.
+
+### Cookies de sesión / Sanctum no funcionan desde otro dispositivo
+
+Sanctum valida el `Host` header de la petición (incluyendo el puerto). El proyecto ya incluye las variantes con y sin `:80` en `SANCTUM_STATEFUL_DOMAINS`, pero si cambias el puerto de Nginx en `docker-compose.yml` debes agregar también ese puerto:
+
+```yaml
+# docker-compose.yml — variable de entorno del servicio backend
+- SANCTUM_STATEFUL_DOMAINS=localhost,localhost:8080,<TU_IP>,<TU_IP>:8080
+```
+
+Recuerda siempre hacer la petición a `/sanctum/csrf-cookie` primero y usar `withCredentials: true` / `credentials: 'include'` en el frontend.
 
 ### Error 400 Bad Request — Request Header Or Cookie Too Large
 
@@ -203,6 +245,9 @@ docker compose up -d
 - Las sesiones anteriores se limpian automáticamente en cada reinicio del backend.
 - Los volúmenes de `storage/` y `database/` persisten entre reinicios.
 - El `vendor/` de Composer se genera durante el build y se protege con un named volume para que no sea sobreescrito por el montaje local.
+- **Nginx** usa `server_name _;` (catch-all) para responder a cualquier IP o hostname, y timeouts de 120s para evitar 502 durante el arranque lento del backend o frontend.
+- **Sanctum** maneja todas las cookies de sesión (`XSRF-TOKEN`, `laravel_session`). `SANCTUM_STATEFUL_DOMAINS` incluye automáticamente la IP elegida con y sin el puerto `:80`.
+- **`build.ps1`** filtra adaptadores virtuales (VMware, VirtualBox, WSL, Docker, VPN, Hyper-V) y prioriza Ethernet/Wi-Fi físico en el menú de selección de IP.
 
 ---
 

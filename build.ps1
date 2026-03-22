@@ -112,6 +112,22 @@ if ($ipChoice -match "^\d+$") {
 
 Write-Success "Se usara la IP: $HostIP"
 
+if ($HostIP -ne "localhost") {
+    Write-Host ""
+    Write-Host "  AVISO IMPORTANTE:" -ForegroundColor Yellow
+    Write-Host "  La IP $HostIP quedara fija en la configuracion de Docker." -ForegroundColor Yellow
+    Write-Host "  Si cambias de red (ej. de Wi-Fi a Ethernet o viceversa)" -ForegroundColor Yellow
+    Write-Host "  tu IP cambiara y la app dejara de funcionar desde otros" -ForegroundColor Yellow
+    Write-Host "  dispositivos hasta que vuelvas a ejecutar .\\build.ps1" -ForegroundColor Yellow
+    Write-Host "  con la nueva IP." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  Redes tipicas:" -ForegroundColor DarkYellow
+    Write-Host "    Wi-Fi   -> 192.168.X.X  (asignada por el router Wi-Fi)" -ForegroundColor DarkYellow
+    Write-Host "    Ethernet -> 192.168.X.X  (asignada por el router/switch)" -ForegroundColor DarkYellow
+    Write-Host "  Al cambiar de adaptador, ejecuta nuevamente: .\\build.ps1" -ForegroundColor DarkYellow
+    Write-Host ""
+}
+
 # =============================================================================
 # PASO 3: Verificar imagenes/contenedores existentes
 # =============================================================================
