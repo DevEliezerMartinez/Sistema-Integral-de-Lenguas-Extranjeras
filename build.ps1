@@ -53,54 +53,61 @@ if ($LASTEXITCODE -eq 0 -or $composeCheck) {
 # =============================================================================
 Write-Step "Detectando IP de red local..."
 
-# Get IPv4 addresses, filtering out loopback and APIPA
-$ipAddresses = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | Where-Object { $_.InterfaceAlias -notmatch "Loopback" -and $_.IPAddress -notmatch "^169\.254\." -and $_.IPAddress -notmatch "^127\." }
+# Filtrar adaptadores virtuales/VPN y ordenar priorizando Ethernet y Wi-Fi fisicos
+$physicalAdapters = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
+    Where-Object {
+        $_.InterfaceAlias -notmatch "Loopback|vEthernet|VMware|VirtualBox|Hyper-V|WSL|docker|vpn|tap|tun|Pseudo|isatap" -and
+        $_.IPAddress -notmatch "^169\.254\." -and
+        $_.IPAddress -notmatch "^127\."
+    } |
+    Sort-Object { if ($_.InterfaceAlias -match "Ethernet|Wi-Fi|WLAN|Wireless") { 0 } else { 1 } }
 
-$DetectedIP = ""
-if ($ipAddresses) {
-    $DetectedIP = @($ipAddresses)[0].IPAddress
-}
-
-if ($DetectedIP) {
-    Write-Info "IP detectada: $DetectedIP"
+if ($physicalAdapters) {
+    Write-Success "Se encontraron $(@($physicalAdapters).Count) adaptador(es) de red fisico(s)."
 } else {
-    Write-WarningMsg "No se pudo detectar la IP automaticamente."
+    Write-WarningMsg "No se encontraron adaptadores de red fisicos. Se mostrara solo la opcion localhost."
 }
 
 Write-Host ""
-Write-Host "Opciones de IP para el despliegue:" -ForegroundColor Yellow
-$displayIP = "N/A"
-if ($DetectedIP) { $displayIP = $DetectedIP }
-Write-Host "  1) Usar la IP detectada: " -NoNewline; Write-Host $displayIP -ForegroundColor White
-Write-Host "  2) Usar 'localhost'  (solo acceso desde esta maquina)"
-Write-Host "  3) Ingresar otra IP  (red personalizada)"
+Write-Host "Selecciona la IP para el despliegue:" -ForegroundColor Yellow
+
+$menuIndex = 1
+$ipList = @()
+foreach ($adapter in @($physicalAdapters)) {
+    Write-Host "  $menuIndex) [$($adapter.InterfaceAlias)]  " -NoNewline
+    Write-Host $adapter.IPAddress -ForegroundColor White
+    $ipList += $adapter.IPAddress
+    $menuIndex++
+}
+
+$localhostIndex = $menuIndex
+$manualIndex    = $menuIndex + 1
+Write-Host "  $localhostIndex) localhost  (solo acceso desde esta maquina)"
+Write-Host "  $manualIndex) Ingresar otra IP manualmente"
 Write-Host ""
 
-$ipChoice = Read-Host "Selecciona una opcion [1/2/3]"
+$ipChoice = Read-Host "Selecciona una opcion [1-$manualIndex]"
 
 $HostIP = ""
-switch ($ipChoice) {
-    "1" {
-        if (-not $DetectedIP) {
-            Write-ErrorMsg "No hay IP detectada. Elige otra opcion."
-            exit 1
-        }
-        $HostIP = $DetectedIP
-    }
-    "2" {
+if ($ipChoice -match "^\d+$") {
+    $choiceNum = [int]$ipChoice
+    if ($choiceNum -ge 1 -and $choiceNum -le $ipList.Count) {
+        $HostIP = $ipList[$choiceNum - 1]
+    } elseif ($choiceNum -eq $localhostIndex) {
         $HostIP = "localhost"
-    }
-    "3" {
+    } elseif ($choiceNum -eq $manualIndex) {
         $HostIP = Read-Host "Ingresa la IP que deseas usar"
         if ($HostIP -notmatch "^localhost$" -and $HostIP -notmatch "^([0-9]{1,3}\.){3}[0-9]{1,3}$") {
             Write-ErrorMsg "Formato de IP invalido: '$HostIP'"
             exit 1
         }
-    }
-    default {
+    } else {
         Write-ErrorMsg "Opcion invalida."
         exit 1
     }
+} else {
+    Write-ErrorMsg "Opcion invalida."
+    exit 1
 }
 
 Write-Success "Se usara la IP: $HostIP"
