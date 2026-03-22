@@ -42,6 +42,10 @@ php artisan migrate --force
 echo ">>> Ejecutando seeders..."
 php artisan db:seed --force
 
+# Limpiar sesiones anteriores
+echo ">>> Limpiando sesiones anteriores..."
+rm -rf /var/www/html/storage/framework/sessions/*
+
 # Limpiar cache antes de cachear de nuevo
 echo ">>> Limpiando cache..."
 php artisan config:clear
