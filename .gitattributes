@@ -1,0 +1,4 @@
+# Fuerza LF en todos los shell scripts
+*.sh text eol=lf
+# Normalizar otros archivos de texto (opcional pero recomendado)
+* text=auto

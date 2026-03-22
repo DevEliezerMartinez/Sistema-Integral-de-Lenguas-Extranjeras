@@ -7,10 +7,6 @@ return [
 
     'allowed_origins' => array_filter([
         env('FRONTEND_URL', 'http://localhost'),
-        'http://localhost',
-        'http://127.0.0.1',
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
     ]),
 
     'allowed_origins_patterns' => [],
@@ -21,5 +17,5 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true, // 🔥 ESTE ES EL CAMBIO IMPORTANTE
+    'supports_credentials' => true,
 ];

@@ -32,6 +32,10 @@ fi
 echo ">>> Ejecutando migraciones..."
 php artisan migrate --force
 
+# Ejecutar seeders
+echo ">>> Ejecutando seeders..."
+php artisan db:seed --force
+
 # Limpiar cache antes de cachear de nuevo
 echo ">>> Limpiando cache..."
 php artisan config:clear

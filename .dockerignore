@@ -24,8 +24,9 @@ Thumbs.db
 **/.eslintcache
 
 # PHP / Laravel
-**/vendor
-**/.env
+# vendor NO se excluye — se genera via composer install en el Dockerfile
+**/.env.backup
+**/.env.production
 **/database/database.sqlite
 **/public/storage
 **/storage/logs/*.log

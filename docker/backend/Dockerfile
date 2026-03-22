@@ -21,11 +21,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Establecer directorio de trabajo
 WORKDIR /var/www/html
 
-# Copiar archivos del backend
+# Copiar solo archivos de dependencias primero (mejor cache de Docker)
+COPY Back/composer.json Back/composer.lock ./
+
+# Instalar dependencias de Composer sin scripts (no requiere .env ni bootstrap)
+RUN composer install --no-dev --no-interaction --no-scripts --no-autoloader
+
+# Copiar el resto de archivos del backend
 COPY Back/ .
 
-# Instalar dependencias de Composer
-RUN composer install --no-dev --no-interaction --optimize-autoloader
+# Generar autoloader optimizado
+RUN composer dump-autoload --optimize --no-scripts
 
 # Configurar permisos
 RUN chown -R www-data:www-data /var/www/html \

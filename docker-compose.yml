@@ -9,6 +9,7 @@ services:
     container_name: lenguas_backend
     volumes:
       - ./Back:/var/www/html
+      - backend_vendor:/var/www/html/vendor
       - ./Back/database:/var/www/html/database
       - ./Back/storage:/var/www/html/storage
     environment:
@@ -20,7 +21,6 @@ services:
       - FRONTEND_URL=http://${HOST_IP:-localhost}
       - SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,${HOST_IP:-localhost}
       - SESSION_DRIVER=cookie
-      - SESSION_DOMAIN=null
       - SESSION_SECURE_COOKIE=false
       - SESSION_SAME_SITE=lax
       - DB_CONNECTION=sqlite
@@ -63,3 +63,6 @@ services:
 networks:
   lenguas_network:
     driver: bridge
+
+volumes:
+  backend_vendor:

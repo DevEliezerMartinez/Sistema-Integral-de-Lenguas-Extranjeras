@@ -7,9 +7,42 @@ Sistema de Información para la Gestión de Lenguas Extranjeras del Tecnológico
 ### Requisitos Previos
 
 - **Docker Desktop** (versión 20.10+) - [Descargar aquí](https://www.docker.com/products/docker-desktop)
-- **Git**
+- **Git** / **Git Bash** (Recomendado en Windows para ejecutar el script)
 
-### Comandos de Instalación
+### Opción 1: Instalación Automatizada (Recomendada)
+
+Hemos creado scripts de despliegue que configuran dinámicamente tu IP local, reparan saltos de línea y configuran automáticamente los contenedores listos para usarse.
+
+#### Si estás en Windows (Powershell):
+Abre PowerShell en la carpeta del repositorio y ejecuta:
+
+```powershell
+# 1. Clonar el repositorio
+git clone https://github.com/DevEliezerMartinez/Sistema-Integral-de-Lenguas-Extranjeras.git
+cd Sistema-Integral-de-Lenguas-Extranjeras
+
+# 2. Ejecutar el script (puede que necesites permisos)
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+.\build.ps1
+```
+
+#### Si estás en Linux / macOS / Git Bash:
+Ejecuta el script equivalente para bash:
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/DevEliezerMartinez/Sistema-Integral-de-Lenguas-Extranjeras.git
+cd Sistema-Integral-de-Lenguas-Extranjeras
+
+# 2. Ejecutar el script
+bash build.sh
+```
+
+El script interactivo te preguntará qué IP deseas usar para la red local y luego levantará el sistema de forma limpia. Al finalizar te mostrará la URL de acceso.
+
+### Opción 2: Instalación Manual
+
+Si prefieres hacerlo manualmente de la forma tradicional:
 
 ```bash
 # 1. Clonar el repositorio
@@ -31,13 +64,17 @@ docker-compose up -d
 docker ps
 ```
 
-**Accede a:** `http://localhost`
+**Accede a:** `http://localhost` (o la IP que configuraste en tu `.env`)
 
 ---
 
 ## 🌐 Configuración para Red Local
 
-Para acceder desde otros dispositivos en tu red (celular, otras PCs):
+Para acceder desde otros dispositivos en tu red (celular, otras PCs), es importante configurar tu IP local.
+
+> **¡Atención!** Si utilizaste la **Opción 1: Instalación Automatizada** con `build.sh`, estos pasos ya se han realizado automáticamente y **NO** necesitas hacerlos.
+
+Si elegiste la Instalación Manual, debes seguir estos pasos:
 
 ### 1. Crear configuración local
 
