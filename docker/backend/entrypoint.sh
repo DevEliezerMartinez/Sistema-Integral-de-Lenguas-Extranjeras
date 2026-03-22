@@ -16,6 +16,12 @@ if [ ! -f /var/www/html/database/database.sqlite ]; then
     touch /var/www/html/database/database.sqlite
 fi
 
+# Crear .env desde .env.example si no existe
+if [ ! -f /var/www/html/.env ]; then
+    echo ">>> Creando .env desde .env.example..."
+    cp /var/www/html/.env.example /var/www/html/.env
+fi
+
 # Configurar permisos
 echo ">>> Configurando permisos..."
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
